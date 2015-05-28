@@ -6,6 +6,7 @@ var gulp = require('gulp'),
 
 gulp.task('minify', function() {
   gulp.src([
+    './src/module.js',
     './src/grid.js',
     './src/services/*.js',
     './src/directives/*.js'
@@ -30,8 +31,8 @@ gulp.task('minify', function() {
           {name: 'lodash'}
         ]
       },
-      exports: function() {return 'grid';},
-      namespace: function() {return 'grid';}
+      exports: function() {return 'vmsGrid';},
+      namespace: function() {return 'vmsGrid';}
     }))
     .pipe(gulp.dest('./dist/'))
     .pipe(uglify())

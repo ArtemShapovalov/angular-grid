@@ -1,7 +1,5 @@
 
-  var module = angular.module('grid', ['schemaForm', 'ui.bootstrap.tpls']);
-
-  module.run(['$templateCache', function ($templateCache) {
+  angular.module('grid').run(['$templateCache', function ($templateCache) {
 
     $templateCache.put('templates/grid/table.html',
       '<span ng-repeat="link in links">' +
@@ -48,11 +46,11 @@
 
   }]);
 
-  module.factory('_', function () {
+  angular.module('grid').factory('_', function () {
     return lodash;
   });
 
-  module.provider('grid-entity', gridEntity);
+  angular.module('grid').provider('grid-entity', gridEntity);
 
   gridEntity.$inject = [];
 
@@ -383,7 +381,7 @@
     }
   }
 
-  module.factory('grid-action-goTo', gridActionGoTo);
+  angular.module('grid').factory('grid-action-goTo', gridActionGoTo);
   gridActionGoTo.$inject = ['$location'];
   function gridActionGoTo($location) {
     return function(link) {
@@ -396,7 +394,7 @@
     };
   }
 
-  module.factory('grid-action-delete', gridActionDelete);
+  angular.module('grid').factory('grid-action-delete', gridActionDelete);
   gridActionDelete.$inject = ['$http', 'grid-entity'];
   function gridActionDelete($http, gridEntity) {
     return function(link, scope) {
@@ -434,7 +432,7 @@
     };
   }
 
-  module.factory('grid-action-update', gridActionUpdate);
+  angular.module('grid').factory('grid-action-update', gridActionUpdate);
   gridActionUpdate.$inject = ['$http', 'grid-entity'];
   function gridActionUpdate($http, gridEntity) {
     return function(link, scope) {
@@ -473,7 +471,7 @@
     };
   }
 
-  module.factory('grid-action-create', gridActionCreate);
+  angular.module('grid').factory('grid-action-create', gridActionCreate);
   gridActionCreate.$inject = ['$http', 'grid-entity'];
   function gridActionCreate($http, gridEntity) {
     return function(link, scope) {
@@ -514,7 +512,7 @@
   }
 
   /* Grid links actions */
-  module.provider('grid-actions', gridActions);
+  angular.module('grid').provider('grid-actions', gridActions);
   gridActions.$inject = [];
   function gridActions() {
 
@@ -545,7 +543,7 @@
     }
   }
 
-  module.directive('gridForm', crudDirective);
+  angular.module('grid').directive('gridForm', crudDirective);
   crudDirective.$inject = [];
   function crudDirective() {
     var directive = {
@@ -595,7 +593,7 @@
   }
 
 
-  module.directive("gridTable", ['$timeout', 'grid-entity', 'grid-actions', function($timeout, gridEntity, gridActions) {
+  angular.module('grid').directive("gridTable", ['$timeout', 'grid-entity', 'grid-actions', function($timeout, gridEntity, gridActions) {
     return {
       restrict: 'E',
       templateUrl: 'templates/grid/table.html',

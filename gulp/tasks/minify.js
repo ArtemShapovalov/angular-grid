@@ -28,7 +28,11 @@ gulp.task('minify', function() {
             name: 'bootstrapDecorator',
             amd: 'bootstrap-decorator'
           },
-          {name: 'lodash'}
+          {
+            name: 'lodash',
+            amd: '_',
+            global: '_'
+          }
         ]
       },
       exports: function() {return 'vmsGrid';},

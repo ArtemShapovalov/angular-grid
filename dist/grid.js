@@ -1,10 +1,10 @@
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['angular', 'jsonary', 'angular-bootstrap', 'bootstrap-decorator', 'lodash'], factory);
+    define(['angular', 'jsonary', 'angular-bootstrap', 'bootstrap-decorator', '_'], factory);
   } else if (typeof exports === 'object') {
     module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));
   } else {
-    root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root.lodash);
+    root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root._);
   }
 }(this, function(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {
 // Deps is sort of a problem for us, maybe in the future we will ask the user to depend

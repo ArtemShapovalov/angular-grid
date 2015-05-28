@@ -8,7 +8,7 @@ gulp.task('minify', function() {
   gulp.src([
     './src/module.js',
     './src/grid.js',
-    './src/services/*.js',
+    './src/actions/*.js',
     './src/directives/*.js'
   ])
     .pipe(concat('grid.js'))

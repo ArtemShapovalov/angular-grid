@@ -407,250 +407,6 @@ var vmsGrid = angular.module('grid', deps);
     }
   }
 
-  angular.module('grid').factory('grid-action-goTo', gridActionGoTo);
-  gridActionGoTo.$inject = ['$location'];
-  function gridActionGoTo($location) {
-    return function(link) {
-      var templateLink = link.definition.data.propertyValue('href');
-      var resultLink = templateLink.replace(/{([^\{,}]*)}/g, function(match, p1){
-        return link.subjectData.propertyValue(p1);
-      });
-
-      $location.url(resultLink);
-    };
-  }
-
-  angular.module('grid').factory('grid-action-delete', gridActionDelete);
-  gridActionDelete.$inject = ['$http', 'grid-entity'];
-  function gridActionDelete($http, gridEntity) {
-    return function(link, scope) {
-      var params = {
-        method: link.method,
-        url: link.href
-      };
-
-      $http(params).then(actionDeleteSuccess, actionDeleteError);
-
-      function actionDeleteSuccess() {
-        if (gridEntity.type === gridEntity.TYPE_TABLE) {
-          gridEntity.getTableInfo(function (table) {
-            scope.rows = table.rows;
-            scope.columns = table.columns;
-            scope.links = table.links;
-          });
-        } else if (gridEntity.type === gridEntity.TYPE_FORM) {
-          scope.hideForm = true;
-        }
-
-        scope.alerts.push({
-          type: 'success',
-          msg: gridEntity.getMessage('successDeleted')
-        });
-
-      }
-
-      function actionDeleteError(res) {
-        scope.alerts.push({
-          type: 'danger',
-          msg: res.statusText || gridEntity.getMessage('serverError')
-        });
-      }
-    };
-  }
-
-  angular.module('grid').factory('grid-action-update', gridActionUpdate);
-  gridActionUpdate.$inject = ['$http', 'grid-entity'];
-  function gridActionUpdate($http, gridEntity) {
-    return function(link, scope) {
-      var params = {
-        method: link.method,
-        url: link.href,
-        data: scope.model
-      };
-
-      scope.$broadcast('schemaFormValidate');
-      if (!scope.scopeForm.gridForm.$valid) {
-        return false;
-      }
-      
-      $http(params).then(actionUpdateSuccess, actionUpdateError);
-
-      function actionUpdateSuccess() {
-        gridEntity.getFormInfo(function (form) {
-          scope.schema = form.schema;
-          scope.form = form.form;
-          scope.model = form.model;
-          scope.alerts.push({
-            type: 'success',
-            msg: gridEntity.getMessage('successUpdated')
-          });
-        });
-      }
-
-      function actionUpdateError(res) {
-        scope.alerts.push({
-          type: 'danger',
-          msg: res.statusText || gridEntity.getMessage('serverError')
-        });
-      }
-
-    };
-  }
-
-  angular.module('grid').factory('grid-action-create', gridActionCreate);
-  gridActionCreate.$inject = ['$http', 'grid-entity'];
-  function gridActionCreate($http, gridEntity) {
-    return function(link, scope) {
-      var params = {
-        method: link.method,
-        url: link.href,
-        data: scope.model
-      };
-
-      scope.$broadcast('schemaFormValidate');
-      if (!scope.scopeForm.gridForm.$valid) {
-        return false;
-      }
-
-      $http(params).then(actionCreateSuccess, actionCreateError);
-
-      function actionCreateSuccess() {
-        gridEntity.getFormInfo(function (form) {
-          scope.schema = form.schema;
-          scope.form = form.form;
-          scope.model = form.model;
-
-          scope.alerts.push({
-            type: 'success',
-            msg: gridEntity.getMessage('successCreated')
-          });
-        });
-      }
-
-      function actionCreateError(res) {
-        scope.alerts.push({
-          type: 'danger',
-          msg: res.statusText || gridEntity.getMessage('serverError')
-        });
-      }
-
-    };
-  }
-
-  /* Grid links actions */
-  angular.module('grid').provider('grid-actions', gridActions);
-  gridActions.$inject = [];
-  function gridActions() {
-
-    var provider = {
-      actions: {},
-      $get: gridActionsGet
-    };
-
-    gridActionsGet.$inject = ['grid-action-goTo', 'grid-action-delete', 'grid-action-update', 'grid-action-create'];
-    return provider;
-
-    function gridActionsGet(ActionGoTo, ActionDelete, ActionUpdate, ActionCreate) {
-      /*jshint validthis: true */
-      this.actions = {
-        goToUpdate: ActionGoTo,
-        goToCreate: ActionGoTo,
-        goToList: ActionGoTo,
-        read: ActionGoTo,
-        delete: ActionDelete,
-        update: ActionUpdate,
-        create: ActionCreate
-      };
-      return {
-        action: function (link, scope) {
-          this.actions[link.definition.data.propertyValue('rel')](link, scope);
-        }.bind(this)
-      };
-    }
-  }
-
-  angular.module('grid').directive('gridForm', crudDirective);
-  crudDirective.$inject = [];
-  function crudDirective() {
-    var directive = {
-      restrict: 'EA',
-      scope: {
-        gridModel: '=gridModel'
-      },
-      replace: true,
-      templateUrl: 'templates/grid/form.html',
-      controller: crudDirectiveController
-    };
-
-    crudDirectiveController.$inject = ['$scope', 'grid-entity', 'grid-actions'];
-    return directive;
-
-    function crudDirectiveController($scope, gridEntity, gridActions) {
-      $scope.alerts = [];
-      $scope.scopeForm = {
-        gridForm: {}
-      };
-
-      $scope.setFormScope= function(scope){
-        $scope.scopeForm = scope;
-      };
-
-      gridEntity.setModel($scope.gridModel);
-      gridEntity.getFormInfo(function (form) {
-          $scope.schema = form.schema;
-          $scope.form = form.form;
-          $scope.model = form.model;
-          $scope.links = form.links;
-          $scope.$digest();
-      });
-
-      $scope.edit = function($event, form) {
-        gridActions.action(form.link, $scope);
-      };
-
-      $scope.go = function(link) {
-        gridActions.action(link, $scope);
-      };
-
-      $scope.closeAlert = function(index) {
-        $scope.alerts.splice(index, 1);
-      };
-    }
-  }
-
-
-  angular.module('grid').directive("gridTable", ['$timeout', 'grid-entity', 'grid-actions', function($timeout, gridEntity, gridActions) {
-    return {
-      restrict: 'E',
-      templateUrl: 'templates/grid/table.html',
-      scope: {
-        gridModel: '=gridModel'
-      },
-      controller: function($scope) {
-        $scope.alerts = [];
-        gridEntity.setModel($scope.gridModel);
-
-        gridEntity.getTableInfo(function(table) {
-            $scope.rows = table.rows;
-            $scope.columns = table.columns;
-            $scope.links = table.links;
-            $scope.$digest();
-        });
-
-        $scope.edit = function(link) {
-          gridActions.action(link, $scope);
-        };
-
-        $scope.closeAlert = function(index) {
-          $scope.alerts.splice(index, 1);
-        };
-      },
-      link: function(scope, element, attributes, controller) {
-
-      }
-    };
-  }]);
-
   Object.byString = function(obj, path) {
     path = path.replace(/\[(\w+)]/g, '.$1'); // convert indexes to properties
     path = path.replace(/\/(\w+)/g, '.$1'); // convert indexes to properties
@@ -666,5 +422,241 @@ var vmsGrid = angular.module('grid', deps);
     }
     return obj;
   };
+angular.module('grid').factory('grid-action-create', gridActionCreate);
+gridActionCreate.$inject = ['$http', 'grid-entity'];
+function gridActionCreate($http, gridEntity) {
+  return function(link, scope) {
+    var params = {
+      method: link.method,
+      url: link.href,
+      data: scope.model
+    };
+
+    scope.$broadcast('schemaFormValidate');
+    if (!scope.scopeForm.gridForm.$valid) {
+      return false;
+    }
+
+    $http(params).then(actionCreateSuccess, actionCreateError);
+
+    function actionCreateSuccess() {
+      gridEntity.getFormInfo(function (form) {
+        scope.schema = form.schema;
+        scope.form = form.form;
+        scope.model = form.model;
+
+        scope.alerts.push({
+          type: 'success',
+          msg: gridEntity.getMessage('successCreated')
+        });
+      });
+    }
+
+    function actionCreateError(res) {
+      scope.alerts.push({
+        type: 'danger',
+        msg: res.statusText || gridEntity.getMessage('serverError')
+      });
+    }
+
+  };
+}
+angular.module('grid').factory('grid-action-delete', gridActionDelete);
+gridActionDelete.$inject = ['$http', 'grid-entity'];
+function gridActionDelete($http, gridEntity) {
+  return function(link, scope) {
+    var params = {
+      method: link.method,
+      url: link.href
+    };
+
+    $http(params).then(actionDeleteSuccess, actionDeleteError);
+
+    function actionDeleteSuccess() {
+      if (gridEntity.type === gridEntity.TYPE_TABLE) {
+        gridEntity.getTableInfo(function (table) {
+          scope.rows = table.rows;
+          scope.columns = table.columns;
+          scope.links = table.links;
+        });
+      } else if (gridEntity.type === gridEntity.TYPE_FORM) {
+        scope.hideForm = true;
+      }
+
+      scope.alerts.push({
+        type: 'success',
+        msg: gridEntity.getMessage('successDeleted')
+      });
+
+    }
+
+    function actionDeleteError(res) {
+      scope.alerts.push({
+        type: 'danger',
+        msg: res.statusText || gridEntity.getMessage('serverError')
+      });
+    }
+  };
+}
+angular.module('grid').factory('grid-action-goTo', gridActionGoTo);
+gridActionGoTo.$inject = ['$location'];
+function gridActionGoTo($location) {
+  return function(link) {
+    var templateLink = link.definition.data.propertyValue('href');
+    var resultLink = templateLink.replace(/{([^\{,}]*)}/g, function(match, p1){
+      return link.subjectData.propertyValue(p1);
+    });
+
+    $location.url(resultLink);
+  };
+}
+/* Grid links actions */
+angular.module('grid').provider('grid-actions', gridActions);
+gridActions.$inject = [];
+function gridActions() {
+
+  var provider = {
+    actions: {},
+    $get: gridActionsGet
+  };
+
+  gridActionsGet.$inject = ['grid-action-goTo', 'grid-action-delete', 'grid-action-update', 'grid-action-create'];
+  return provider;
+
+  function gridActionsGet(ActionGoTo, ActionDelete, ActionUpdate, ActionCreate) {
+    /*jshint validthis: true */
+    this.actions = {
+      goToUpdate: ActionGoTo,
+      goToCreate: ActionGoTo,
+      goToList: ActionGoTo,
+      read: ActionGoTo,
+      delete: ActionDelete,
+      update: ActionUpdate,
+      create: ActionCreate
+    };
+    return {
+      action: function (link, scope) {
+        this.actions[link.definition.data.propertyValue('rel')](link, scope);
+      }.bind(this)
+    };
+  }
+}
+angular.module('grid').factory('grid-action-update', gridActionUpdate);
+gridActionUpdate.$inject = ['$http', 'grid-entity'];
+function gridActionUpdate($http, gridEntity) {
+  return function(link, scope) {
+    var params = {
+      method: link.method,
+      url: link.href,
+      data: scope.model
+    };
+
+    scope.$broadcast('schemaFormValidate');
+    if (!scope.scopeForm.gridForm.$valid) {
+      return false;
+    }
+
+    $http(params).then(actionUpdateSuccess, actionUpdateError);
+
+    function actionUpdateSuccess() {
+      gridEntity.getFormInfo(function (form) {
+        scope.schema = form.schema;
+        scope.form = form.form;
+        scope.model = form.model;
+        scope.alerts.push({
+          type: 'success',
+          msg: gridEntity.getMessage('successUpdated')
+        });
+      });
+    }
+
+    function actionUpdateError(res) {
+      scope.alerts.push({
+        type: 'danger',
+        msg: res.statusText || gridEntity.getMessage('serverError')
+      });
+    }
+
+  };
+}
+angular.module('grid').directive('gridForm', crudDirective);
+crudDirective.$inject = [];
+function crudDirective() {
+  var directive = {
+    restrict: 'EA',
+    scope: {
+      gridModel: '=gridModel'
+    },
+    replace: true,
+    templateUrl: 'templates/grid/form.html',
+    controller: crudDirectiveController
+  };
+
+  crudDirectiveController.$inject = ['$scope', 'grid-entity', 'grid-actions'];
+  return directive;
+
+  function crudDirectiveController($scope, gridEntity, gridActions) {
+    $scope.alerts = [];
+    $scope.scopeForm = {
+      gridForm: {}
+    };
+
+    $scope.setFormScope= function(scope){
+      $scope.scopeForm = scope;
+    };
+
+    gridEntity.setModel($scope.gridModel);
+    gridEntity.getFormInfo(function (form) {
+      $scope.schema = form.schema;
+      $scope.form = form.form;
+      $scope.model = form.model;
+      $scope.links = form.links;
+      $scope.$digest();
+    });
+
+    $scope.edit = function($event, form) {
+      gridActions.action(form.link, $scope);
+    };
+
+    $scope.go = function(link) {
+      gridActions.action(link, $scope);
+    };
+
+    $scope.closeAlert = function(index) {
+      $scope.alerts.splice(index, 1);
+    };
+  }
+}
+
+angular.module('grid').directive("gridTable", ['$timeout', 'grid-entity', 'grid-actions', function($timeout, gridEntity, gridActions) {
+  return {
+    restrict: 'E',
+    templateUrl: 'templates/grid/table.html',
+    scope: {
+      gridModel: '=gridModel'
+    },
+    controller: function($scope) {
+      $scope.alerts = [];
+      gridEntity.setModel($scope.gridModel);
+
+      gridEntity.getTableInfo(function(table) {
+        $scope.rows = table.rows;
+        $scope.columns = table.columns;
+        $scope.links = table.links;
+        $scope.$digest();
+      });
+
+      $scope.edit = function(link) {
+        gridActions.action(link, $scope);
+      };
+
+      $scope.closeAlert = function(index) {
+        $scope.alerts.splice(index, 1);
+      };
+    },
+    link: function(scope, element, attributes, controller) {
+    }
+  };
+}]);
 return vmsGrid;
 }));

@@ -1,30 +1,40 @@
-angular.module('grid').directive("gridTable", ['$timeout', 'grid-entity', 'grid-actions', function($timeout, gridEntity, gridActions) {
-  return {
-    restrict: 'E',
-    templateUrl: 'templates/grid/table.html',
-    scope: {
-      gridModel: '=gridModel'
-    },
-    controller: function($scope) {
-      $scope.alerts = [];
-      gridEntity.setModel($scope.gridModel);
+angular.module('grid').directive("gridTable", tableDirective);
+tableDirective.$inject = ['grid-entity', 'grid-actions'];
+function tableDirective(gridEntity, gridActions) {
+  var directive = {
+      restrict: 'E',
+      templateUrl: 'templates/grid/table.html',
+      scope: {
+        gridModel: '=gridModel'
+      },
+      controller: tableDirectiveCtrl,
+      link: tableDirectiveLink
+    };
 
-      gridEntity.getTableInfo(function(table) {
-        $scope.rows = table.rows;
-        $scope.columns = table.columns;
-        $scope.links = table.links;
-        $scope.$digest();
-      });
+  tableDirectiveCtrl.$inject = ['$scope'];
+  return directive;
 
-      $scope.edit = function(link) {
-        gridActions.action(link, $scope);
-      };
+  function tableDirectiveCtrl($scope) {
+    $scope.alerts = [];
+    gridEntity.setModel($scope.gridModel);
 
-      $scope.closeAlert = function(index) {
-        $scope.alerts.splice(index, 1);
-      };
-    },
-    link: function(scope, element, attributes, controller) {
-    }
-  };
-}]);
+    gridEntity.getTableInfo(function(table) {
+      $scope.rows = table.rows;
+      $scope.columns = table.columns;
+      $scope.links = table.links;
+      $scope.$digest();
+    });
+
+    $scope.edit = function(link) {
+      gridActions.action(link, $scope);
+    };
+
+    $scope.closeAlert = function(index) {
+      $scope.alerts.splice(index, 1);
+    };
+  }
+
+  function tableDirectiveLink(scope, element, attributes, controller) {
+
+  }
+}

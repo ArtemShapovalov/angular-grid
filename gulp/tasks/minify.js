@@ -26,7 +26,8 @@ gulp.task('minify', function() {
           {
             name: 'bootstrapDecorator',
             amd: 'bootstrap-decorator'
-          }
+          },
+          {name: 'lodash'}
         ]
       },
       exports: function() {return 'grid';},

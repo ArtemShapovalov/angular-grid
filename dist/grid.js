@@ -1,12 +1,12 @@
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['angular', 'jsonary', 'angular-bootstrap', 'bootstrap-decorator'], factory);
+    define(['angular', 'jsonary', 'angular-bootstrap', 'bootstrap-decorator', 'lodash'], factory);
   } else if (typeof exports === 'object') {
-    module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'));
+    module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));
   } else {
-    root.grid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator);
+    root.grid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root.lodash);
   }
-}(this, function(angular, Jsonary, angularBootstrap, bootstrapDecorator) {
+}(this, function(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {
 
   var module = angular.module('grid', ['schemaForm', 'ui.bootstrap.tpls']);
 

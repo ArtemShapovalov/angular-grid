@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "Angular module for render UI by Hyper-schema",
   "main": "dist/grid.js",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "^3.8.11",
     "gulp-angular-templatecache": "^1.2.1",
+    "gulp-bower": "0.0.10",
     "gulp-concat": "^2.2.0",
     "gulp-jscs": "^1.1.0",
     "gulp-minify-html": "^0.1.1",

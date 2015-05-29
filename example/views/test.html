@@ -1,1 +1,2 @@
-<grid-table grid-model="userGrid"></grid-table>
+<grid-table ng-if="!userGrid.params.type" grid-model="userGrid"></grid-table>
+<grid-form ng-if="userGrid.params.type" grid-model="userGrid"></grid-form>

@@ -7,6 +7,10 @@ gulp.task('bower', function(){
   //  'bower_components/**/*'])
   //  .pipe(gulp.dest('example/bower_components'));
 
+  gulp.src([
+    'dist/**/*'])
+    .pipe(gulp.dest('example/bower_components/angular-grid/dist'));
+
   return bower({ directory: './bower_components', cwd: './' })
     .pipe(gulp.dest('./example/bower_components'));
 

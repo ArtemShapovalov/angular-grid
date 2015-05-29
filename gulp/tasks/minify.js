@@ -30,7 +30,7 @@ gulp.task('minify', function() {
           },
           {
             name: 'lodash',
-            amd: '_',
+            amd: 'lodash',
             global: '_'
           }
         ]

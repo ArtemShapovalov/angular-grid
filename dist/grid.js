@@ -1,6 +1,6 @@
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['angular', 'jsonary', 'angular-bootstrap', 'bootstrap-decorator', '_'], factory);
+    define(['angular', 'jsonary', 'angular-bootstrap', 'bootstrap-decorator', 'lodash'], factory);
   } else if (typeof exports === 'object') {
     module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));
   } else {

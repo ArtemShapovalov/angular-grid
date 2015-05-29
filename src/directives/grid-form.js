@@ -1,21 +1,19 @@
-angular.module('grid').directive('gridForm', crudDirective);
-crudDirective.$inject = [];
-function crudDirective() {
+angular.module('grid').directive('gridForm', gridFormDirective);
+
+function gridFormDirective() {
   var directive = {
-    restrict: 'EA',
-    scope: {
-      gridModel: '=gridModel'
-    },
+    restrict: 'E',
     replace: true,
-    templateUrl: 'templates/grid/form.html',
-    controller: crudDirectiveController
+    controller: gridFormDirectiveCtrl
   };
 
-  crudDirectiveController.$inject = ['$scope', 'grid-entity', 'grid-actions'];
+  gridFormDirectiveCtrl.$inject = ['$scope', 'grid-entity', 'grid-actions'];
+
   return directive;
 
-  function crudDirectiveController($scope, gridEntity, gridActions) {
+  function gridFormDirectiveCtrl($scope, gridEntity, gridActions) {
     $scope.alerts = [];
+
     $scope.scopeForm = {
       gridForm: {}
     };
@@ -24,7 +22,6 @@ function crudDirective() {
       $scope.scopeForm = scope;
     };
 
-    gridEntity.setModel($scope.gridModel);
     gridEntity.getFormInfo(function (form) {
       $scope.schema = form.schema;
       $scope.form = form.form;

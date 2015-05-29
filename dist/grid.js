@@ -24,16 +24,13 @@ try {
 } catch (e) {}
 
 var vmsGrid = angular.module('grid', deps);
-
-  angular.module('grid').run(['$templateCache', function ($templateCache) {
-
-    $templateCache.put('templates/grid/table.html',
+angular.module('grid').run(['$templateCache', function ($templateCache) {
+  $templateCache.put('templates/grid/table.html',
+    '<grid-table>' +
       '<span ng-repeat="link in links">' +
         '<a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a> ' +
       '</span>'+
-      '<div>' +
-        '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
-      '</div>' +
+      '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
       '<table class="table grid">'+
         '<thead>'+
           '<tr>'+
@@ -52,11 +49,12 @@ var vmsGrid = angular.module('grid', deps);
             '</td>'+
           '</tr>'+
         '</tbody>'+
-      '</table>'
-    );
+      '</table>' +
+    '</grid-table>'
+  );
 
-    $templateCache.put('templates/grid/form.html',
-    '<div>' +
+  $templateCache.put('templates/grid/form.html',
+    '<grid-form>' +
       '<span ng-repeat="link in links">' +
         '<a href="javascript:void(0);" ng-click="go(link)">{{link.title}}</a> ' +
       '</span>'+
@@ -67,361 +65,378 @@ var vmsGrid = angular.module('grid', deps);
         'sf-schema="schema" sf-form="form" sf-model="model"' +
         'class="form-horizontal" role="form" ng-if="hideForm !== true">'+
       '</form>'+
-    '</div>'
-    );
+    '</grid-form>'
+  );
+}]);
 
-  }]);
+angular.module('grid').factory('_', function () {
+  return lodash;
+});
 
-  angular.module('grid').factory('_', function () {
-    return lodash;
-  });
+angular.module('grid').provider('grid-entity', gridEntity);
 
-  angular.module('grid').provider('grid-entity', gridEntity);
+function gridEntity() {
+  var data,
+      schema;
 
-  gridEntity.$inject = [];
+  var provider = {
+    $get: gridEntityGet
+  };
 
-  function gridEntity(_) {
-    var data,
-        schema;
+  gridEntityGet.$inject = ['$timeout', '_'];
 
-    var provider = {
-      $get: gridEntityGet
+  return provider;
+
+  function gridEntityGet($timeout, _) {
+    var model,
+        url,
+        messages = {
+          successDeleted: 'Successfully delete',
+          successCreated: 'Successfully create',
+          successUpdated: 'Successfully update',
+          serverError: 'Oops! server error'
+        };
+
+    return {
+      TYPE_FORM: 'form',
+      TYPE_TABLE: 'table',
+      type: '',
+      config: {},
+      setData: setData,
+      setModel: setModel,
+      getModel: getModel,
+      setSchema: setSchema,
+      getMessage: getMessage,
+      setMessage: setMessage,
+      fetchData: fetchData,
+      fetchSchema: fetchSchema,
+      getTableInfo: getTableInfo,
+      getFormInfo: getFormInfo
     };
 
-    gridEntityGet.$inject = ['$timeout', '_'];
+    function setData(value) {
+      data = value;
+    }
 
-    return provider;
+    function setSchema(value) {
+      schema = value;
+    }
 
-    function gridEntityGet($timeout, _) {
-      var model,
-          messages = {
-            successDeleted: 'You successfully delete this resource',
-            successCreated: 'You successfully create new resource',
-            successUpdated: 'You successfully update this resource',
-            serverError: 'Oops! server error'
-          };
+    function setModel(Model) {
+      model = Model;
+    }
 
-      return {
-        TYPE_FORM: 'form',
-        TYPE_TABLE: 'table',
-        type: '',
-        config: {},
-        setData: setData,
-        setModel: setModel,
-        getModel: getModel,
-        setSchema: setSchema,
-        getMessage: getMessage,
-        setMessage: setMessage,
-        fetchData: fetchData,
-        fetchSchema: fetchSchema,
-        getTableInfo: getTableInfo,
-        getFormInfo: getFormInfo
-      };
+    function getModel() {
+      return model;
+    }
 
-      function setData(value) {
-        data = value;
+    function getMessage(param) {
+      return messages[param];
+    }
+
+    function setMessage(param, message) {
+      messages[param] = message;
+    }
+
+    function fetchData(url, callback) {
+      /*jshint validthis: true */
+      var self = this;
+
+      if (model === undefined) {
+        alert('Please set model before call fetch data');
+        return false;
       }
 
-      function setSchema(value) {
-        schema = value;
-      }
+      Jsonary.getData(url, function (jData) {
+        var data = jData;
+        var schema = jData.property('data').schemas()[0].data.document.raw.value();
 
-      function setModel(Model) {
-        model = Model;
-      }
+        self.setData(data);
+        self.setSchema(schema);
 
-      function getModel() {
-        return model;
-      }
-
-      function getMessage(param) {
-        return messages[param];
-      }
-
-      function setMessage(param, message) {
-        messages[param] = message;
-      }
-
-      function fetchData(url, callback) {
-        /*jshint validthis: true */
-        var self = this;
-
-        if (model === undefined) {
-          alert('Please set model before call fetch data');
-          return false;
+        if (callback !== undefined) {
+          callback(data, schema);
         }
 
-        Jsonary.getData(url, function (jData) {
-          var data = jData;
-          var schema = jData.property('data').schemas()[0].data.document.raw.value();
+      });
 
-          self.setData(data);
-          self.setSchema(schema);
+    }
 
-          if (callback !== undefined) {
-            callback(data, schema);
-          }
+    function fetchSchema(url, callback) {
+      /*jshint validthis: true */
+      var self = this;
 
-        });
+      Jsonary.getSchema(url, function (jSchema) {
 
-      }
+        var schema = jSchema.data.document.raw.value();
+        var data = Jsonary.create(getEmptyData(jSchema.data.value(), schema));
+        data.document.url = self.getModel().url;
 
-      function fetchSchema(url, callback) {
-        /*jshint validthis: true */
-        var self = this;
+        data.addSchema(jSchema);
 
-        Jsonary.getSchema(url, function (jSchema) {
+        self.setData(data);
+        self.setSchema(schema);
 
-          var schema = jSchema.data.document.raw.value();
-          var data = Jsonary.create(getEmptyData(jSchema.data.value(), schema));
-          data.document.url = self.getModel().url;
+        if (callback !== undefined) {
+          callback(data, schema);
+        }
 
-          data.addSchema(jSchema);
+      });
+    }
 
-          self.setData(data);
-          self.setSchema(schema);
+    function getEmptyData(schema, fullSchema) {
+      var result;
+      var schemaWithoutRef = mergeRelSchema(schema, fullSchema);
 
-          if (callback !== undefined) {
-            callback(data, schema);
-          }
+      result = _.clone(schemaWithoutRef.properties);
+      result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
+      result.data.attributes = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties.attributes.properties));
 
-        });
-      }
-
-      function getEmptyData(schema, fullSchema) {
-        var result;
-        var schemaWithoutRef = mergeRelSchema(schema, fullSchema);
-
-        result = _.clone(schemaWithoutRef.properties);
-        result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
-        result.data.attributes = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties.attributes.properties));
-
-        function getTypeProperty(obj) {
-          var tmpObj = obj;
-          _.forEach(tmpObj, function(value, key) {
-            if (value.type) {
-              switch(value.type) {
-                case 'object':
-                  tmpObj[key] = {};
-                  break;
-                case 'string':
-                  tmpObj[key] = '';
-                  break;
-                case 'array':
-                  tmpObj[key] = [];
-                  break;
-                case 'integer':
-                  tmpObj[key] = '';
-                  break;
-              }
+      function getTypeProperty(obj) {
+        var tmpObj = obj;
+        _.forEach(tmpObj, function(value, key) {
+          if (value.type) {
+            switch(value.type) {
+              case 'object':
+                tmpObj[key] = {};
+                break;
+              case 'string':
+                tmpObj[key] = '';
+                break;
+              case 'array':
+                tmpObj[key] = [];
+                break;
+              case 'integer':
+                tmpObj[key] = '';
+                break;
             }
-          });
-          return tmpObj;
+          }
+        });
+        return tmpObj;
+      }
+      return result;
+    }
+
+    function setUrl(Url, params) {
+      url = Url + '/' + params.resource;
+
+      if (params.type) {
+        if (params.type === 'update' || params.type === 'read') {
+          url += '/' + params.type + '/' + model.params.id;
+        } else if (params.type === 'create') {
+          url += '/schema#/definitions/create';
         }
-        return result;
+      }
+    }
+
+    function getUrl() {
+      return url;
+    }
+
+    function getTableInfo(callback) {
+      /*jshint validthis: true */
+      var self = this,
+        model = self.getModel(),
+        url;
+
+      setUrl(model.url, model.params);
+      url = getUrl();
+
+      $timeout(function() {
+        self.fetchData(url, fetchDataSuccess);
+      });
+
+      function fetchDataSuccess(data, schema) {
+
+        var schemaWithoutRef = mergeRelSchema(data.schemas()[0].data.value(), schema);
+
+          self.type = self.TYPE_TABLE;
+          if (!self.config.table) {
+            self.config.table = {};
+          }
+
+          self.config.table.rows = rowsToTableFormat(getRowsByData(data));
+          self.config.table.links = data.links();
+          self.config.table.columns = getColumnsBySchema(schemaWithoutRef);
+          self.config.table.columns.push({
+            title: 'Actions',
+            type: 'string',
+            attributeName: 'links'
+          });
+
+          if (callback !== undefined) {
+            callback(self.config.table);
+          }
       }
 
-      function getTableInfo(callback) {
-        /*jshint validthis: true */
-        var self = this;
-        var model = self.getModel();
+    }
 
+    /**
+     *
+     * @param callback
+     */
+    function getFormInfo(callback) {
+      /*jshint validthis: true */
+      var self = this,
+          model = self.getModel(),
+          url;
+
+      setUrl(model.url, model.params);
+      url = getUrl();
+
+      if (model.params.type === 'update' || model.params.type === 'read') {
         $timeout(function() {
-          self.fetchData(model.url, fetchDataSuccess);
+          self.fetchData(url, fetchDataSuccess);
         });
-
-        function fetchDataSuccess(data, schema) {
-
-          var schemaWithoutRef = mergeRelSchema(data.schemas()[0].data.value(), schema);
-
-            self.type = self.TYPE_TABLE;
-            if (!self.config.table) {
-              self.config.table = {};
-            }
-
-            self.config.table.rows = rowsToTableFormat(getRowsByData(data));
-            self.config.table.links = data.links();
-            self.config.table.columns = getColumnsBySchema(schemaWithoutRef);
-            self.config.table.columns.push({
-              title: 'Actions',
-              type: 'string',
-              attributeName: 'links'
-            });
-
-            if (callback !== undefined) {
-              callback(self.config.table);
-            }
-        }
-
+      } else if (model.params.type === 'create') {
+        $timeout(function() {
+          self.fetchSchema(url, fetchDataSuccess);
+        });
       }
 
-      /**
-       *
-       * @param callback
-       */
-      function getFormInfo(callback) {
-        /*jshint validthis: true */
-        var self = this;
-        var model = self.getModel();
-        var url = model.url;
+      function fetchDataSuccess(data, schema) {
+        var newData = data.property('data').property('attributes');
+        var schemaWithoutRef = mergeRelSchema(newData.schemas()[0].data.value(), schema);
 
-        if (model.params.type === 'update' || model.params.type === 'read') {
-          url = model.url + '/' + model.params.type + '/' + model.params.id;
-
-          $timeout(function() {
-            self.fetchData(url, fetchDataSuccess);
-          });
-        } else if (model.params.type === 'create') {
-          url = model.url + '/schema#/definitions/create';
-
-          $timeout(function() {
-            self.fetchSchema(url, fetchDataSuccess);
-          });
+        self.type = self.TYPE_FORM;
+        if (!self.config.form) {
+          self.config.form = {};
         }
 
-        function fetchDataSuccess(data, schema) {
-          var newData = data.property('data').property('attributes');
-          var schemaWithoutRef = mergeRelSchema(newData.schemas()[0].data.value(), schema);
+        self.config.form.links = data.links();
+        self.config.form.schema = schemaWithoutRef;
+        self.config.form.model = newData.value();
+        self.config.form.form = [
+          '*'
+        ];
+        /** add button to config form */
+        self.config.form.form =  _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
 
-          self.type = self.TYPE_FORM;
-          if (!self.config.form) {
-            self.config.form = {};
+
+        if (callback !== undefined) {
+          callback(self.config.form);
+        }
+      }
+
+    }
+
+    /**
+     * Recursive function replacing $ref from schema
+     * @param haystack
+     * @param schemaFull
+     * @returns {*}
+     */
+    function replaceFromFull(haystack, schemaFull) {
+      for (var key in haystack) {
+        if (haystack.hasOwnProperty(key)) {
+          if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && haystack[key].$ref) {
+            haystack[key] = Object.byString(schemaFull, haystack[key].$ref.substring(2));
+            replaceFromFull(haystack[key], schemaFull);
           }
-
-          self.config.form.links = data.links();
-          self.config.form.schema = schemaWithoutRef;
-          self.config.form.model = newData.value();
-          self.config.form.form = [
-            '*'
-          ];
-          /** add button to config form */
-          self.config.form.form =  _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
-
-
-          if (callback !== undefined) {
-            callback(self.config.form);
+          if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && (haystack[key] !== 'links')) {
+            replaceFromFull(haystack[key], schemaFull);
           }
         }
-
       }
+      return haystack;
+    }
 
-      /**
-       * Recursive function replacing $ref from schema
-       * @param haystack
-       * @param schemaFull
-       * @returns {*}
-       */
-      function replaceFromFull(haystack, schemaFull) {
-        for (var key in haystack) {
-          if (haystack.hasOwnProperty(key)) {
-            if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && haystack[key].$ref) {
-              haystack[key] = Object.byString(schemaFull, haystack[key].$ref.substring(2));
-              replaceFromFull(haystack[key], schemaFull);
-            }
-            if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && (haystack[key] !== 'links')) {
-              replaceFromFull(haystack[key], schemaFull);
-            }
-          }
-        }
-        return haystack;
-      }
+    /**
+     * Convert schema with $ref link to schema without $ref
+     * @param schema
+     * @param schemaFull
+     * @returns {*}
+     */
+    function mergeRelSchema(schema, schemaFull) {
+      var schemaWithoutRef = schema;
 
-      /**
-       * Convert schema with $ref link to schema without $ref
-       * @param schema
-       * @param schemaFull
-       * @returns {*}
-       */
-      function mergeRelSchema(schema, schemaFull) {
-        var schemaWithoutRef = schema;
+      schemaWithoutRef = replaceFromFull(schemaWithoutRef, schemaFull);
 
-        schemaWithoutRef = replaceFromFull(schemaWithoutRef, schemaFull);
+      return schemaWithoutRef;
+    }
 
-        return schemaWithoutRef;
-      }
+    /**
+     * Get Columns info by schema
+     *
+     * @param schemaWithoutRef
+     * @returns {Array}
+     */
+    function getColumnsBySchema(schemaWithoutRef) {
+      var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
 
-      /**
-       * Get Columns info by schema
-       *
-       * @param schemaWithoutRef
-       * @returns {Array}
-       */
-      function getColumnsBySchema(schemaWithoutRef) {
-        var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
+      var result = [];
+      _.forEach(columns, function(value, key) {
+        value.attributeName = key;
+        result.push(value);
+      });
+      return result;
+    }
 
-        var result = [];
-        _.forEach(columns, function(value, key) {
-          value.attributeName = key;
-          result.push(value);
+    /**
+     * Convert array Jsonary Data to result array for rendering table
+     *
+     * @param rows
+     * @returns {Array}
+     */
+    function rowsToTableFormat(rows) {
+      var result = [];
+      rows.forEach(function(data) {
+        var tmp = data.property('attributes').value();
+        tmp.links = [];
+        _.forOwn(data.links(), function(link) {
+          tmp.links.push(link);
         });
-        return result;
-      }
+        result.push(tmp);
+      });
+      return result;
+    }
 
-      /**
-       * Convert array Jsonary Data to result array for rendering table
-       *
-       * @param rows
-       * @returns {Array}
-       */
-      function rowsToTableFormat(rows) {
-        var result = [];
-        rows.forEach(function(data) {
-          var tmp = data.property('attributes').value();
-          tmp.links = [];
-          _.forOwn(data.links(), function(link) {
-            tmp.links.push(link);
-          });
-          result.push(tmp);
+    /**
+     * Get array rows by Jsonary Data
+     *
+     * @param data Jsonary
+     * @returns {Array}
+     */
+    function getRowsByData(data) {
+      var rows = [];
+      data.property('data').items(function(index, value) {
+        rows.push(value);
+      });
+
+      return rows;
+    }
+
+    function getFormButtonBySchema(links) {
+      var result = [];
+      _.forEach(links, function(value) {
+        result.push({
+          type: 'button',
+          title: value.title,
+          link: value,
+          onClick: 'edit($event, form)'
         });
-        return result;
-      }
+      });
+      return result;
+    }
 
-      /**
-       * Get array rows by Jsonary Data
-       *
-       * @param data Jsonary
-       * @returns {Array}
-       */
-      function getRowsByData(data) {
-        var rows = [];
-        data.property('data').items(function(index, value) {
-          rows.push(value);
-        });
+  }
+}
 
-        return rows;
-      }
-
-      function getFormButtonBySchema(links) {
-        var result = [];
-        _.forEach(links, function(value) {
-          result.push({
-            type: 'button',
-            title: value.title,
-            link: value,
-            onClick: 'edit($event, form)'
-          });
-        });
-        return result;
-      }
-
+Object.byString = function(obj, path) {
+  path = path.replace(/\[(\w+)]/g, '.$1'); // convert indexes to properties
+  path = path.replace(/\/(\w+)/g, '.$1'); // convert indexes to properties
+  path = path.replace(/^\./, '');           // strip a leading dot
+  var a = path.split('.');
+  for (var i = 0, n = a.length; i < n; ++i) {
+    var k = a[i];
+    if (k in obj) {
+      obj = obj[k];
+    } else {
+      return;
     }
   }
-
-  Object.byString = function(obj, path) {
-    path = path.replace(/\[(\w+)]/g, '.$1'); // convert indexes to properties
-    path = path.replace(/\/(\w+)/g, '.$1'); // convert indexes to properties
-    path = path.replace(/^\./, '');           // strip a leading dot
-    var a = path.split('.');
-    for (var i = 0, n = a.length; i < n; ++i) {
-      var k = a[i];
-      if (k in obj) {
-        obj = obj[k];
-      } else {
-        return;
-      }
-    }
-    return obj;
-  };
+  return obj;
+};
 angular.module('grid').factory('grid-action-create', gridActionCreate);
 gridActionCreate.$inject = ['$http', 'grid-entity'];
 function gridActionCreate($http, gridEntity) {
@@ -579,24 +594,22 @@ function gridActionUpdate($http, gridEntity) {
 
   };
 }
-angular.module('grid').directive('gridForm', crudDirective);
-crudDirective.$inject = [];
-function crudDirective() {
+angular.module('grid').directive('gridForm', gridFormDirective);
+
+function gridFormDirective() {
   var directive = {
-    restrict: 'EA',
-    scope: {
-      gridModel: '=gridModel'
-    },
+    restrict: 'E',
     replace: true,
-    templateUrl: 'templates/grid/form.html',
-    controller: crudDirectiveController
+    controller: gridFormDirectiveCtrl
   };
 
-  crudDirectiveController.$inject = ['$scope', 'grid-entity', 'grid-actions'];
+  gridFormDirectiveCtrl.$inject = ['$scope', 'grid-entity', 'grid-actions'];
+
   return directive;
 
-  function crudDirectiveController($scope, gridEntity, gridActions) {
+  function gridFormDirectiveCtrl($scope, gridEntity, gridActions) {
     $scope.alerts = [];
+
     $scope.scopeForm = {
       gridForm: {}
     };
@@ -605,7 +618,6 @@ function crudDirective() {
       $scope.scopeForm = scope;
     };
 
-    gridEntity.setModel($scope.gridModel);
     gridEntity.getFormInfo(function (form) {
       $scope.schema = form.schema;
       $scope.form = form.form;
@@ -628,25 +640,22 @@ function crudDirective() {
   }
 }
 
-angular.module('grid').directive("gridTable", tableDirective);
-tableDirective.$inject = ['grid-entity', 'grid-actions'];
-function tableDirective(gridEntity, gridActions) {
+angular.module('grid').directive('gridTable', gridTableDirective);
+
+gridTableDirective.$inject = ['grid-entity', 'grid-actions'];
+
+function gridTableDirective(gridEntity, gridActions) {
   var directive = {
       restrict: 'E',
-      templateUrl: 'templates/grid/table.html',
-      scope: {
-        gridModel: '=gridModel'
-      },
-      controller: tableDirectiveCtrl,
-      link: tableDirectiveLink
+      controller: gridTableDirectiveCtrl
     };
 
-  tableDirectiveCtrl.$inject = ['$scope'];
+  gridTableDirectiveCtrl.$inject = ['$scope'];
+
   return directive;
 
-  function tableDirectiveCtrl($scope) {
+  function gridTableDirectiveCtrl($scope) {
     $scope.alerts = [];
-    gridEntity.setModel($scope.gridModel);
 
     gridEntity.getTableInfo(function(table) {
       $scope.rows = table.rows;
@@ -663,9 +672,32 @@ function tableDirective(gridEntity, gridActions) {
       $scope.alerts.splice(index, 1);
     };
   }
+}
+angular.module('grid').directive('vmsGrid', vmsGridDirective);
 
-  function tableDirectiveLink(scope, element, attributes, controller) {
+function vmsGridDirective() {
+  var directive = {
+    restrict: 'E',
+    template: '<ng-include src="getTemplateUrl()" />',
+    scope: {
+      gridModel: '=gridModel'
+    },
+    controller: vmsGridDirectiveCtrl
+  };
 
+  vmsGridDirectiveCtrl.$inject = ['$scope', 'grid-entity'];
+
+  return directive;
+
+  function vmsGridDirectiveCtrl($scope, gridEntity) {
+    $scope.getTemplateUrl = function() {
+      if ($scope.gridModel.params.type) {
+        return 'templates/grid/form.html';
+      }
+      return 'templates/grid/table.html';
+    };
+
+    gridEntity.setModel($scope.gridModel);
   }
 }
 return vmsGrid;

@@ -1,22 +1,19 @@
-angular.module('grid').directive("gridTable", tableDirective);
-tableDirective.$inject = ['grid-entity', 'grid-actions'];
-function tableDirective(gridEntity, gridActions) {
+angular.module('grid').directive('gridTable', gridTableDirective);
+
+gridTableDirective.$inject = ['grid-entity', 'grid-actions'];
+
+function gridTableDirective(gridEntity, gridActions) {
   var directive = {
       restrict: 'E',
-      templateUrl: 'templates/grid/table.html',
-      scope: {
-        gridModel: '=gridModel'
-      },
-      controller: tableDirectiveCtrl,
-      link: tableDirectiveLink
+      controller: gridTableDirectiveCtrl
     };
 
-  tableDirectiveCtrl.$inject = ['$scope'];
+  gridTableDirectiveCtrl.$inject = ['$scope'];
+
   return directive;
 
-  function tableDirectiveCtrl($scope) {
+  function gridTableDirectiveCtrl($scope) {
     $scope.alerts = [];
-    gridEntity.setModel($scope.gridModel);
 
     gridEntity.getTableInfo(function(table) {
       $scope.rows = table.rows;
@@ -32,9 +29,5 @@ function tableDirective(gridEntity, gridActions) {
     $scope.closeAlert = function(index) {
       $scope.alerts.splice(index, 1);
     };
-  }
-
-  function tableDirectiveLink(scope, element, attributes, controller) {
-
   }
 }

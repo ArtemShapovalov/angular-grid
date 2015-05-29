@@ -39,7 +39,9 @@ gulp.task('minify', function() {
       namespace: function() {return 'vmsGrid';}
     }))
     .pipe(gulp.dest('./dist/'))
+    .pipe(gulp.dest('example/bower_components/angular-grid/dist'))
     .pipe(uglify())
     .pipe(rename('grid.min.js'))
-    .pipe(gulp.dest('./dist/'));
+    .pipe(gulp.dest('./dist/'))
+    .pipe(gulp.dest('example/bower_components/angular-grid/dist'));
 });

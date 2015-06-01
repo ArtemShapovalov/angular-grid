@@ -7,18 +7,19 @@
     root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root._);
   }
 }(this, function(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {
-// Deps is sort of a problem for us, maybe in the future we will ask the user to depend
-// on modules for add-ons
+/*!
+ * VmsGrid v0.1.1 (https://github.com/VertaMedia/angular-grid)
+ * Copyright 2015 VertaMedia, Inc.
+ * Licensed under MIT (https://github.com/VertaMedia/angular-grid/master/LICENSE)
+ */
 
 var deps = [];
 try {
-  //This throws an expection if module does not exist.
   angular.module('schemaForm');
   deps.push('schemaForm');
 } catch (e) {}
 
 try {
-  //This throws an expection if module does not exist.
   angular.module('ui.bootstrap');
   deps.push('ui.bootstrap');
 } catch (e) {}
@@ -108,7 +109,8 @@ function gridEntity() {
       getMessage: getMessage,
       setMessage: setMessage,
       fetchData: fetchData,
-      fetchSchema: fetchSchema,
+      loadData: loadData,
+      loadSchema: loadSchema,
       getTableInfo: getTableInfo,
       getFormInfo: getFormInfo
     };
@@ -137,7 +139,34 @@ function gridEntity() {
       messages[param] = message;
     }
 
+
     function fetchData(url, callback) {
+      /*jshint validthis: true */
+      var self = this;
+
+      if (model.params.type === 'create') {
+          self.loadSchema(url, fetchDataSuccess);
+      } else {
+          self.loadData(url, fetchDataSuccess);
+      }
+
+      function fetchDataSuccess(data, schema) {
+        self.setData(data);
+        self.setSchema(schema);
+
+        if (callback !== undefined) {
+          callback(data, schema);
+        }
+      }
+    }
+
+    /**
+     * Fetch data by url and include schema from header data
+     * @param url
+     * @param callback
+     * @returns {boolean}
+     */
+    function loadData(url, callback) {
       /*jshint validthis: true */
       var self = this;
 
@@ -150,9 +179,6 @@ function gridEntity() {
         var data = jData;
         var schema = jData.property('data').schemas()[0].data.document.raw.value();
 
-        self.setData(data);
-        self.setSchema(schema);
-
         if (callback !== undefined) {
           callback(data, schema);
         }
@@ -161,7 +187,12 @@ function gridEntity() {
 
     }
 
-    function fetchSchema(url, callback) {
+    /**
+     * Fetch schema by url, create empty data and join them
+     * @param url
+     * @param callback
+     */
+    function loadSchema(url, callback) {
       /*jshint validthis: true */
       var self = this;
 
@@ -170,11 +201,7 @@ function gridEntity() {
         var schema = jSchema.data.document.raw.value();
         var data = Jsonary.create(getEmptyData(jSchema.data.value(), schema));
         data.document.url = self.getModel().url;
-
         data.addSchema(jSchema);
-
-        self.setData(data);
-        self.setSchema(schema);
 
         if (callback !== undefined) {
           callback(data, schema);
@@ -278,16 +305,9 @@ function gridEntity() {
 
       url = getResourceUrl(model.url, model.params);
 
-      //TODO: Exclude from here should be just fetchData
-      if (model.params.type === 'update' || model.params.type === 'read') {
-        $timeout(function() {
-          self.fetchData(url, fetchDataSuccess);
-        });
-      } else if (model.params.type === 'create') {
-        $timeout(function() {
-          self.fetchSchema(url, fetchDataSuccess);
-        });
-      }
+      $timeout(function() {
+        self.fetchData(url, fetchDataSuccess);
+      });
 
       function fetchDataSuccess(data, schema) {
         var newData = data.property('data').property('attributes');
@@ -680,7 +700,7 @@ function vmsGridDirective() {
     },
     controller: vmsGridDirectiveCtrl,
     link: function(scope, el, attr, ctrl) {
-      console.log(ctrl);
+
     }
   };
 

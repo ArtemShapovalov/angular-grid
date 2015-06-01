@@ -1,15 +1,16 @@
-// Deps is sort of a problem for us, maybe in the future we will ask the user to depend
-// on modules for add-ons
+/*!
+ * VmsGrid v0.1.1 (https://github.com/VertaMedia/angular-grid)
+ * Copyright 2015 VertaMedia, Inc.
+ * Licensed under MIT (https://github.com/VertaMedia/angular-grid/master/LICENSE)
+ */
 
 var deps = [];
 try {
-  //This throws an expection if module does not exist.
   angular.module('schemaForm');
   deps.push('schemaForm');
 } catch (e) {}
 
 try {
-  //This throws an expection if module does not exist.
   angular.module('ui.bootstrap');
   deps.push('ui.bootstrap');
 } catch (e) {}

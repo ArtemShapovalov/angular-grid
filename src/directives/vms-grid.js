@@ -9,7 +9,7 @@ function vmsGridDirective() {
     },
     controller: vmsGridDirectiveCtrl,
     link: function(scope, el, attr, ctrl) {
-      console.log(ctrl);
+
     }
   };
 

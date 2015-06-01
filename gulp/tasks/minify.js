@@ -1,8 +1,8 @@
-var gulp = require('gulp'),
-  concat = require('gulp-concat'),
-  rename = require('gulp-rename'),
-  umd = require('gulp-umd'),
-  uglify = require('gulp-uglify');
+  var gulp = require('gulp'),
+    concat = require('gulp-concat'),
+    rename = require('gulp-rename'),
+       umd = require('gulp-umd'),
+    uglify = require('gulp-uglify');
 
 gulp.task('minify', function() {
   gulp.src([

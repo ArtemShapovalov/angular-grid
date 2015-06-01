@@ -63,7 +63,6 @@ function gridEntity() {
 
   function gridEntityGet($timeout, _) {
     var model,
-        url,
         messages = {
           successDeleted: 'Successfully delete',
           successCreated: 'Successfully create',
@@ -191,20 +190,17 @@ function gridEntity() {
       return result;
     }
 
-    function setUrl(Url, params) {
-      url = Url + '/' + params.resource;
+    function getResourceUrl(url, params) {
+      var result = url + '/' + params.resource;
 
       if (params.type) {
         if (params.type === 'update' || params.type === 'read') {
-          url += '/' + params.type + '/' + model.params.id;
+          result += '/' + params.type + '/' + params.id;
         } else if (params.type === 'create') {
-          url += '/schema#/definitions/create';
+          result += '/schema#/definitions/create';
         }
       }
-    }
-
-    function getUrl() {
-      return url;
+      return result
     }
 
     function getTableInfo(callback) {
@@ -213,8 +209,7 @@ function gridEntity() {
         model = self.getModel(),
         url;
 
-      setUrl(model.url, model.params);
-      url = getUrl();
+      url = getResourceUrl(model.url, model.params);
 
       $timeout(function() {
         self.fetchData(url, fetchDataSuccess);
@@ -255,9 +250,9 @@ function gridEntity() {
           model = self.getModel(),
           url;
 
-      setUrl(model.url, model.params);
-      url = getUrl();
+      url = getResourceUrl(model.url, model.params);
 
+      //TODO: Exclude from here should be just fetchData
       if (model.params.type === 'update' || model.params.type === 'read') {
         $timeout(function() {
           self.fetchData(url, fetchDataSuccess);
@@ -285,7 +280,6 @@ function gridEntity() {
         ];
         /** add button to config form */
         self.config.form.form =  _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
-
 
         if (callback !== undefined) {
           callback(self.config.form);

@@ -1,5 +1,6 @@
 angular.module('grid').directive('gridForm', gridFormDirective);
 
+//TODO: should be set require ... depends on vmsGrid
 function gridFormDirective() {
   var directive = {
     restrict: 'E',

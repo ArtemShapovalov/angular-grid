@@ -10,8 +10,8 @@ try {
 
 try {
   //This throws an expection if module does not exist.
-  angular.module('ui.bootstrap.tpls');
-  deps.push('ui.bootstrap.tpls');
+  angular.module('ui.bootstrap');
+  deps.push('ui.bootstrap');
 } catch (e) {}
 
 var vmsGrid = angular.module('grid', deps);

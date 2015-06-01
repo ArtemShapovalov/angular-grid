@@ -2,6 +2,7 @@ angular.module('grid').directive('gridTable', gridTableDirective);
 
 gridTableDirective.$inject = ['grid-entity', 'grid-actions'];
 
+//TODO: should be set require ... depends on vmsGrid
 function gridTableDirective(gridEntity, gridActions) {
   var directive = {
       restrict: 'E',

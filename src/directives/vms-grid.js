@@ -7,7 +7,10 @@ function vmsGridDirective() {
     scope: {
       gridModel: '=gridModel'
     },
-    controller: vmsGridDirectiveCtrl
+    controller: vmsGridDirectiveCtrl,
+    link: function(scope, el, attr, ctrl) {
+      console.log(ctrl);
+    }
   };
 
   vmsGridDirectiveCtrl.$inject = ['$scope', 'grid-entity'];

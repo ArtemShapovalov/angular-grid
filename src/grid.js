@@ -141,7 +141,6 @@ function gridEntity() {
      */
     function loadData(url, callback) {
       /*jshint validthis: true */
-      var self = this;
 
       if (model === undefined) {
         alert('Please set model before call fetch data');
@@ -217,7 +216,11 @@ function gridEntity() {
     }
 
     function getResourceUrl(url, params) {
-      var result = url + '/' + params.resource;
+      var result = url;
+
+      if (params.resource) {
+        result = url + '/' + params.resource;
+      }
 
       if (params.type) {
         if (params.type === 'update' || params.type === 'read') {
@@ -342,6 +345,17 @@ function gridEntity() {
       return schemaWithoutRef;
     }
 
+    /*function loadRelationResource(resource, id) {
+      var self = this;
+      var model = self.getModel();
+      var url = getResourceUrl(model.url, {resource: resource, type: model.params.type})
+      self.loadData(url, loadedData);
+
+      function loadedData(data, schema) {
+        console.log(data);
+      }
+    }*/
+
     /**
      * Get Columns info by schema
      *
@@ -349,13 +363,20 @@ function gridEntity() {
      * @returns {Array}
      */
     function getColumnsBySchema(schemaWithoutRef) {
-      var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
-
       var result = [];
+      var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
+      var relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
+
       _.forEach(columns, function(value, key) {
         value.attributeName = key;
         result.push(value);
       });
+
+      _.forEach(relationships, function(value, key) {
+        value.attributeName = key;
+        result.push(value);
+      });
+
       return result;
     }
 
@@ -386,7 +407,38 @@ function gridEntity() {
      */
     function getRowsByData(data) {
       var rows = [];
+      var included = []
       data.property('data').items(function(index, value) {
+
+        var relations = {};
+        if (relations = value.property('relationships').value()) {
+          _.forEach(relations, function(relItem, relKey) {
+            if (Array.isArray(relItem.data)) {
+              _.forEach(relItem.data, function(dataObj) {
+
+                included.push({
+                  url: getResourceUrl(relItem.links.self, {type: 'read', id: dataObj.id})
+                });
+
+              })
+            } else {
+              included.push({
+                url: getResourceUrl(relItem.links.self, {type: 'read', id: relItem.data.id})
+              });
+            }
+
+          })
+        }
+
+        _(included).forEach(function(item) {
+          loadData(url, success);
+
+           function success(data, schema) {
+           rows.push(data.property('data'));
+           }
+        });
+
+
         rows.push(value);
       });
 

@@ -52,7 +52,7 @@ function userSrv() {
      * update - DATA   -> jsonary/users/:id
      * read   - DATA   -> jsonary/users/:id
      */
-    url: 'http://private-f4056-jsonschema.apiary-mock.com/jsonary',
+    url: 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
     /**
      * {
        *    id:   undefined|string

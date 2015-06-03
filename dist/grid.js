@@ -174,12 +174,12 @@ function gridEntity() {
         return false;
       }
 
-      Jsonary.getData(url, function (jData) {
+      Jsonary.getData(url, function (jData, request) {
         var data = jData;
         var schema = jData.property('data').schemas()[0].data.document.raw.value();
 
         if (callback !== undefined) {
-          callback(data, schema);
+          callback(data, schema, request);
         }
 
       });
@@ -280,7 +280,10 @@ function gridEntity() {
             self.config.table = {};
           }
 
-          self.config.table.rows = rowsToTableFormat(getRowsByData(data));
+
+        getRowsByData(data, function(rows, relations) {
+
+          self.config.table.rows = rowsToTableFormat(rows);
           self.config.table.links = data.links();
           self.config.table.columns = getColumnsBySchema(schemaWithoutRef);
           self.config.table.columns.push({
@@ -292,6 +295,8 @@ function gridEntity() {
           if (callback !== undefined) {
             callback(self.config.table);
           }
+
+        });
       }
 
     }
@@ -372,17 +377,6 @@ function gridEntity() {
       return schemaWithoutRef;
     }
 
-    /*function loadRelationResource(resource, id) {
-      var self = this;
-      var model = self.getModel();
-      var url = getResourceUrl(model.url, {resource: resource, type: model.params.type})
-      self.loadData(url, loadedData);
-
-      function loadedData(data, schema) {
-        console.log(data);
-      }
-    }*/
-
     /**
      * Get Columns info by schema
      *
@@ -392,7 +386,10 @@ function gridEntity() {
     function getColumnsBySchema(schemaWithoutRef) {
       var result = [];
       var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
-      var relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
+      var relationships = {};
+      if (schemaWithoutRef.properties.data.items.properties.relationships) {
+        relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
+      }
 
       _.forEach(columns, function(value, key) {
         value.attributeName = key;
@@ -415,8 +412,16 @@ function gridEntity() {
      */
     function rowsToTableFormat(rows) {
       var result = [];
-      rows.forEach(function(data) {
+      _.forEach(rows, function(resource) {
+        var data = resource.own;
         var tmp = data.property('attributes').value();
+
+        _.forEach(resource.relationships, function(relation, key) {
+          tmp[key] = _.map(relation, function(relationItem) {
+            return relationItem.property('data').propertyValue('id');
+          }).join(', ');
+        });
+
         tmp.links = [];
         _.forOwn(data.links(), function(link) {
           tmp.links.push(link);
@@ -432,46 +437,160 @@ function gridEntity() {
      * @param data Jsonary
      * @returns {Array}
      */
-    function getRowsByData(data) {
+    function getRowsByData(data, callback) {
       var rows = [];
-      var included = []
+      var included = [];
       data.property('data').items(function(index, value) {
 
-        var relations = {};
-        if (relations = value.property('relationships').value()) {
-          _.forEach(relations, function(relItem, relKey) {
-            if (Array.isArray(relItem.data)) {
-              _.forEach(relItem.data, function(dataObj) {
-
-                included.push({
-                  url: getResourceUrl(relItem.links.self, {type: 'read', id: dataObj.id})
-                });
-
-              })
-            } else {
-              included.push({
-                url: getResourceUrl(relItem.links.self, {type: 'read', id: relItem.data.id})
-              });
-            }
-
-          })
-        }
-
-        _(included).forEach(function(item) {
-          loadData(url, success);
-
-           function success(data, schema) {
-           rows.push(data.property('data'));
-           }
-        });
-
+        included.push(getRelationResource(value));
 
         rows.push(value);
       });
 
-      return rows;
+      batchLoadData(included, batchLoaded);
+
+      function batchLoaded(relationResources) {
+        var res = [];
+
+        _.forEach(rows, function(row, index) {
+          var tmpRow = {
+            own: row,
+            relationships: _.mapValues(relationResources[index], function(n) {
+              _.forEach(n, function(item, index){
+                n[index] = item.data;
+              });
+              return n;
+            })
+          };
+
+          res.push(tmpRow);
+        });
+
+        callback(res);
+      }
+
     }
 
+    /**
+     * Circumvention the array relationships and get links for late them load
+     *
+     * @param data
+     * @returns {Object} link for get resource
+     */
+    function getRelationResource(data) {
+      var relations;
+      var result = {};
+
+      if (relations = data.property('relationships').value()) {
+        _.forEach(relations, function(relItem, relKey) {
+          result[relKey] = getRelationLink(relItem);
+        })
+      }
+      return result;
+    }
+
+    /**
+     * Get link from relation for load resource data
+     *
+     * "data": [{
+     *    "type": "posts",
+     *    "id": "1",
+     *    "attributes": {
+     *      ...
+     *    },
+     *    "relationships": {
+     *      "author": {           <-- input data
+     *         "links": {
+     *           "self": "http://example.com/posts/1/relationships/author",
+     *           "related": "http://example.com/posts/1/author"
+     *         },
+     *         "data": { "type": "people", "id": "9" }
+     *      }
+     *    }
+     *}]
+     * @param relItem
+     * @returns {Array}
+     */
+    function getRelationLink(relItem) {
+      var resource = [];
+
+      if (Array.isArray(relItem.data)) {
+        var linkArray = [];
+        _.forEach(relItem.data, function(dataObj) {
+
+          linkArray.push({
+            url: getResourceUrl(relItem.links.self, {type: 'read', id: dataObj.id})
+          });
+        });
+        resource = linkArray;
+
+      } else {
+        resource = [{
+          url: getResourceUrl(relItem.links.self, {type: 'read', id: relItem.data.id})
+        }];
+      }
+      return resource;
+    }
+
+    /**
+     * Multiple (batch) load data
+     *
+     * @param included
+     * @param callback
+     */
+    function batchLoadData(included, callback) {
+      var result = [];
+      var resources = {};
+      var cached = {};
+      var total = 0;
+
+      _.forEach(included, function(item) {
+        _.forEach(item, function(rel) {
+          _.forEach(rel, function(relItem) {
+            if (cached[relItem.url]) {
+              console.log('cache');
+              total++;
+            } else {
+              loadData(relItem.url, success);
+              cached[relItem.url] = {};
+              total++;
+            }
+          });
+        });
+      });
+
+      var interval = setInterval(function() {
+        if ((_.size(resources) + _.size(cached)) === total) {
+          clearInterval(interval);
+
+          _.forEach(included, function(item, ki) {
+            _.forEach(item, function(rel, kr) {
+              _.forEach(rel, function(relItem, kri) {
+                result[ki] = result[ki] || {};
+                result[ki][kr] = result[ki][kr] || [];
+                result[ki][kr][kri] = resources[relItem.url];
+              });
+            });
+          });
+
+          callback(result)
+        }
+      }, 100);
+
+      function success(data, schema, request) {
+        resources[data.document.url] = {
+          data: data,
+          schema: schema
+        };
+        console.log('load');
+      }
+    }
+
+    /**
+     *
+     * @param links
+     * @returns {Array}
+     */
     function getFormButtonBySchema(links) {
       var result = [];
       _.forEach(links, function(value) {

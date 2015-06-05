@@ -299,20 +299,49 @@ function gridEntity() {
           self.config.form = {};
         }
 
-        self.config.form.links = data.links();
-        self.config.form.schema = schemaWithoutRef;
-        self.config.form.model = newData.value();
-        self.config.form.form = [
-          '*'
-        ];
-        /** add button to config form */
-        self.config.form.form =  _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
+        getFieldsForm(data, function(fields, relations) {
 
-        if (callback !== undefined) {
-          callback(self.config.form);
-        }
+          self.config.form.links = data.links();
+          self.config.form.schema = schemaWithoutRef;
+          self.config.form.model = fieldsToFormFormat(fields);
+          self.config.form.form = [
+            '*'
+          ];
+          /** add button to config form */
+          self.config.form.form = _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
+
+          if (callback !== undefined) {
+            callback(self.config.form);
+          }
+        })
+
       }
 
+    }
+
+    function getFieldsForm(data, callback) {
+      var fields;
+      var included = [];
+
+      fields = data.property('data');
+      included.push(getRelationResource(data.property('data')));
+
+      batchLoadData(included, batchLoaded);
+
+      function batchLoaded(relationResources) {
+
+          var result = {
+            own: fields,
+            relationships: _.mapValues(relationResources[0], function(n) {
+              _.forEach(n, function(item, index){
+                n[index] = item.data;
+              });
+              return n;
+            })
+          };
+
+        callback(result);
+      }
     }
 
     /**
@@ -359,22 +388,41 @@ function gridEntity() {
     function getColumnsBySchema(schemaWithoutRef) {
       var result = [];
       var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
-      var relationships = {};
-      if (schemaWithoutRef.properties.data.items.properties.relationships) {
-        relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
-      }
+
 
       _.forEach(columns, function(value, key) {
         value.attributeName = key;
         result.push(value);
       });
 
+      /*var relationships = {};
+      if (schemaWithoutRef.properties.data.items.properties.relationships) {
+        relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
+      }
       _.forEach(relationships, function(value, key) {
         value.attributeName = key;
         result.push(value);
-      });
+      });*/
 
       return result;
+    }
+
+
+    function fieldsToFormFormat(resource) {
+      var data = resource.own;
+      var fields = data.property('attributes').value();
+
+      _.forEach(resource.relationships, function(relation, key) {
+        fields[key] = _.map(relation, function(relationItem) {
+          return relationItem.property('data').propertyValue('id');
+        });
+        /** check if data as array then return string else array */
+        if (!Array.isArray(data.property('relationships').property(key).propertyValue('data'))) {
+          fields[key] = fields[key][0];
+        }
+      });
+
+      return fields;
     }
 
     /**
@@ -393,10 +441,12 @@ function gridEntity() {
           tmp[key] = _.map(relation, function(relationItem) {
             var field = resource.own.property('relationships').property(key).schemas()[0].data.propertyValue('name');
 
+            /**
+             * name additional field(relation resource)
+             */
             if (field) {
               return relationItem.property('data').property('attributes').propertyValue(field);
             }
-
             return relationItem.property('data').propertyValue('id');
 
           }).join(', ');
@@ -523,6 +573,7 @@ function gridEntity() {
       var resources = {};
       var cached = {};
       var total = 0;
+      var loaded = 0;
 
       _.forEach(included, function(item) {
         _.forEach(item, function(rel) {
@@ -534,13 +585,14 @@ function gridEntity() {
               loadData(relItem.url, success);
               cached[relItem.url] = {};
               total++;
+              loaded++;
             }
           });
         });
       });
 
       var interval = setInterval(function() {
-        if ((_.size(resources) + _.size(cached)) === total) {
+        if (_.size(resources) === loaded) {
           clearInterval(interval);
 
           _.forEach(included, function(item, ki) {

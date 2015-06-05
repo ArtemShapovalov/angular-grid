@@ -1,10 +1,9 @@
-  var gulp = require('gulp'),
-    concat = require('gulp-concat'),
-    rename = require('gulp-rename'),
-       //umd = require('gulp-umd'),
-       //wrapUmd = require('gulp-wrap-umd'),
-    uglify = require('gulp-uglify');
-
+var gulp = require('gulp');
+var concat = require('gulp-concat');
+var rename = require('gulp-rename');
+//var umd = require('gulp-umd');
+//var wrapUmd = require('gulp-wrap-umd');
+var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
 var ngAnnotate = require('gulp-ng-annotate');

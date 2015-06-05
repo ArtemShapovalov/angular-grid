@@ -391,7 +391,14 @@ function gridEntity() {
 
         _.forEach(resource.relationships, function(relation, key) {
           tmp[key] = _.map(relation, function(relationItem) {
+            var field = resource.own.property('relationships').property(key).schemas()[0].data.propertyValue('name');
+
+            if (field) {
+              return relationItem.property('data').property('attributes').propertyValue(field);
+            }
+
             return relationItem.property('data').propertyValue('id');
+
           }).join(', ');
         });
 

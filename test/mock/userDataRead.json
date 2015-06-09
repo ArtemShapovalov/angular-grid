@@ -1,0 +1,10 @@
+{
+  "data": {
+    "type": "users",
+    "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+    "attributes": {
+      "email": "dimon3@gmail.com",
+      "fullname": "John3 Doe"
+    }
+  }
+}

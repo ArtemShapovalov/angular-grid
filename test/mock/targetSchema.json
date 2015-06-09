@@ -1,0 +1,383 @@
+{
+  "$schema": "http://json-schema.org/draft-04/hyper-schema#",
+  "title": "User",
+  "type": "object",
+  "definitions": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "type": {
+      "title": "Type",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "editable": {
+      "title": "Editable",
+      "type": "string"
+    },
+    "scope": {
+      "title": "Scope",
+      "type": "string"
+    },
+    "users": {
+      "title": "Users",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "de105d54-75b4-431b-adb2-eb6b9e546013",
+          "de205d54-75b4-431b-adb2-eb6b9e546013",
+          "de305d54-75b4-431b-adb2-eb6b9e546013"
+        ],
+        "maximum": 2,
+        "uniqueItems": true
+      }
+    },
+    "user": {
+      "title": "User",
+      "type": "string",
+      "enum": ["de105d54-75b4-431b-adb2-eb6b9e546013","de205d54-75b4-431b-adb2-eb6b9e546013"]
+    },
+    "attributes": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "#/definitions/title"
+        },
+        "editable": {
+          "$ref": "#/definitions/editable"
+        },
+        "scope": {
+          "$ref": "#/definitions/scope"
+        },
+        "users": {
+          "$ref": "#/definitions/users"
+        },
+        "user": {
+          "$ref": "#/definitions/user"
+        }
+      },
+      "required": ["title", "editable", "scope"],
+      "additionalProperties": false
+    },
+    "relationships": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "users": {
+          "$ref": "#/definitions/relationshipUsers"
+        },
+        "user": {
+          "$ref": "#/definitions/relationshipUser"
+        }
+      }
+    },
+    "relationshipUser": {
+      "type": "object",
+      "title": "User",
+      "additionalProperties": true,
+      "properties": {
+        "links": {
+          "$ref": "#/definitions/relationshipLinks"
+        },
+        "data": {
+          "$ref": "#/definitions/relationshipDataSingle"
+        }
+      }
+    },
+    "relationshipUsers": {
+      "type": "object",
+      "title": "Users",
+      "name": "fullname",
+      "additionalProperties": true,
+      "properties": {
+        "links": {
+          "$ref": "#/definitions/relationshipLinks"
+        },
+        "data": {
+          "$ref": "#/definitions/relationshipDataList"
+        }
+      }
+    },
+    "relationshipLinks": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "self": {
+          "title": "Self",
+          "type": "string"
+        },
+        "related": {
+          "title": "Related",
+          "type": "string"
+        }
+      }
+    },
+    "relationshipDataSingle": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        }
+      }
+    },
+    "relationshipDataList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/id"
+          },
+          "type": {
+            "$ref": "#/definitions/type"
+          }
+        }
+      }
+    },
+    "targetRead": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "title": "Title",
+              "type": "string",
+              "readOnly": true
+            },
+            "editable": {
+              "title": "Editable",
+              "type": "string",
+              "readOnly": true
+            },
+            "scope": {
+              "title": "Scope",
+              "type": "string",
+              "readOnly": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "relationships": {
+          "$ref": "#/definitions/relationships"
+        }
+      },
+      "additionalProperties": false
+    },
+    "targetUpdate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/attributes"
+        },
+        "relationships": {
+          "$ref": "#/definitions/relationships"
+        }
+      },
+      "required": ["type", "id", "attributes"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Update",
+          "description": "Update Target",
+          "href": "/jsonary/targets/{id}",
+          "rel": "update",
+          "method": "PUT",
+          "encType": "application/vnd.api+json"
+        },
+        {
+          "title": "Delete",
+          "description": "Delete Target",
+          "href": "/jsonary/targets/{id}",
+          "rel": "delete",
+          "method": "DELETE",
+          "encType": "application/vnd.api+json",
+          "targetSchema": {
+            "$ref": "#/definitions/targetDelete"
+          }
+        }
+      ]
+    },
+    "targetCreate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/attributes"
+        },
+        "relationships": {
+          "$ref": "#/definitions/relationships"
+        }
+      },
+      "required": ["type", "id", "attributes"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Create",
+          "description": "Create Target",
+          "href": "/jsonary/targets",
+          "rel": "create",
+          "method": "POST",
+          "encType": "application/vnd.api+json",
+          "schema": {
+            "$ref": "#/definitions/targetCreate"
+          }
+        }
+      ]
+    },
+    "targetList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/attributes"
+        },
+        "relationships": {
+          "$ref": "#/definitions/relationships"
+        }
+      },
+      "required": ["type", "id", "attributes"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Read",
+          "description": "Get single Target",
+          "href": "/grid/targets/read/{id}",
+          "rel": "read",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        },
+        {
+          "title": "Edit",
+          "description": "Go to update Target",
+          "href": "/grid/targets/update/{id}",
+          "rel": "goToUpdate",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        },
+        {
+          "title": "Delete",
+          "description": "Delete Target",
+          "href": "/jsonary/targets/{id}",
+          "rel": "delete",
+          "method": "DELETE",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "read": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/targetRead"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Go to List",
+          "description": "Go to list Targets",
+          "href": "/grid/targets",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "update": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/targetUpdate"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Go to List",
+          "description": "Go to list Targets",
+          "href": "/grid/targets",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "create": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/targetCreate"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Go to List",
+          "description": "Go to list Targets",
+          "href": "/grid/targets",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "list": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/targetList"
+          }
+        }
+      },
+      "required": ["data"],
+      "links": [
+        {
+          "title": "Go to Create",
+          "description": "Go to create new Target",
+          "href": "/grid/targets/create",
+          "rel": "goToCreate",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    }
+  }
+}

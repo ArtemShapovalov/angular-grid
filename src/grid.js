@@ -57,11 +57,11 @@ function gridEntity() {
     $get: gridEntityGet
   };
 
-  gridEntityGet.$inject = ['$timeout', '_'];
+  gridEntityGet.$inject = ['$timeout', '$interval', '_'];
 
   return provider;
 
-  function gridEntityGet($timeout, _) {
+  function gridEntityGet($timeout, $interval, _) {
     var model,
         messages = {
           successDeleted: 'Successfully delete',
@@ -591,7 +591,7 @@ function gridEntity() {
         });
       });
 
-      var interval = setInterval(function() {
+      /*var interval = setInterval(function() {
         if (_.size(resources) === loaded) {
           clearInterval(interval);
 
@@ -607,7 +607,26 @@ function gridEntity() {
 
           callback(result)
         }
+      }, 100);*/
+
+      var interval = $interval(function() {
+        if (_.size(resources) === loaded) {
+          $interval.cancel(interval);
+
+          _.forEach(included, function(item, ki) {
+            _.forEach(item, function(rel, kr) {
+              _.forEach(rel, function(relItem, kri) {
+                result[ki] = result[ki] || {};
+                result[ki][kr] = result[ki][kr] || [];
+                result[ki][kr][kri] = resources[relItem.url];
+              });
+            });
+          });
+
+          callback(result)
+        }
       }, 100);
+
 
       function success(data, schema, request) {
         resources[data.document.url] = {

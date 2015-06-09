@@ -1,0 +1,58 @@
+{
+  "data": [{
+    "type": "targets",
+    "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
+    "attributes": {
+      "title": "My Favorite Target",
+      "editable": 1,
+      "scope": 1
+    },
+    "relationships": {
+      "users": {
+        "links": {
+          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+        },
+        "data": [
+          { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+          { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+        ]
+      },
+      "user": {
+        "links": {
+          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+        },
+        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+      }
+    }
+  },
+    {
+      "type": "targets",
+      "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+      "attributes": {
+        "title": "My Favorite Target",
+        "editable": 1,
+        "scope": 1
+      },
+      "relationships": {
+        "users": {
+          "links": {
+            "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+            "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+          },
+          "data": [
+            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+          ]
+        },
+        "user": {
+          "links": {
+            "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+            "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+          },
+          "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+        }
+      }
+    }]
+}

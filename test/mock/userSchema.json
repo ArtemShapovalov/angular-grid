@@ -1,0 +1,268 @@
+{
+  "$schema": "http://json-schema.org/draft-04/hyper-schema#",
+  "title": "User",
+  "type": "object",
+  "definitions": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "type": {
+      "title": "Type",
+      "type": "string"
+    },
+    "fullname": {
+      "title": "Fullname",
+      "type": "string"
+    },
+    "email": {
+      "title": "Email",
+      "type": "string"
+    },
+    "attributes": {
+      "type": "object",
+      "properties": {
+        "fullname": {
+          "$ref": "#/definitions/fullname"
+        },
+        "email": {
+          "$ref": "#/definitions/email"
+        }
+      },
+      "required": ["fullname", "email"],
+      "additionalProperties": false
+    },
+    "userRead": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "fullname": {
+              "title": "Fullname",
+              "type": "string",
+              "readOnly": true
+            },
+            "email": {
+              "title": "Email",
+              "type": "string",
+              "readOnly": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "userUpdate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/attributes"
+        }
+      },
+      "required": ["type", "id", "attributes"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Update",
+          "description": "Update User",
+          "href": "/jsonary/users/{id}",
+          "rel": "update",
+          "method": "PUT",
+          "encType": "application/vnd.api+json"
+        },
+        {
+          "title": "Delete",
+          "description": "Delete User",
+          "href": "/jsonary/users/{id}",
+          "rel": "delete",
+          "method": "DELETE",
+          "encType": "application/vnd.api+json",
+          "targetSchema": {
+            "$ref": "#/definitions/user/{id}"
+          }
+        }
+      ]
+    },
+    "userCreate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/attributes"
+        }
+      },
+      "required": ["type", "id", "attributes"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Create",
+          "description": "Create User",
+          "href": "/jsonary/users",
+          "rel": "create",
+          "method": "POST",
+          "encType": "application/vnd.api+json",
+          "schema": {
+            "$ref": "#/definitions/userCreate"
+          }
+        }
+      ]
+    },
+    "userList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/attributes"
+        }
+      },
+      "required": ["type", "id", "attributes"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Read",
+          "description": "Get single User",
+          "href": "/grid/users/read/{id}",
+          "rel": "read",
+          "method": "GET",
+          "encType": "application/vnd.api+json",
+          "targetSchema": {
+            "$ref": "#/definitions/userSingle"
+          }
+        },
+        {
+          "title": "Edit",
+          "description": "Go to update User",
+          "href": "/grid/users/update/{id}",
+          "rel": "goToUpdate",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        },
+        {
+          "title": "Delete",
+          "description": "Delete User",
+          "href": "/jsonary/users/{id}",
+          "rel": "delete",
+          "method": "DELETE",
+          "encType": "application/vnd.api+json",
+          "targetSchema": {
+            "$ref": "#/definitions/user/{id}"
+          }
+        }
+      ]
+    },
+    "read": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/userRead"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Go to List",
+          "description": "Go to list Users",
+          "href": "/grid/users",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "update": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/userUpdate"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Go to List",
+          "description": "Go to list Users",
+          "href": "/grid/users",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        },
+        {
+          "title": "Go to Agencies",
+          "description": "Go to list Agencies",
+          "href": "/grid/agencies",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "create": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/userCreate"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false,
+      "links": [
+        {
+          "title": "Go to List",
+          "description": "Go to list Users",
+          "href": "/grid/users",
+          "rel": "goToList",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    },
+    "list": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/userList"
+          }
+        }
+      },
+      "required": ["data"],
+      "links": [
+        {
+          "title": "Go to Create",
+          "description": "Go to create new User",
+          "href": "/grid/users/create",
+          "rel": "goToCreate",
+          "method": "GET",
+          "encType": "application/vnd.api+json"
+        }
+      ]
+    }
+  }
+}

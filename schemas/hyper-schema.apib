@@ -1,0 +1,1107 @@
+FORMAT: 1A
+
+# HyperSchema VMS
+
+# Group JSONARY Targets
+JSON Schemas
+
+
+## Extand schema [/vms-schema]
+### Get schema [GET]
++ Response 200 (application/schema+json)
+
+        {
+            "$schema": "http://private-c9370-hyperschemavms.apiary-mock.com/vms-schema#",
+            "id": "http://private-c9370-hyperschemavms.apiary-mock.com/vms-schema#",
+            "title": "JSON Hyper-Schema",
+            "allOf": [
+                {
+                    "$ref": "http://json-schema.org/draft-04/schema#"
+                }
+            ],
+            "properties": {
+                "additionalItems": {
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "$ref": "#"
+                        }
+                    ]
+                },
+                "additionalProperties": {
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "$ref": "#"
+                        }
+                    ]
+                },
+                "dependencies": {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "$ref": "#"
+                            },
+                            {
+                                "type": "array"
+                            }
+                        ]
+                    }
+                },
+                "items": {
+                    "anyOf": [
+                        {
+                            "$ref": "#"
+                        },
+                        {
+                            "$ref": "#/definitions/schemaArray"
+                        }
+                    ]
+                },
+                "definitions": {
+                    "additionalProperties": {
+                        "$ref": "#"
+                    }
+                },
+                "patternProperties": {
+                    "additionalProperties": {
+                        "$ref": "#"
+                    }
+                },
+                "properties": {
+                    "additionalProperties": {
+                        "$ref": "#"
+                    }
+                },
+                "allOf": {
+                    "$ref": "#/definitions/schemaArray"
+                },
+                "anyOf": {
+                    "$ref": "#/definitions/schemaArray"
+                },
+                "oneOf": {
+                    "$ref": "#/definitions/schemaArray"
+                },
+                "not": {
+                    "$ref": "#"
+                },
+        
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/linkDescription"
+                    }
+                },
+                "fragmentResolution": {
+                    "type": "string"
+                },
+                "media": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "description": "A media type, as described in RFC 2046",
+                            "type": "string"
+                        },
+                        "binaryEncoding": {
+                            "description": "A content encoding scheme, as described in RFC 2045",
+                            "type": "string"
+                        }
+                    }
+                },
+                "pathStart": {
+                    "description": "Instances' URIs must start with this value for this schema to apply to them",
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "definitions": {
+                "schemaArray": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#"
+                    }
+                },
+                "linkDescription": {
+                    "title": "Link Description Object",
+                    "type": "object",
+                    "required": [ "href", "rel" ],
+                    "properties": {
+                        "href": {
+                            "description": "a URI template, as defined by RFC 6570, with the addition of the $, ( and ) characters for pre-processing",
+                            "type": "string"
+                        },
+                        "rel": {
+                            "description": "relation to the target resource of the link",
+                            "type": "string"
+                        },
+                        "title": {
+                            "description": "a title for the link",
+                            "type": "string"
+                        },
+                        "targetSchema": {
+                            "description": "JSON Schema describing the link target",
+                            "$ref": "#"
+                        },
+                        "mediaType": {
+                            "description": "media type (as defined by RFC 2046) describing the link target",
+                            "type": "string"
+                        },
+                        "method": {
+                            "description": "method for requesting the target of the link (e.g. for HTTP this might be \"GET\" or \"DELETE\")",
+                            "type": "string"
+                        },
+                        "encType": {
+                            "description": "The media type in which to submit data along with the request",
+                            "type": "string",
+                            "default": "application/json"
+                        },
+                        "schema": {
+                            "description": "Schema describing the data to submit along with the request",
+                            "$ref": "#"
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Targets Data List [/jsonary/targets]
+### Get targets list [GET]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/list)
+
+        {
+            "data": [{
+                "type": "targets",
+                "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
+                "attributes": {
+                    "title": "My Favorite Target",
+                    "editable": 1,
+                    "scope": 1
+                },
+                "relationships": {
+                    "users": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": [
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                        ]
+                    },
+                    "user": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                    }
+                }
+            },
+            {
+                "type": "targets",
+                "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+                "attributes": {
+                    "title": "My Favorite Target",
+                    "editable": 1,
+                    "scope": 1
+                },
+                "relationships": {
+                    "users": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": [
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                        ]
+                    },
+                    "user": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                    }
+                }
+            }]
+        }
+        
+### Create single target [POST]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/create)
+
+        {
+            
+        }
+        
+## Targets Data Read [/jsonary/targets/read/{id}]
+### Get read target [GET]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/read)
+
+        {
+            "data": {
+                "type": "targets",
+                "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+                "attributes": {
+                    "title": "My Favorite Target",
+                    "editable": 1,
+                    "scope": 1
+                },
+                "relationships": {
+                    "users": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": [
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                        ]
+                    },
+                    "user": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                    }
+                }
+            }
+        }
+
+## Targets Data Update [/jsonary/targets/update/{id}]
+### Get update target [GET]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/update)
+
+        {
+            "data": {
+                "type": "targets",
+                "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+                "attributes": {
+                    "title": "My Favorite Target",
+                    "editable": 1,
+                    "scope": 1
+                },
+                "relationships": {
+                    "users": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": [
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                        ]
+                    },
+                    "user": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                    }
+                }
+            }
+        }     
+
+## Targets Data Delete [/jsonary/targets/{id}]
+### Delete single target [DELETE]
++ Response 200 (application/vnd.api+json)
+
+        {
+
+        }
+      
+### Update single target [PUT]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/update)
+
+        {
+
+        }
+    
+## Targets Schema [/jsonary/targets/schema]
+### Resourse Users schema [GET] 
++ Response 200 (application/schema+json)
+
+        {
+            "$schema": "http://json-schema.org/draft-04/hyper-schema#",
+            "title": "User",
+            "type": "object",
+            "definitions": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string"
+                },
+                "title": {
+                    "title": "Title",
+                    "type": "string"
+                },
+                "editable": {
+                    "title": "Editable",
+                    "type": "string"
+                },
+                "scope": {
+                    "title": "Scope",
+                    "type": "string"
+                },
+                "users": {
+                    "title": "Users",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["de105d54-75b4-431b-adb2-eb6b9e546013","de205d54-75b4-431b-adb2-eb6b9e546013","de305d54-75b4-431b-adb2-eb6b9e546013"]
+                    }
+                },
+                "user": {
+                    "title": "User",
+                    "type": "string",
+                    "enum": ["de105d54-75b4-431b-adb2-eb6b9e546013","de205d54-75b4-431b-adb2-eb6b9e546013"]
+                },
+                "attributes": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "$ref": "#/definitions/title"
+                        },
+                        "editable": {
+                            "$ref": "#/definitions/editable"
+                        },
+                        "scope": {
+                            "$ref": "#/definitions/scope"
+                        },
+                        "users": {
+                            "$ref": "#/definitions/users"
+                        },
+                        "user": {
+                            "$ref": "#/definitions/user"
+                        }
+                    },
+                    "required": ["title", "editable", "scope"],
+                    "additionalProperties": false
+                },
+                "relationships": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                        "users": {
+                            "$ref": "#/definitions/relationshipUsers"
+                        },
+                        "user": {
+                            "$ref": "#/definitions/relationshipUser"
+                        }
+                    }
+                },
+                "relationshipUser": {
+                    "type": "object",
+                    "title": "User",
+                    "additionalProperties": true,
+                    "properties": {
+                        "links": {
+                            "$ref": "#/definitions/relationshipLinks"
+                        },
+                        "data": {
+                            "$ref": "#/definitions/relationshipDataSingle"
+                        }
+                    }
+                },
+                "relationshipUsers": {
+                    "type": "object",
+                    "title": "Users",
+                    "name": "fullname", 
+                    "additionalProperties": true,
+                    "properties": {
+                        "links": {
+                            "$ref": "#/definitions/relationshipLinks"
+                        },
+                        "data": {
+                           "$ref": "#/definitions/relationshipDataList"
+                        }
+                    }
+                },
+                "relationshipLinks": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                        "self": {
+                          "title": "Self",
+                          "type": "string"
+                        },
+                        "related": {
+                          "title": "Related",
+                          "type": "string"
+                        }
+                    }
+                },
+                "relationshipDataSingle": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/type"
+                        }
+                    }
+                },
+                "relationshipDataList": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "properties": {
+                            "id": {
+                                "$ref": "#/definitions/id"
+                            },
+                            "type": {
+                                "$ref": "#/definitions/type"
+                            }
+                        }
+                    }
+                },
+                "targetRead": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/type"
+                        },
+                        "attributes": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "title": "Title",
+                                    "type": "string",
+                                    "readOnly": true
+                                },
+                                "editable": {
+                                    "title": "Editable",
+                                    "type": "string",
+                                    "readOnly": true
+                                },
+                                "scope": {
+                                    "title": "Scope",
+                                    "type": "string",
+                                    "readOnly": true
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "relationships": {
+                            "$ref": "#/definitions/relationships"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "targetUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/type"
+                        },
+                        "attributes": {
+                            "$ref": "#/definitions/attributes"
+                        },
+                        "relationships": {
+                            "$ref": "#/definitions/relationships"
+                        }
+                    },
+                    "required": ["type", "id", "attributes"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Update",
+                            "description": "Update Target",
+                            "href": "/jsonary/targets/{id}",
+                            "rel": "update",
+                            "method": "PUT",
+                            "encType": "application/vnd.api+json"
+                        },
+                        {
+                            "title": "Delete",
+                            "description": "Delete Target",
+                            "href": "/jsonary/targets/{id}",
+                            "rel": "delete",
+                            "method": "DELETE",
+                            "encType": "application/vnd.api+json",
+                            "targetSchema": {
+                              "$ref": "#/definitions/targetDelete"
+                            }
+                        }
+                    ]
+                },
+                "targetCreate": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/type"
+                        },
+                        "attributes": {
+                            "$ref": "#/definitions/attributes"
+                        },
+                        "relationships": {
+                            "$ref": "#/definitions/relationships"
+                        }
+                    },
+                    "required": ["type", "id", "attributes"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Create",
+                            "description": "Create Target",
+                            "href": "/jsonary/targets",
+                            "rel": "create",
+                            "method": "POST",
+                            "encType": "application/vnd.api+json",
+                            "schema": {
+                                "$ref": "#/definitions/targetCreate"
+                            }
+                        }
+                    ]
+                },
+                "targetList": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/type"
+                        },
+                        "attributes": {
+                            "$ref": "#/definitions/attributes"
+                        },
+                        "relationships": {
+                            "$ref": "#/definitions/relationships"
+                        }
+                    },
+                    "required": ["type", "id", "attributes"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Read",
+                            "description": "Get single Target",
+                            "href": "/grid/targets/read/{id}",
+                            "rel": "read",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        },
+                        {
+                            "title": "Edit",
+                            "description": "Go to update Target",
+                            "href": "/grid/targets/update/{id}",
+                            "rel": "goToUpdate",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        },
+                        {
+                            "title": "Delete",
+                            "description": "Delete Target",
+                            "href": "/jsonary/targets/{id}",
+                            "rel": "delete",
+                            "method": "DELETE",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },
+                "read": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "$ref": "#/definitions/targetRead"
+                        }
+                    },
+                    "required": ["data"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Go to List",
+                            "description": "Go to list Targets",
+                            "href": "/grid/targets",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },               
+                "update": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "$ref": "#/definitions/targetUpdate"
+                        }
+                    },
+                    "required": ["data"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Go to List",
+                            "description": "Go to list Targets",
+                            "href": "/grid/targets",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },
+                "create": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "$ref": "#/definitions/targetCreate"
+                        }
+                    },
+                    "required": ["data"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Go to List",
+                            "description": "Go to list Targets",
+                            "href": "/grid/targets",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },
+                "list": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                           "$ref": "#/definitions/targetList"
+                        }
+                      }
+                    },
+                    "required": ["data"],
+                    "links": [
+                        {
+                            "title": "Go to Create",
+                            "description": "Go to create new Target",
+                            "href": "/grid/targets/create",
+                            "rel": "goToCreate",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                }
+            }
+        }
+        
+        
+        
+        
+# Group JSONARY Users
+JSON Schemas
+        
+## Users Data [/jsonary/users]
+### Get users list [GET]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users/schema#/definitions/list)
+
+        {
+          "data": [
+            {
+              "type": "users",
+              "id": "de105d54-75b4-431b-adb2-eb6b9e546013",
+              "attributes": {
+                "email": "dimon1@gmail.com",
+                "fullname": "John1 Doe"
+              }
+            },
+            {
+              "type": "users",
+              "id": "de205d54-75b4-431b-adb2-eb6b9e546014",
+              "attributes": {
+                "email": "dimon2@gmail.com",
+                "fullname": "John2 Doe"
+              }
+            },
+            {
+              "type": "users",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546015",
+              "attributes": {
+                "email": "dimon3@gmail.com",
+                "fullname": "John3 Doe"
+              }
+            }]
+        }
+        
+### Create single user [POST]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users/schema#/definitions/create)
+
+        {
+            "data": {
+              "type": "users",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+              "attributes": {
+                "email": "dimon13@gmail.com",
+                "fullname": "John3 Doe"
+              }
+            }
+        }
+        
+## Users Data Read [/jsonary/users/read/{id}]
+### Get read user [GET]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users/schema#/definitions/read)
+
+        {
+            "data": {
+              "type": "users",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+              "attributes": {
+                "email": "dimon3@gmail.com",
+                "fullname": "John3 Doe"
+              }
+            }
+        }
+
+## Users Data Update [/jsonary/users/update/{id}]
+### Get update user [GET]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users/schema#/definitions/update)
+
+        {
+            "data": {
+              "type": "users",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+              "attributes": {
+                "email": "dimon3@gmail.com",
+                "fullname": "John3 Doe"
+              }
+            }
+        }        
+
+## Users Data Delete [/jsonary/users/{id}]
+### Delete single user [DELETE]
++ Response 200 (application/vnd.api+json)
+
+        {
+            "data": {
+              "type": "users",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+              "attributes": {
+                "email": "dimon3@gmail.com",
+                "fullname": "John3 Doe"
+              }
+            }
+        }
+      
+### Update single user [PUT]
++ Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users/schema#/definitions/update)
+
+        {
+            "data": {
+              "type": "users",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+              "attributes": {
+                "email": "dimon13@gmail.com",
+                "fullname": "John3 Doe"
+              }
+            }
+        }
+    
+## Users Schema [/jsonary/users/schema]
+### Resourse Users schema [GET] 
++ Response 200 (application/schema+json)
+
+        {
+            "$schema": "http://json-schema.org/draft-04/hyper-schema#",
+            "title": "User",
+            "type": "object",
+            "definitions": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string"
+                },
+                "fullname": {
+                    "title": "Fullname",
+                    "type": "string"
+                },
+                "email": {
+                    "title": "Email",
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "object",
+                    "properties": {
+                      "fullname": {
+                        "$ref": "#/definitions/fullname"
+                      },
+                      "email": {
+                        "$ref": "#/definitions/email"
+                      }
+                    },
+                    "required": ["fullname", "email"],
+                    "additionalProperties": false
+                },
+                "userRead": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/id"
+                      },
+                      "type": {
+                        "$ref": "#/definitions/type"
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                            "fullname": {
+                                "title": "Fullname",
+                                "type": "string",
+                                "readOnly": true
+                            },
+                            "email": {
+                                "title": "Email",
+                                "type": "string",
+                                "readOnly": true
+                            }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                },
+                "userUpdate": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/id"
+                      },
+                      "type": {
+                        "$ref": "#/definitions/type"
+                      },
+                      "attributes": {
+                        "$ref": "#/definitions/attributes"
+                      }
+                    },
+                    "required": ["type", "id", "attributes"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Update",
+                            "description": "Update User",
+                            "href": "/jsonary/users/{id}",
+                            "rel": "update",
+                            "method": "PUT",
+                            "encType": "application/vnd.api+json"
+                        },
+                        {
+                            "title": "Delete",
+                            "description": "Delete User",
+                            "href": "/jsonary/users/{id}",
+                            "rel": "delete",
+                            "method": "DELETE",
+                            "encType": "application/vnd.api+json",
+                            "targetSchema": {
+                              "$ref": "#/definitions/user/{id}"
+                            }
+                        }
+                    ]
+                },
+                "userCreate": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/id"
+                      },
+                      "type": {
+                        "$ref": "#/definitions/type"
+                      },
+                      "attributes": {
+                        "$ref": "#/definitions/attributes"
+                      }
+                    },
+                    "required": ["type", "id", "attributes"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Create",
+                            "description": "Create User",
+                            "href": "/jsonary/users",
+                            "rel": "create",
+                            "method": "POST",
+                            "encType": "application/vnd.api+json",
+                            "schema": {
+                                "$ref": "#/definitions/userCreate"
+                            }
+                        }
+                    ]
+                },
+                "userList": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/id"
+                      },
+                      "type": {
+                        "$ref": "#/definitions/type"
+                      },
+                      "attributes": {
+                        "$ref": "#/definitions/attributes"
+                      }
+                    },
+                    "required": ["type", "id", "attributes"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Read",
+                            "description": "Get single User",
+                            "href": "/grid/users/read/{id}",
+                            "rel": "read",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json",
+                            "targetSchema": {
+                              "$ref": "#/definitions/userSingle"
+                            }
+                        },
+                        {
+                            "title": "Edit",
+                            "description": "Go to update User",
+                            "href": "/grid/users/update/{id}",
+                            "rel": "goToUpdate",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        },
+                        {
+                            "title": "Delete",
+                            "description": "Delete User",
+                            "href": "/jsonary/users/{id}",
+                            "rel": "delete",
+                            "method": "DELETE",
+                            "encType": "application/vnd.api+json",
+                            "targetSchema": {
+                              "$ref": "#/definitions/user/{id}"
+                            }
+                        }
+                    ]
+                },
+                "read": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "$ref": "#/definitions/userRead"
+                        }
+                    },
+                    "required": ["data"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Go to List",
+                            "description": "Go to list Users",
+                            "href": "/grid/users",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },               
+                "update": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "$ref": "#/definitions/userUpdate"
+                        }
+                    },
+                    "required": ["data"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Go to List",
+                            "description": "Go to list Users",
+                            "href": "/grid/users",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        },
+                        {
+                            "title": "Go to Agencies",
+                            "description": "Go to list Agencies",
+                            "href": "/grid/agencies",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },
+                "create": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "$ref": "#/definitions/userCreate"
+                        }
+                    },
+                    "required": ["data"],
+                    "additionalProperties": false,
+                    "links": [
+                        {
+                            "title": "Go to List",
+                            "description": "Go to list Users",
+                            "href": "/grid/users",
+                            "rel": "goToList",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                },
+                "list": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                           "$ref": "#/definitions/userList"
+                        }
+                      }
+                    },
+                    "required": ["data"],
+                    "links": [
+                        {
+                            "title": "Go to Create",
+                            "description": "Go to create new User",
+                            "href": "/grid/users/create",
+                            "rel": "goToCreate",
+                            "method": "GET",
+                            "encType": "application/vnd.api+json"
+                        }
+                    ]
+                }
+            }
+        }

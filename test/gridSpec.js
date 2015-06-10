@@ -34,6 +34,20 @@ describe('GridEntity testing', function() {
             status: 200,
             responseText: JSON.stringify(readJSON('test/mock/targetDataList.json'))
           }
+        },
+        read: {
+          success: {
+            contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/read',
+            status: 200,
+            responseText: JSON.stringify(readJSON('test/mock/targetDataRead.json'))
+          }
+        },
+        update: {
+          success: {
+            contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/update',
+            status: 200,
+            responseText: JSON.stringify(readJSON('test/mock/targetDataUpdate.json'))
+          }
         }
       },
       schema: {
@@ -68,6 +82,8 @@ describe('GridEntity testing', function() {
 
     jasmine.Ajax.stubRequest(domain + '/targets', '', 'GET')
       .andReturn(TestResponses.targets.data.list.success);
+    jasmine.Ajax.stubRequest(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
+      .andReturn(TestResponses.targets.data.update.success);
     jasmine.Ajax.stubRequest(domain + '/targets/schema', '', 'GET')
       .andReturn(TestResponses.targets.schema.success);
 
@@ -110,6 +126,54 @@ describe('GridEntity testing', function() {
     expect(table.rows).toBeDefined();
     expect(table.columns).toBeDefined();
     expect(table.links).toBeDefined();
+
+  });
+
+  it('check create title map for checkbox list by full schema', function() {
+    var resource = {};
+    var titleMap = {};
+
+      gridEntity.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
+      resource.data = data;
+      resource.schema = schema;
+    });
+
+    gridEntity._createTitleMap(resource.data.property('data'), function(responce) {
+        titleMap = responce;
+    });
+
+    $interval.flush(100);
+
+    expect(titleMap.users).toEqual([
+      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" },
+      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "John3 Doe" },
+      { value: "de305d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" }
+    ]);
+    expect(titleMap.user).toEqual([
+      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "de105d54-75b4-431b-adb2-eb6b9e546013" },
+      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "de205d54-75b4-431b-adb2-eb6b9e546014" }
+    ]);
+    expect(resource.schema).toBeDefined();
+
+  })
+
+  it ('check get form info', function () {
+
+    userModel.params.id = 'de205d54-75b4-431b-adb2-eb6b9e546013';
+    userModel.params.type = 'update';
+
+    var form;
+
+    gridEntity.getFormInfo(function(data) {
+      form = data;
+    });
+
+    $timeout.flush();
+    $interval.flush(100);
+    $interval.flush(100);
+
+    expect(Array.isArray(form)).toEqual(false);
+    expect(form.links).toBeDefined();
 
   });
 

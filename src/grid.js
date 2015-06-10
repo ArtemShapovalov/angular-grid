@@ -85,7 +85,10 @@ function gridEntity() {
       loadData: loadData,
       loadSchema: loadSchema,
       getTableInfo: getTableInfo,
-      getFormInfo: getFormInfo
+      getFormInfo: getFormInfo,
+      _getFormConfig: _getFormConfig,
+      _createTitleMap: _createTitleMap,
+      _replaceFromFull: replaceFromFull
     };
 
     function setData(value) {
@@ -304,19 +307,54 @@ function gridEntity() {
           self.config.form.links = data.links();
           self.config.form.schema = schemaWithoutRef;
           self.config.form.model = fieldsToFormFormat(fields);
-          self.config.form.form = [
-            '*'
-          ];
-          /** add button to config form */
-          self.config.form.form = _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
 
-          if (callback !== undefined) {
-            callback(self.config.form);
+          self._getFormConfig(data, callbackFormConfig);
+
+          function callbackFormConfig(config) {
+            self.config.form.form = config;
+
+            /** add button to config form */
+            self.config.form.form = _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
+
+            if (callback !== undefined) {
+              callback(self.config.form);
+            }
           }
+
         })
 
       }
 
+    }
+
+    function _getFormConfig(data, callback) {
+      var self = this;
+
+      var result = [];
+
+      self._createTitleMap(data.property('data'), function(titleMaps) {
+
+        var attributes = mergeRelSchema(
+          data.property('data').schemas()[0].data.value(),
+          data.schemas()[0].data.document.raw.value()
+        ).properties.attributes.properties;
+
+        _.forEach(attributes, function(value, key) {
+          if (titleMaps[key]) {
+            result.push({
+              key: key,
+              titleMap: titleMaps[key]
+            })
+          } else {
+            result.push({
+              key: key
+            })
+          }
+        });
+
+        callback(result);
+
+      });
     }
 
     function getFieldsForm(data, callback) {
@@ -342,6 +380,64 @@ function gridEntity() {
 
         callback(result);
       }
+    }
+
+    function _createTitleMap(data, callback) {
+      var self = this;
+
+      var titleMaps = {};
+      var loaded = 0;
+      var total = 0;
+
+      var dataRelations = data.property('relationships');
+      var dataAttributes = data.property('attributes');
+      var relations = dataRelations.value();
+      var attributes = dataAttributes.value();
+
+      var documentSchema = dataRelations.schemas()[0].data.document.raw.value();
+
+      _.forEach(relations, function(item, key) {
+
+        var resourceLink = item.links.self;
+        /** get name from schema */
+        var attributeName = dataRelations.property(key).schemas()[0].data.propertyValue('name');
+        var schemaAttributeWithoutRef = self._replaceFromFull(dataAttributes.schemas()[0].data.value(), documentSchema)['properties'][key];
+
+        var sourceEnum = {};
+        if (schemaAttributeWithoutRef.items && schemaAttributeWithoutRef.items.enum) {
+          sourceEnum = schemaAttributeWithoutRef.items.enum
+        } else if (schemaAttributeWithoutRef.enum) {
+          sourceEnum = schemaAttributeWithoutRef.enum
+        }
+
+        if (sourceEnum) {
+
+          titleMaps[key] = [];
+
+          _.forEach(sourceEnum, function (enumItem) {
+            var url = resourceLink + '/read/' + enumItem;
+            self.loadData(url, function (data, schema) {
+              titleMaps[key].push({
+                value: enumItem,
+                name: data.property('data').property('attributes').propertyValue(attributeName) || enumItem
+              });
+              loaded++;
+            });
+            total++;
+          });
+        }
+
+      });
+
+      var interval = $interval(function() {
+        if (total === loaded) {
+          $interval.cancel(interval);
+          if (callback !== undefined) {
+            callback(titleMaps)
+          }
+        }
+      }, 100);
+
     }
 
     /**
@@ -590,24 +686,6 @@ function gridEntity() {
           });
         });
       });
-
-      /*var interval = setInterval(function() {
-        if (_.size(resources) === loaded) {
-          clearInterval(interval);
-
-          _.forEach(included, function(item, ki) {
-            _.forEach(item, function(rel, kr) {
-              _.forEach(rel, function(relItem, kri) {
-                result[ki] = result[ki] || {};
-                result[ki][kr] = result[ki][kr] || [];
-                result[ki][kr][kri] = resources[relItem.url];
-              });
-            });
-          });
-
-          callback(result)
-        }
-      }, 100);*/
 
       var interval = $interval(function() {
         if (_.size(resources) === loaded) {

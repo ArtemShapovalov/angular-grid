@@ -132,8 +132,26 @@ describe('GridEntity testing', function() {
   it('check create title map for checkbox list by full schema', function() {
     var resource = {};
     var titleMap = {};
+    var titleMapUsers = [
+      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" },
+      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "John3 Doe" },
+      { value: "de305d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" }
+    ];
+    var titleMapUser = [
+      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "dimon3@gmail.com" },
+      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "dimon3@gmail.com" },
+      { value: "de305d54-75b4-431b-adb2-eb6b9e546013", name: "dimon3@gmail.com" }
+    ];
+    var formConfigUsers = {
+      key: "users",
+      titleMap: titleMapUsers
+    };
+    var formConfigUser = {
+      key: "user",
+      titleMap: titleMapUser
+    };
 
-      gridEntity.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
+    gridEntity.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
       resource.data = data;
       resource.schema = schema;
     });
@@ -144,18 +162,20 @@ describe('GridEntity testing', function() {
 
     $interval.flush(100);
 
-    expect(titleMap.users).toEqual([
-      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" },
-      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "John3 Doe" },
-      { value: "de305d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" }
-    ]);
-    expect(titleMap.user).toEqual([
-      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "de105d54-75b4-431b-adb2-eb6b9e546013" },
-      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "de205d54-75b4-431b-adb2-eb6b9e546014" }
-    ]);
+    expect(titleMap.users).toEqual(titleMapUsers);
+    expect(titleMap.user).toEqual(titleMapUser);
     expect(resource.schema).toBeDefined();
 
-  })
+    gridEntity._getFormConfig(resource.data, function(form) {
+      expect(form).toContain(formConfigUsers);
+      expect(form).toContain(formConfigUser);
+    });
+
+    $timeout.flush();
+    $interval.flush(100);
+    $interval.flush(100);
+    $timeout.flush();
+  });
 
   it ('check get form info', function () {
 
@@ -171,10 +191,9 @@ describe('GridEntity testing', function() {
     $timeout.flush();
     $interval.flush(100);
     $interval.flush(100);
+    $timeout.flush();
 
-    expect(Array.isArray(form)).toEqual(false);
     expect(form.links).toBeDefined();
-
   });
 
 

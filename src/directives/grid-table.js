@@ -20,7 +20,7 @@ function gridTableDirective(gridEntity, gridActions) {
       $scope.rows = table.rows;
       $scope.columns = table.columns;
       $scope.links = table.links;
-      $scope.$digest();
+      //$scope.$digest();
     });
 
     $scope.edit = function(link) {

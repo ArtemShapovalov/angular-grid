@@ -71,6 +71,9 @@ function gridEntity() {
         };
 
     return {
+      default: {
+        actionGetResource: 'read'
+      },
       TYPE_FORM: 'form',
       TYPE_TABLE: 'table',
       type: '',
@@ -86,9 +89,15 @@ function gridEntity() {
       loadSchema: loadSchema,
       getTableInfo: getTableInfo,
       getFormInfo: getFormInfo,
-      _getFormConfig: _getFormConfig,
+      _getRelationResource: _getRelationResource,
+      _replaceFromFull: _replaceFromFull,
+      _getRelationLink: _getRelationLink,
       _createTitleMap: _createTitleMap,
-      _replaceFromFull: replaceFromFull
+      _getFormConfig: _getFormConfig,
+      _getFieldsForm: _getFieldsForm,
+      _getRowsByData: _getRowsByData,
+      _getEmptyData: _getEmptyData,
+      _batchLoadData: _batchLoadData
     };
 
     function setData(value) {
@@ -174,7 +183,7 @@ function gridEntity() {
       Jsonary.getSchema(url, function (jSchema) {
 
         var schema = jSchema.data.document.raw.value();
-        var data = Jsonary.create(getEmptyData(jSchema.data.value(), schema));
+        var data = Jsonary.create(self._getEmptyData(jSchema.data.value(), schema));
         data.document.url = self.getModel().url;
         data.addSchema(jSchema);
 
@@ -185,7 +194,7 @@ function gridEntity() {
       });
     }
 
-    function getEmptyData(schema, fullSchema) {
+    function _getEmptyData(schema, fullSchema) {
       var result;
       var schemaWithoutRef = mergeRelSchema(schema, fullSchema);
 
@@ -257,7 +266,7 @@ function gridEntity() {
           }
 
 
-        getRowsByData(data, function(rows, relations) {
+        self._getRowsByData(data, function(rows, relations) {
 
           self.config.table.rows = rowsToTableFormat(rows);
           self.config.table.links = data.links();
@@ -302,7 +311,7 @@ function gridEntity() {
           self.config.form = {};
         }
 
-        getFieldsForm(data, function(fields, relations) {
+        self._getFieldsForm(data, function(fields, relations) {
 
           self.config.form.links = data.links();
           self.config.form.schema = schemaWithoutRef;
@@ -327,6 +336,12 @@ function gridEntity() {
 
     }
 
+    /**
+     * Generate form config for Angular schema form
+     * @param data
+     * @param callback
+     * @private
+     */
     function _getFormConfig(data, callback) {
       var self = this;
 
@@ -340,31 +355,30 @@ function gridEntity() {
         ).properties.attributes.properties;
 
         _.forEach(attributes, function(value, key) {
+          var obj = {key: key};
+
           if (titleMaps[key]) {
-            result.push({
-              key: key,
-              titleMap: titleMaps[key]
-            })
-          } else {
-            result.push({
-              key: key
-            })
+              obj.titleMap = titleMaps[key]
           }
+          result.push(obj)
         });
 
-        callback(result);
+        $timeout(function() {
+          callback(result);
+        });
 
       });
     }
 
-    function getFieldsForm(data, callback) {
+    function _getFieldsForm(data, callback) {
+      var self = this;
       var fields;
       var included = [];
 
       fields = data.property('data');
-      included.push(getRelationResource(data.property('data')));
+      included.push(self._getRelationResource(data.property('data')));
 
-      batchLoadData(included, batchLoaded);
+      self._batchLoadData(included, batchLoaded);
 
       function batchLoaded(relationResources) {
 
@@ -382,6 +396,12 @@ function gridEntity() {
       }
     }
 
+    /**
+     * Create titleMap for form and load dependency resource
+     * @param data
+     * @param callback
+     * @private
+     */
     function _createTitleMap(data, callback) {
       var self = this;
 
@@ -394,7 +414,10 @@ function gridEntity() {
       var relations = dataRelations.value();
       var attributes = dataAttributes.value();
 
-      var documentSchema = dataRelations.schemas()[0].data.document.raw.value();
+      var documentSchema = data.schemas()[0].data.document.raw.value();
+
+
+      var loadResourcesUrl = [];
 
       _.forEach(relations, function(item, key) {
 
@@ -415,10 +438,14 @@ function gridEntity() {
           titleMaps[key] = [];
 
           _.forEach(sourceEnum, function (enumItem) {
-            var url = resourceLink + '/read/' + enumItem;
+            var url = resourceLink + '/' + self.default.actionGetResource +'/' + enumItem;
+
+            loadResourcesUrl.push(url);
+
             self.loadData(url, function (data, schema) {
               titleMaps[key].push({
                 value: enumItem,
+                //value: data.property('data').propertyValue('id'),
                 name: data.property('data').property('attributes').propertyValue(attributeName) || enumItem
               });
               loaded++;
@@ -426,6 +453,11 @@ function gridEntity() {
             total++;
           });
         }
+
+      });
+
+      //TODO: require added functional load collection resource by link
+      loadCollectionResource(loadResourcesUrl, function() {
 
       });
 
@@ -440,21 +472,25 @@ function gridEntity() {
 
     }
 
+    function loadCollectionResource(baseUrl, ids, callback) {
+
+    }
+
     /**
      * Recursive function replacing $ref from schema
      * @param haystack
      * @param schemaFull
      * @returns {*}
      */
-    function replaceFromFull(haystack, schemaFull) {
+    function _replaceFromFull(haystack, schemaFull) {
       for (var key in haystack) {
         if (haystack.hasOwnProperty(key)) {
           if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && haystack[key].$ref) {
             haystack[key] = Object.byString(schemaFull, haystack[key].$ref.substring(2));
-            replaceFromFull(haystack[key], schemaFull);
+            _replaceFromFull(haystack[key], schemaFull);
           }
           if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && (haystack[key] !== 'links')) {
-            replaceFromFull(haystack[key], schemaFull);
+            _replaceFromFull(haystack[key], schemaFull);
           }
         }
       }
@@ -470,7 +506,7 @@ function gridEntity() {
     function mergeRelSchema(schema, schemaFull) {
       var schemaWithoutRef = schema;
 
-      schemaWithoutRef = replaceFromFull(schemaWithoutRef, schemaFull);
+      schemaWithoutRef = _replaceFromFull(schemaWithoutRef, schemaFull);
 
       return schemaWithoutRef;
     }
@@ -563,17 +599,18 @@ function gridEntity() {
      * @param data Jsonary
      * @returns {Array}
      */
-    function getRowsByData(data, callback) {
+    function _getRowsByData(data, callback) {
+      var self = this;
       var rows = [];
       var included = [];
       data.property('data').items(function(index, value) {
 
-        included.push(getRelationResource(value));
+        included.push(self._getRelationResource(value));
 
         rows.push(value);
       });
 
-      batchLoadData(included, batchLoaded);
+      self._batchLoadData(included, batchLoaded);
 
       function batchLoaded(relationResources) {
         var res = [];
@@ -603,13 +640,14 @@ function gridEntity() {
      * @param data
      * @returns {Object} link for get resource
      */
-    function getRelationResource(data) {
+    function _getRelationResource(data) {
+      var self = this;
       var relations;
       var result = {};
 
       if (relations = data.property('relationships').value()) {
         _.forEach(relations, function(relItem, relKey) {
-          result[relKey] = getRelationLink(relItem);
+          result[relKey] = self._getRelationLink(relItem);
         })
       }
       return result;
@@ -637,7 +675,8 @@ function gridEntity() {
      * @param relItem
      * @returns {Array}
      */
-    function getRelationLink(relItem) {
+    function _getRelationLink(relItem) {
+      var self = this;
       var resource = [];
 
       if (Array.isArray(relItem.data)) {
@@ -645,14 +684,14 @@ function gridEntity() {
         _.forEach(relItem.data, function(dataObj) {
 
           linkArray.push({
-            url: getResourceUrl(relItem.links.self, {type: 'read', id: dataObj.id})
+            url: getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: dataObj.id})
           });
         });
         resource = linkArray;
 
       } else {
         resource = [{
-          url: getResourceUrl(relItem.links.self, {type: 'read', id: relItem.data.id})
+          url: getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: relItem.data.id})
         }];
       }
       return resource;
@@ -664,7 +703,7 @@ function gridEntity() {
      * @param included
      * @param callback
      */
-    function batchLoadData(included, callback) {
+    function _batchLoadData(included, callback) {
       var result = [];
       var resources = {};
       var cached = {};
@@ -705,8 +744,7 @@ function gridEntity() {
         }
       }, 100);
 
-
-      function success(data, schema, request) {
+      function success(data, schema) {
         resources[data.document.url] = {
           data: data,
           schema: schema

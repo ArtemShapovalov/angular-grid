@@ -26,15 +26,31 @@
     "users": {
       "title": "Users",
       "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "additionalItems": true,
       "items": {
         "type": "string",
         "enum": [
           "de105d54-75b4-431b-adb2-eb6b9e546013",
           "de205d54-75b4-431b-adb2-eb6b9e546014",
           "de305d54-75b4-431b-adb2-eb6b9e546013"
-        ],
-        "maximum": 2,
-        "uniqueItems": true
+        ]
+      }
+    },
+    "us": {
+      "title": "Us",
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "additionalItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "de105d54-75b4-431b-adb2-eb6b9e546013",
+          "de205d54-75b4-431b-adb2-eb6b9e546014",
+          "de305d54-75b4-431b-adb2-eb6b9e546013"
+        ]
       }
     },
     "user": {
@@ -42,7 +58,8 @@
       "type": "string",
       "enum": [
         "de105d54-75b4-431b-adb2-eb6b9e546013",
-        "de205d54-75b4-431b-adb2-eb6b9e546014"
+        "de205d54-75b4-431b-adb2-eb6b9e546014",
+        "de305d54-75b4-431b-adb2-eb6b9e546013"
       ]
     },
     "attributes": {
@@ -60,11 +77,14 @@
         "users": {
           "$ref": "#/definitions/users"
         },
+        "us": {
+          "$ref": "#/definitions/us"
+        },
         "user": {
           "$ref": "#/definitions/user"
         }
       },
-      "required": ["title", "editable", "scope"],
+      "required": ["title", "editable", "scope", "users", "user"],
       "additionalProperties": false
     },
     "relationships": {
@@ -74,6 +94,9 @@
         "users": {
           "$ref": "#/definitions/relationshipUsers"
         },
+        "us": {
+          "$ref": "#/definitions/relationshipUs"
+        },
         "user": {
           "$ref": "#/definitions/relationshipUser"
         }
@@ -82,6 +105,7 @@
     "relationshipUser": {
       "type": "object",
       "title": "User",
+      "name": "email",
       "additionalProperties": true,
       "properties": {
         "links": {
@@ -95,6 +119,20 @@
     "relationshipUsers": {
       "type": "object",
       "title": "Users",
+      "name": "fullname",
+      "additionalProperties": true,
+      "properties": {
+        "links": {
+          "$ref": "#/definitions/relationshipLinks"
+        },
+        "data": {
+          "$ref": "#/definitions/relationshipDataList"
+        }
+      }
+    },
+    "relationshipUs": {
+      "type": "object",
+      "title": "Us",
       "name": "fullname",
       "additionalProperties": true,
       "properties": {
@@ -173,6 +211,15 @@
               "title": "Scope",
               "type": "string",
               "readOnly": true
+            },
+            "users": {
+              "$ref": "#/definitions/users"
+            },
+            "us": {
+              "$ref": "#/definitions/us"
+            },
+            "user": {
+              "$ref": "#/definitions/user"
             }
           },
           "additionalProperties": false

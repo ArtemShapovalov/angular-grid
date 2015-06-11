@@ -1,7 +1,7 @@
 {
   "data": {
     "type": "targets",
-    "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
+    "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
     "attributes": {
       "title": "My Favorite Target",
       "editable": 1,
@@ -14,8 +14,16 @@
           "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
         },
         "data": [
-          { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-          { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+          { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
+        ]
+      },
+      "us": {
+        "links": {
+          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+        },
+        "data": [
+          { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
         ]
       },
       "user": {

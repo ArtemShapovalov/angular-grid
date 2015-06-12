@@ -89,6 +89,7 @@ function gridEntity() {
       loadSchema: loadSchema,
       getTableInfo: getTableInfo,
       getFormInfo: getFormInfo,
+      loadCollectionResource: loadCollectionResource,
       _getRelationResource: _getRelationResource,
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
@@ -405,10 +406,6 @@ function gridEntity() {
     function _createTitleMap(data, callback) {
       var self = this;
 
-      var titleMaps = {};
-      var loaded = 0;
-      var total = 0;
-
       var dataRelations = data.property('relationships');
       var dataAttributes = data.property('attributes');
       var relations = dataRelations.value();
@@ -416,8 +413,7 @@ function gridEntity() {
 
       var documentSchema = data.schemas()[0].data.document.raw.value();
 
-
-      var loadResourcesUrl = [];
+      var sourceTitleMaps = [];
 
       _.forEach(relations, function(item, key) {
 
@@ -427,53 +423,79 @@ function gridEntity() {
         var schemaAttributeWithoutRef = self._replaceFromFull(dataAttributes.schemas()[0].data.value(), documentSchema)['properties'][key];
 
         var sourceEnum = {};
+
         if (schemaAttributeWithoutRef.items && schemaAttributeWithoutRef.items.enum) {
           sourceEnum = schemaAttributeWithoutRef.items.enum
         } else if (schemaAttributeWithoutRef.enum) {
           sourceEnum = schemaAttributeWithoutRef.enum
         }
 
-        if (sourceEnum) {
+        _.forEach(sourceEnum, function (enumItem) {
+          var url = resourceLink + '/' + self.default.actionGetResource +'/' + enumItem;
 
-          titleMaps[key] = [];
-
-          _.forEach(sourceEnum, function (enumItem) {
-            var url = resourceLink + '/' + self.default.actionGetResource +'/' + enumItem;
-
-            loadResourcesUrl.push(url);
-
-            self.loadData(url, function (data, schema) {
-              titleMaps[key].push({
-                value: enumItem,
-                //value: data.property('data').propertyValue('id'),
-                name: data.property('data').property('attributes').propertyValue(attributeName) || enumItem
-              });
-              loaded++;
-            });
-            total++;
-          });
-        }
+          sourceTitleMaps.push({
+            url: url,
+            enumItem: enumItem,
+            relationName: key,
+            attributeName: attributeName
+          })
+        });
 
       });
 
-      //TODO: require added functional load collection resource by link
-      loadCollectionResource(loadResourcesUrl, function() {
+      self.loadCollectionResource(_.map(sourceTitleMaps, 'url'), function(resources) {
+        var titleMaps = {};
 
+        _.forEach(sourceTitleMaps, function (item) {
+
+          if (!titleMaps[item.relationName]) {
+            titleMaps[item.relationName] = [];
+          }
+
+          titleMaps[item.relationName].push({
+            value: item.enumItem,
+            //value: data.property('data').propertyValue('id'),
+            name: resources[item.url].data.property('data').property('attributes').propertyValue(item.attributeName) || item.enumItem
+          });
+        });
+
+        callback(titleMaps)
+      });
+
+    }
+
+    /**
+     * Multiple load resource by array links
+     * @param linkResources
+     * @param callback
+     */
+    function loadCollectionResource(linkResources, callback) {
+      var self = this;
+      var loaded = 0;
+      var total = 0;
+      var resources = {};
+
+      _.forEach(linkResources, function (url) {
+
+        self.loadData(url, function (data, schema, request) {
+          resources[url] = {
+            data: data,
+            schema: schema,
+            request: request
+          };
+          loaded++;
+        });
+        total++;
       });
 
       var interval = $interval(function() {
         if (total === loaded) {
           $interval.cancel(interval);
           if (callback !== undefined) {
-            callback(titleMaps)
+            callback(resources);
           }
         }
       }, 100);
-
-    }
-
-    function loadCollectionResource(baseUrl, ids, callback) {
-
     }
 
     /**

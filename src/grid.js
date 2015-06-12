@@ -78,10 +78,8 @@ function gridEntity() {
       TYPE_TABLE: 'table',
       type: '',
       config: {},
-      setData: setData,
       setModel: setModel,
       getModel: getModel,
-      setSchema: setSchema,
       getMessage: getMessage,
       setMessage: setMessage,
       fetchData: fetchData,
@@ -90,6 +88,7 @@ function gridEntity() {
       getTableInfo: getTableInfo,
       getFormInfo: getFormInfo,
       fetchCollection: fetchCollection,
+      getTitleMapsForRelations: getTitleMapsForRelations,
       _getRelationResource: _getRelationResource,
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
@@ -100,14 +99,6 @@ function gridEntity() {
       _getEmptyData: _getEmptyData,
       _batchLoadData: _batchLoadData
     };
-
-    function setData(value) {
-      data = value;
-    }
-
-    function setSchema(value) {
-      schema = value;
-    }
 
     function setModel(Model) {
       model = Model;
@@ -137,8 +128,6 @@ function gridEntity() {
       }
 
       function fetchDataSuccess(data, schema) {
-        self.setData(data);
-        self.setSchema(schema);
 
         if (callback !== undefined) {
           callback(data, schema);
@@ -397,23 +386,17 @@ function gridEntity() {
       }
     }
 
-    /**
-     * Create titleMap for form and load dependency resource
-     * @param data
-     * @param callback
-     * @private
-     */
-    function _createTitleMap(data, callback) {
+    function getTitleMapsForRelations(data) {
       var self = this;
+      var sourceTitleMaps = [];
 
       var dataRelations = data.property('relationships');
       var dataAttributes = data.property('attributes');
+
       var relations = dataRelations.value();
       var attributes = dataAttributes.value();
 
       var documentSchema = data.schemas()[0].data.document.raw.value();
-
-      var sourceTitleMaps = [];
 
       _.forEach(relations, function(item, key) {
 
@@ -431,7 +414,7 @@ function gridEntity() {
         }
 
         _.forEach(sourceEnum, function (enumItem) {
-          var url = resourceLink + '/' + self.default.actionGetResource +'/' + enumItem;
+          var url = resourceLink + '/' + self.default.actionGetResource + '/' + enumItem;
 
           sourceTitleMaps.push({
             url: url,
@@ -442,6 +425,19 @@ function gridEntity() {
         });
 
       });
+      return sourceTitleMaps;
+    }
+
+    /**
+     * Create titleMap for form and load dependency resource
+     * @param data
+     * @param callback
+     * @private
+     */
+    function _createTitleMap(data, callback) {
+      var self = this;
+
+      var sourceTitleMaps = self.getTitleMapsForRelations(data);
 
       self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
         var titleMaps = {};
@@ -466,7 +462,8 @@ function gridEntity() {
 
     /**
      * Multiple load resource by array links
-     * @param linkResources
+     *
+     * @param {array} linkResources
      * @param callback
      */
     function fetchCollection(linkResources, callback) {
@@ -474,10 +471,11 @@ function gridEntity() {
       var loaded = 0;
       var total = 0;
       var resources = {};
+      var links;
 
-      linkResources = _.uniq(linkResources);
+      links = _.uniq(linkResources);
 
-      _.forEach(linkResources, function (url) {
+      _.forEach(links, function (url) {
 
         self.loadData(url, function (data, schema, request) {
           resources[url] = {
@@ -563,7 +561,12 @@ function gridEntity() {
       return result;
     }
 
-
+    /**
+     * Convert Jsonary Data to result model for rendering form
+     *
+     * @param resource
+     * @returns {*}
+     */
     function fieldsToFormFormat(resource) {
       var data = resource.own;
       var fields = data.property('attributes').value();
@@ -589,17 +592,14 @@ function gridEntity() {
      */
     function rowsToTableFormat(rows) {
       var result = [];
-      _.forEach(rows, function(resource) {
-        var data = resource.own;
-        var tmp = data.property('attributes').value();
+      _.forEach(rows, function(row) {
+        var data = row.own;
+        var rowResult = data.property('attributes').value();
 
-        _.forEach(resource.relationships, function(relation, key) {
-          tmp[key] = _.map(relation, function(relationItem) {
-            var field = resource.own.property('relationships').property(key).schemas()[0].data.propertyValue('name');
-
-            /**
-             * name additional field(relation resource)
-             */
+        _.forEach(row.relationships, function(relation, key) {
+          rowResult[key] = _.map(relation, function(relationItem) {
+            var field = row.own.property('relationships').property(key).schemas()[0].data.propertyValue('name');
+            /** name additional field(relation row) */
             if (field) {
               return relationItem.property('data').property('attributes').propertyValue(field);
             }
@@ -608,11 +608,11 @@ function gridEntity() {
           }).join(', ');
         });
 
-        tmp.links = [];
+        rowResult.links = [];
         _.forOwn(data.links(), function(link) {
-          tmp.links.push(link);
+          rowResult.links.push(link);
         });
-        result.push(tmp);
+        result.push(rowResult);
       });
       return result;
     }
@@ -706,7 +706,6 @@ function gridEntity() {
       if (Array.isArray(relItem.data)) {
         var linkArray = [];
         _.forEach(relItem.data, function(dataObj) {
-
           linkArray.push({
             url: getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: dataObj.id})
           });
@@ -721,47 +720,51 @@ function gridEntity() {
       return resource;
     }
 
-    /**
-     * Multiple (batch) load data
-     *
-     * @param included
-     * @param callback
-     */
-    function _batchLoadData(included, callback) {
-      var self = this;
+    function getLinkFromRowsDataRelations(rowsRelationships) {
       var result = [];
-      var cached = {};
 
-      var loadResourcesUrl = [];
-
-      _.forEach(included, function(item) {
-        _.forEach(item, function(rel) {
+      _.forEach(rowsRelationships, function(row) {
+        _.forEach(row, function(rel) {
           _.forEach(rel, function(relItem) {
 
-              loadResourcesUrl.push(relItem.url);
+            result.push(relItem.url);
 
           });
         });
       });
 
-      self.fetchCollection(loadResourcesUrl, function(resources) {
+      return result;
+    }
 
-        _.forEach(included, function(item, ki) {
-          _.forEach(item, function(rel, kr) {
-            _.forEach(rel, function(relItem, kri) {
-              result[ki] = result[ki] || {};
-              result[ki][kr] = result[ki][kr] || [];
-              result[ki][kr][kri] = resources[relItem.url];
+    /**
+     * Multiple (batch) load data
+     *
+     * @param rowsRelationships
+     * @param callback
+     */
+    function _batchLoadData(rowsRelationships, callback) {
+      var self = this;
+
+      self.fetchCollection(getLinkFromRowsDataRelations(rowsRelationships), function(resources) {
+        var result = [];
+
+        _.forEach(rowsRelationships, function(row, kRow) {
+          _.forEach(row, function(rel, kRel) {
+            _.forEach(rel, function(relItem, kRelItem) {
+              result[kRow] = result[kRow] || {};
+              result[kRow][kRel] = result[kRow][kRel] || [];
+              result[kRow][kRel][kRelItem] = resources[relItem.url];
             });
           });
         });
 
-        callback(result)
+        callback(result);
 
       });
     }
 
     /**
+     * Generate config for rendering buttons from schema links
      *
      * @param links
      * @returns {Array}

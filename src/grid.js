@@ -71,7 +71,6 @@ function gridEntity() {
         };
 
     return {
-      //cache: {},
       default: {
         actionGetResource: 'read'
       },
@@ -155,38 +154,21 @@ function gridEntity() {
      */
     function loadData(url, callback) {
       /*jshint validthis: true */
-      var self = this;
 
       if (model === undefined) {
         alert('Please set model before call fetch data');
         return false;
       }
 
-      /*if (_.isEmpty(self.cache[url])===false) {
-        console.log('cache');
-        callback(self.cache[url].data, self.cache[url].schema, self.cache[url].request);
-        return false;
-      }*/
-
       Jsonary.getData(url, function (jData, request) {
         var data = jData;
         var schema = jData.property('data').schemas()[0].data.document.raw.value();
-
-        console.log('load');
-
-        /*self.cache[url] = {
-          data: data,
-          schema: schema,
-          request: request
-        };*/
 
         if (callback !== undefined) {
           callback(data, schema, request);
         }
 
       });
-
-      //self.cache[url] = {};
 
     }
 

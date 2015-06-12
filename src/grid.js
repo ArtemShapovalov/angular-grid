@@ -71,6 +71,7 @@ function gridEntity() {
         };
 
     return {
+      //cache: {},
       default: {
         actionGetResource: 'read'
       },
@@ -89,7 +90,7 @@ function gridEntity() {
       loadSchema: loadSchema,
       getTableInfo: getTableInfo,
       getFormInfo: getFormInfo,
-      loadCollectionResource: loadCollectionResource,
+      fetchCollection: fetchCollection,
       _getRelationResource: _getRelationResource,
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
@@ -154,21 +155,38 @@ function gridEntity() {
      */
     function loadData(url, callback) {
       /*jshint validthis: true */
+      var self = this;
 
       if (model === undefined) {
         alert('Please set model before call fetch data');
         return false;
       }
 
+      /*if (_.isEmpty(self.cache[url])===false) {
+        console.log('cache');
+        callback(self.cache[url].data, self.cache[url].schema, self.cache[url].request);
+        return false;
+      }*/
+
       Jsonary.getData(url, function (jData, request) {
         var data = jData;
         var schema = jData.property('data').schemas()[0].data.document.raw.value();
+
+        console.log('load');
+
+        /*self.cache[url] = {
+          data: data,
+          schema: schema,
+          request: request
+        };*/
 
         if (callback !== undefined) {
           callback(data, schema, request);
         }
 
       });
+
+      //self.cache[url] = {};
 
     }
 
@@ -443,7 +461,7 @@ function gridEntity() {
 
       });
 
-      self.loadCollectionResource(_.map(sourceTitleMaps, 'url'), function(resources) {
+      self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
         var titleMaps = {};
 
         _.forEach(sourceTitleMaps, function (item) {
@@ -469,11 +487,13 @@ function gridEntity() {
      * @param linkResources
      * @param callback
      */
-    function loadCollectionResource(linkResources, callback) {
+    function fetchCollection(linkResources, callback) {
       var self = this;
       var loaded = 0;
       var total = 0;
       var resources = {};
+
+      linkResources = _.uniq(linkResources);
 
       _.forEach(linkResources, function (url) {
 
@@ -726,53 +746,37 @@ function gridEntity() {
      * @param callback
      */
     function _batchLoadData(included, callback) {
+      var self = this;
       var result = [];
-      var resources = {};
       var cached = {};
-      var total = 0;
-      var loaded = 0;
+
+      var loadResourcesUrl = [];
 
       _.forEach(included, function(item) {
         _.forEach(item, function(rel) {
           _.forEach(rel, function(relItem) {
-            if (cached[relItem.url]) {
-              console.log('cache');
-              total++;
-            } else {
-              loadData(relItem.url, success);
-              cached[relItem.url] = {};
-              total++;
-              loaded++;
-            }
+
+              loadResourcesUrl.push(relItem.url);
+
           });
         });
       });
 
-      var interval = $interval(function() {
-        if (_.size(resources) === loaded) {
-          $interval.cancel(interval);
+      self.fetchCollection(loadResourcesUrl, function(resources) {
 
-          _.forEach(included, function(item, ki) {
-            _.forEach(item, function(rel, kr) {
-              _.forEach(rel, function(relItem, kri) {
-                result[ki] = result[ki] || {};
-                result[ki][kr] = result[ki][kr] || [];
-                result[ki][kr][kri] = resources[relItem.url];
-              });
+        _.forEach(included, function(item, ki) {
+          _.forEach(item, function(rel, kr) {
+            _.forEach(rel, function(relItem, kri) {
+              result[ki] = result[ki] || {};
+              result[ki][kr] = result[ki][kr] || [];
+              result[ki][kr][kri] = resources[relItem.url];
             });
           });
+        });
 
-          callback(result)
-        }
-      }, 100);
+        callback(result)
 
-      function success(data, schema) {
-        resources[data.document.url] = {
-          data: data,
-          schema: schema
-        };
-        console.log('load');
-      }
+      });
     }
 
     /**

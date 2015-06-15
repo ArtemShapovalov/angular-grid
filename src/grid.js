@@ -71,6 +71,8 @@ function gridEntity() {
         };
 
     return {
+      //form: function() { return new Form() },
+      //table: function() { return new Table() },
       default: {
         actionGetResource: 'read'
       },
@@ -80,15 +82,15 @@ function gridEntity() {
       config: {},
       setModel: setModel,
       getModel: getModel,
-      getMessage: getMessage,
       setMessage: setMessage,
+      getMessage: getMessage,
       fetchData: fetchData,
+      fetchCollection: fetchCollection,
       loadData: loadData,
       loadSchema: loadSchema,
       getTableInfo: getTableInfo,
       getFormInfo: getFormInfo,
-      fetchCollection: fetchCollection,
-      getTitleMapsForRelations: getTitleMapsForRelations,
+      _getTitleMapsForRelations: _getTitleMapsForRelations,
       _getRelationResource: _getRelationResource,
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
@@ -115,7 +117,6 @@ function gridEntity() {
     function setMessage(param, message) {
       messages[param] = message;
     }
-
 
     function fetchData(url, callback) {
       /*jshint validthis: true */
@@ -184,6 +185,14 @@ function gridEntity() {
       });
     }
 
+    /**
+     * Generate empty model for create form
+     *
+     * @param schema
+     * @param fullSchema
+     * @returns {*}
+     * @private
+     */
     function _getEmptyData(schema, fullSchema) {
       var result;
       var schemaWithoutRef = mergeRelSchema(schema, fullSchema);
@@ -217,6 +226,13 @@ function gridEntity() {
       return result;
     }
 
+    /**
+     * Create url by params for load resource
+     *
+     * @param url
+     * @param params
+     * @returns {*}
+     */
     function getResourceUrl(url, params) {
       var result = url;
 
@@ -386,7 +402,7 @@ function gridEntity() {
       }
     }
 
-    function getTitleMapsForRelations(data) {
+    function _getTitleMapsForRelations(data) {
       var self = this;
       var sourceTitleMaps = [];
 
@@ -414,7 +430,7 @@ function gridEntity() {
         }
 
         _.forEach(sourceEnum, function (enumItem) {
-          var url = resourceLink + '/' + self.default.actionGetResource + '/' + enumItem;
+          var url = getResourceUrl(resourceLink, {type: self.default.actionGetResource, id: enumItem});
 
           sourceTitleMaps.push({
             url: url,
@@ -437,7 +453,7 @@ function gridEntity() {
     function _createTitleMap(data, callback) {
       var self = this;
 
-      var sourceTitleMaps = self.getTitleMapsForRelations(data);
+      var sourceTitleMaps = self._getTitleMapsForRelations(data);
 
       self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
         var titleMaps = {};

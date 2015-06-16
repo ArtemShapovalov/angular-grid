@@ -134,6 +134,13 @@ function gridEntity() {
       });
     }
 
+    /**
+     * Load data by url and check type (create or other)
+     * if create - fetch schema with create empty data,
+     * if other action - fetch data with schema
+     * @param url
+     * @param callback
+     */
     function fetchData(url, callback) {
       /*jshint validthis: true */
       var self = this;
@@ -287,6 +294,28 @@ function gridEntity() {
       return resource;
     }
 
+    /**
+     * Get links from data relationships section
+     * INPUT:
+     *   "data": [{
+     *      ...
+     *      "relationships": {
+     *        "author": {
+     *           "links": {
+     *             "self": "http://example.com/users/1/relationships/author",
+     *             "related": "http://example.com/users/1/author"
+     *           },
+     *           "data": { "type": "users", "id": "9" }
+     *        }
+     *      }
+     *   }]
+     * OUTPUT:
+     *   [
+     *      http://example.com/users/1/author/9
+     *   ]
+     * @param rowsRelationships
+     * @returns {Array}
+     */
     function getLinkFromRowsDataRelations(rowsRelationships) {
       var result = [];
 

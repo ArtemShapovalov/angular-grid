@@ -1,3 +1,20 @@
+angular.module('grid').run(['$templateCache', function ($templateCache) {
+  $templateCache.put('templates/grid/form.html',
+    '<grid-form>' +
+    '<span ng-repeat="link in links">' +
+    '<a href="javascript:void(0);" ng-click="go(link)">{{link.title}}</a> ' +
+    '</span>'+
+    '<div>' +
+    '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
+    '</div>' +
+    '<form novalidate name="gridForm" ng-init="setFormScope(this)"' +
+    'sf-schema="schema" sf-form="form" sf-model="model"' +
+    'class="form-horizontal" role="form" ng-if="hideForm !== true">'+
+    '</form>'+
+    '</grid-form>'
+  );
+}]);
+
 angular.module('grid').directive('gridForm', gridFormDirective);
 
 //TODO: should be set require ... depends on vmsGrid
@@ -8,11 +25,11 @@ function gridFormDirective() {
     controller: gridFormDirectiveCtrl
   };
 
-  gridFormDirectiveCtrl.$inject = ['$scope', 'grid-entity', 'grid-actions'];
+  gridFormDirectiveCtrl.$inject = ['$scope', 'grid-entity', 'gridForm', 'grid-actions'];
 
   return directive;
 
-  function gridFormDirectiveCtrl($scope, gridEntity, gridActions) {
+  function gridFormDirectiveCtrl($scope, gridEntity, gridForm, gridActions) {
     $scope.alerts = [];
 
     $scope.scopeForm = {
@@ -23,7 +40,10 @@ function gridFormDirective() {
       $scope.scopeForm = scope;
     };
 
-    gridEntity.getFormInfo(function (form) {
+
+    var formInst = new gridForm();
+
+    formInst.getFormInfo(function (form) {
       $scope.schema = form.schema;
       $scope.form = form.form;
       $scope.model = form.model;
@@ -32,11 +52,11 @@ function gridFormDirective() {
     });
 
     $scope.edit = function($event, form) {
-      gridActions.action(form.link, $scope);
+      gridActions.action(formInst, form.link, $scope);
     };
 
     $scope.go = function(link) {
-      gridActions.action(link, $scope);
+      gridActions.action(formInst, link, $scope);
     };
 
     $scope.closeAlert = function(index) {

@@ -3,6 +3,8 @@ describe('GridEntity testing', function() {
   var domain = 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary';
 
   var gridEntity;
+  var gridTable;
+  var gridForm;
   var userModel;
   var $timeout;
   var $interval;
@@ -102,6 +104,8 @@ describe('GridEntity testing', function() {
     $timeout = $injector.get('$timeout');
     $interval = $injector.get('$interval');
     gridEntity = $injector.get('grid-entity');
+    gridTable = $injector.get('gridTable');
+    gridForm = $injector.get('gridForm');
     userModel = $injector.get('userModel');
 
     gridEntity.setModel(userModel);
@@ -115,7 +119,8 @@ describe('GridEntity testing', function() {
   it ('check get table info', function () {
     var table;
 
-    gridEntity.getTableInfo(function(data) {
+    var tableInst = new gridTable();
+    tableInst.getTableInfo(function(data) {
       table = data;
     });
 
@@ -151,12 +156,14 @@ describe('GridEntity testing', function() {
       titleMap: titleMapUser
     };
 
-    gridEntity.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
+    var formInst = new gridForm();
+
+    formInst.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
       resource.data = data;
       resource.schema = schema;
     });
 
-    gridEntity._createTitleMap(resource.data.property('data'), function(responce) {
+    formInst._createTitleMap(resource.data.property('data'), function(responce) {
         titleMap = responce;
     });
 
@@ -166,7 +173,7 @@ describe('GridEntity testing', function() {
     expect(titleMap.user).toEqual(titleMapUser);
     expect(resource.schema).toBeDefined();
 
-    gridEntity._getFormConfig(resource.data, function(form) {
+    formInst._getFormConfig(resource.data, function(form) {
       expect(form).toContain(formConfigUsers);
       expect(form).toContain(formConfigUser);
     });
@@ -184,7 +191,8 @@ describe('GridEntity testing', function() {
 
     var form;
 
-    gridEntity.getFormInfo(function(data) {
+    var formInst = new gridForm();
+    formInst.getFormInfo(function(data) {
       form = data;
     });
 

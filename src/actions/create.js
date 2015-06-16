@@ -1,7 +1,7 @@
 angular.module('grid').factory('grid-action-create', gridActionCreate);
 gridActionCreate.$inject = ['$http', 'grid-entity'];
 function gridActionCreate($http, gridEntity) {
-  return function(link, scope) {
+  return function(obj, link, scope) {
     var params = {
       method: link.method,
       url: link.href,
@@ -16,14 +16,14 @@ function gridActionCreate($http, gridEntity) {
     $http(params).then(actionCreateSuccess, actionCreateError);
 
     function actionCreateSuccess() {
-      gridEntity.getFormInfo(function (form) {
+      obj.getFormInfo(function (form) {
         scope.schema = form.schema;
         scope.form = form.form;
         scope.model = form.model;
 
         scope.alerts.push({
           type: 'success',
-          msg: gridEntity.getMessage('successCreated')
+          msg: obj.getMessage('successCreated')
         });
       });
     }
@@ -31,7 +31,7 @@ function gridActionCreate($http, gridEntity) {
     function actionCreateError(res) {
       scope.alerts.push({
         type: 'danger',
-        msg: res.statusText || gridEntity.getMessage('serverError')
+        msg: res.statusText || obj.getMessage('serverError')
       });
     }
 

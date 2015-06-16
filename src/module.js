@@ -16,3 +16,7 @@ try {
 } catch (e) {}
 
 var vmsGrid = angular.module('grid', deps);
+
+angular.module('grid').factory('_', function () {
+  return lodash;
+});

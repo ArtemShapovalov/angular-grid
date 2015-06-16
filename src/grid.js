@@ -1,52 +1,3 @@
-angular.module('grid').run(['$templateCache', function ($templateCache) {
-  $templateCache.put('templates/grid/table.html',
-    '<grid-table>' +
-      '<span ng-repeat="link in links">' +
-        '<a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a> ' +
-      '</span>'+
-      '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
-      '<table class="table grid">'+
-        '<thead>'+
-          '<tr>'+
-            '<th ng-repeat="column in columns">{{column.title}}</th>'+
-          '</tr>'+
-        '</thead>'+
-        '<tbody>'+
-          '<tr ng-repeat="row in rows">'+
-            '<td ng-repeat="column in columns">'+
-              '<span ng-if="column.attributeName !== \'links\'">{{row[column.attributeName]}}</span>'+
-              '<span ng-if="column.attributeName == \'links\'">'+
-                '<span ng-repeat="link in row.links">' +
-                  '<a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a> ' +
-                '</span>'+
-              '</span>'+
-            '</td>'+
-          '</tr>'+
-        '</tbody>'+
-      '</table>' +
-    '</grid-table>'
-  );
-
-  $templateCache.put('templates/grid/form.html',
-    '<grid-form>' +
-      '<span ng-repeat="link in links">' +
-        '<a href="javascript:void(0);" ng-click="go(link)">{{link.title}}</a> ' +
-      '</span>'+
-      '<div>' +
-        '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
-      '</div>' +
-      '<form novalidate name="gridForm" ng-init="setFormScope(this)"' +
-        'sf-schema="schema" sf-form="form" sf-model="model"' +
-        'class="form-horizontal" role="form" ng-if="hideForm !== true">'+
-      '</form>'+
-    '</grid-form>'
-  );
-}]);
-
-angular.module('grid').factory('_', function () {
-  return lodash;
-});
-
 angular.module('grid').provider('grid-entity', gridEntity);
 
 function gridEntity() {
@@ -71,8 +22,6 @@ function gridEntity() {
         };
 
     return {
-      //form: function() { return new Form() },
-      //table: function() { return new Table() },
       default: {
         actionGetResource: 'read'
       },
@@ -88,17 +37,11 @@ function gridEntity() {
       fetchCollection: fetchCollection,
       loadData: loadData,
       loadSchema: loadSchema,
-      getTableInfo: getTableInfo,
-      getFormInfo: getFormInfo,
-      _getTitleMapsForRelations: _getTitleMapsForRelations,
+      getResourceUrl: getResourceUrl,
+      mergeRelSchema: mergeRelSchema,
       _getRelationResource: _getRelationResource,
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
-      _createTitleMap: _createTitleMap,
-      _getFormConfig: _getFormConfig,
-      _getFieldsForm: _getFieldsForm,
-      _getRowsByData: _getRowsByData,
-      _getEmptyData: _getEmptyData,
       _batchLoadData: _batchLoadData
     };
 
@@ -118,22 +61,28 @@ function gridEntity() {
       messages[param] = message;
     }
 
-    function fetchData(url, callback) {
-      /*jshint validthis: true */
-      var self = this;
+    /**
+     * Create url by params for load resource
+     *
+     * @param url
+     * @param params
+     * @returns {*}
+     */
+    function getResourceUrl(url, params) {
+      var result = url;
 
-      if (model.params.type === 'create') {
-          self.loadSchema(url, fetchDataSuccess);
-      } else {
-          self.loadData(url, fetchDataSuccess);
+      if (params.resource) {
+        result = url + '/' + params.resource;
       }
 
-      function fetchDataSuccess(data, schema) {
-
-        if (callback !== undefined) {
-          callback(data, schema);
+      if (params.type) {
+        if (params.type === 'update' || params.type === 'read') {
+          result += '/' + params.type + '/' + params.id;
+        } else if (params.type === 'create') {
+          result += '/schema#/definitions/create';
         }
       }
+      return result
     }
 
     /**
@@ -185,295 +134,22 @@ function gridEntity() {
       });
     }
 
-    /**
-     * Generate empty model for create form
-     *
-     * @param schema
-     * @param fullSchema
-     * @returns {*}
-     * @private
-     */
-    function _getEmptyData(schema, fullSchema) {
-      var result;
-      var schemaWithoutRef = mergeRelSchema(schema, fullSchema);
-
-      result = _.clone(schemaWithoutRef.properties);
-      result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
-      result.data.attributes = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties.attributes.properties));
-
-      function getTypeProperty(obj) {
-        var tmpObj = obj;
-        _.forEach(tmpObj, function(value, key) {
-          if (value.type) {
-            switch(value.type) {
-              case 'object':
-                tmpObj[key] = {};
-                break;
-              case 'string':
-                tmpObj[key] = '';
-                break;
-              case 'array':
-                tmpObj[key] = [];
-                break;
-              case 'integer':
-                tmpObj[key] = '';
-                break;
-            }
-          }
-        });
-        return tmpObj;
-      }
-      return result;
-    }
-
-    /**
-     * Create url by params for load resource
-     *
-     * @param url
-     * @param params
-     * @returns {*}
-     */
-    function getResourceUrl(url, params) {
-      var result = url;
-
-      if (params.resource) {
-        result = url + '/' + params.resource;
-      }
-
-      if (params.type) {
-        if (params.type === 'update' || params.type === 'read') {
-          result += '/' + params.type + '/' + params.id;
-        } else if (params.type === 'create') {
-          result += '/schema#/definitions/create';
-        }
-      }
-      return result
-    }
-
-    function getTableInfo(callback) {
+    function fetchData(url, callback) {
       /*jshint validthis: true */
-      var self = this,
-        model = self.getModel(),
-        url;
+      var self = this;
 
-      url = getResourceUrl(model.url, model.params);
-
-      $timeout(function() {
-        self.fetchData(url, fetchDataSuccess);
-      });
+      if (model.params.type === 'create') {
+        self.loadSchema(url, fetchDataSuccess);
+      } else {
+        self.loadData(url, fetchDataSuccess);
+      }
 
       function fetchDataSuccess(data, schema) {
 
-        var schemaWithoutRef = mergeRelSchema(data.schemas()[0].data.value(), schema);
-
-          self.type = self.TYPE_TABLE;
-          if (!self.config.table) {
-            self.config.table = {};
-          }
-
-
-        self._getRowsByData(data, function(rows, relations) {
-
-          self.config.table.rows = rowsToTableFormat(rows);
-          self.config.table.links = data.links();
-          self.config.table.columns = getColumnsBySchema(schemaWithoutRef);
-          self.config.table.columns.push({
-            title: 'Actions',
-            type: 'string',
-            attributeName: 'links'
-          });
-
-          if (callback !== undefined) {
-            callback(self.config.table);
-          }
-
-        });
-      }
-
-    }
-
-    /**
-     *
-     * @param callback
-     */
-    function getFormInfo(callback) {
-      /*jshint validthis: true */
-      var self = this,
-          model = self.getModel(),
-          url;
-
-      url = getResourceUrl(model.url, model.params);
-
-      $timeout(function() {
-        self.fetchData(url, fetchDataSuccess);
-      });
-
-      function fetchDataSuccess(data, schema) {
-        var newData = data.property('data').property('attributes');
-        var schemaWithoutRef = mergeRelSchema(newData.schemas()[0].data.value(), schema);
-
-        self.type = self.TYPE_FORM;
-        if (!self.config.form) {
-          self.config.form = {};
+        if (callback !== undefined) {
+          callback(data, schema);
         }
-
-        self._getFieldsForm(data, function(fields, relations) {
-
-          self.config.form.links = data.links();
-          self.config.form.schema = schemaWithoutRef;
-          self.config.form.model = fieldsToFormFormat(fields);
-
-          self._getFormConfig(data, callbackFormConfig);
-
-          function callbackFormConfig(config) {
-            self.config.form.form = config;
-
-            /** add button to config form */
-            self.config.form.form = _.union(self.config.form.form, getFormButtonBySchema(data.property('data').links()));
-
-            if (callback !== undefined) {
-              callback(self.config.form);
-            }
-          }
-
-        })
-
       }
-
-    }
-
-    /**
-     * Generate form config for Angular schema form
-     * @param data
-     * @param callback
-     * @private
-     */
-    function _getFormConfig(data, callback) {
-      var self = this;
-
-      var result = [];
-
-      self._createTitleMap(data.property('data'), function(titleMaps) {
-
-        var attributes = mergeRelSchema(
-          data.property('data').schemas()[0].data.value(),
-          data.schemas()[0].data.document.raw.value()
-        ).properties.attributes.properties;
-
-        _.forEach(attributes, function(value, key) {
-          var obj = {key: key};
-
-          if (titleMaps[key]) {
-              obj.titleMap = titleMaps[key]
-          }
-          result.push(obj)
-        });
-
-        $timeout(function() {
-          callback(result);
-        });
-
-      });
-    }
-
-    function _getFieldsForm(data, callback) {
-      var self = this;
-      var fields;
-      var included = [];
-
-      fields = data.property('data');
-      included.push(self._getRelationResource(data.property('data')));
-
-      self._batchLoadData(included, batchLoaded);
-
-      function batchLoaded(relationResources) {
-
-          var result = {
-            own: fields,
-            relationships: _.mapValues(relationResources[0], function(n) {
-              _.forEach(n, function(item, index){
-                n[index] = item.data;
-              });
-              return n;
-            })
-          };
-
-        callback(result);
-      }
-    }
-
-    function _getTitleMapsForRelations(data) {
-      var self = this;
-      var sourceTitleMaps = [];
-
-      var dataRelations = data.property('relationships');
-      var dataAttributes = data.property('attributes');
-
-      var relations = dataRelations.value();
-      var attributes = dataAttributes.value();
-
-      var documentSchema = data.schemas()[0].data.document.raw.value();
-
-      _.forEach(relations, function(item, key) {
-
-        var resourceLink = item.links.self;
-        /** get name from schema */
-        var attributeName = dataRelations.property(key).schemas()[0].data.propertyValue('name');
-        var schemaAttributeWithoutRef = self._replaceFromFull(dataAttributes.schemas()[0].data.value(), documentSchema)['properties'][key];
-
-        var sourceEnum = {};
-
-        if (schemaAttributeWithoutRef.items && schemaAttributeWithoutRef.items.enum) {
-          sourceEnum = schemaAttributeWithoutRef.items.enum
-        } else if (schemaAttributeWithoutRef.enum) {
-          sourceEnum = schemaAttributeWithoutRef.enum
-        }
-
-        _.forEach(sourceEnum, function (enumItem) {
-          var url = getResourceUrl(resourceLink, {type: self.default.actionGetResource, id: enumItem});
-
-          sourceTitleMaps.push({
-            url: url,
-            enumItem: enumItem,
-            relationName: key,
-            attributeName: attributeName
-          })
-        });
-
-      });
-      return sourceTitleMaps;
-    }
-
-    /**
-     * Create titleMap for form and load dependency resource
-     * @param data
-     * @param callback
-     * @private
-     */
-    function _createTitleMap(data, callback) {
-      var self = this;
-
-      var sourceTitleMaps = self._getTitleMapsForRelations(data);
-
-      self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
-        var titleMaps = {};
-
-        _.forEach(sourceTitleMaps, function (item) {
-
-          if (!titleMaps[item.relationName]) {
-            titleMaps[item.relationName] = [];
-          }
-
-          titleMaps[item.relationName].push({
-            value: item.enumItem,
-            //value: data.property('data').propertyValue('id'),
-            name: resources[item.url].data.property('data').property('attributes').propertyValue(item.attributeName) || item.enumItem
-          });
-        });
-
-        callback(titleMaps)
-      });
-
     }
 
     /**
@@ -515,6 +191,20 @@ function gridEntity() {
     }
 
     /**
+     * Convert schema with $ref link to schema without $ref
+     * @param schema
+     * @param schemaFull
+     * @returns {*}
+     */
+    function mergeRelSchema(schema, schemaFull) {
+      var schemaWithoutRef = schema;
+
+      schemaWithoutRef = _replaceFromFull(schemaWithoutRef, schemaFull);
+
+      return schemaWithoutRef;
+    }
+
+    /**
      * Recursive function replacing $ref from schema
      * @param haystack
      * @param schemaFull
@@ -533,145 +223,6 @@ function gridEntity() {
         }
       }
       return haystack;
-    }
-
-    /**
-     * Convert schema with $ref link to schema without $ref
-     * @param schema
-     * @param schemaFull
-     * @returns {*}
-     */
-    function mergeRelSchema(schema, schemaFull) {
-      var schemaWithoutRef = schema;
-
-      schemaWithoutRef = _replaceFromFull(schemaWithoutRef, schemaFull);
-
-      return schemaWithoutRef;
-    }
-
-    /**
-     * Get Columns info by schema
-     *
-     * @param schemaWithoutRef
-     * @returns {Array}
-     */
-    function getColumnsBySchema(schemaWithoutRef) {
-      var result = [];
-      var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
-
-
-      _.forEach(columns, function(value, key) {
-        value.attributeName = key;
-        result.push(value);
-      });
-
-      /*var relationships = {};
-      if (schemaWithoutRef.properties.data.items.properties.relationships) {
-        relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
-      }
-      _.forEach(relationships, function(value, key) {
-        value.attributeName = key;
-        result.push(value);
-      });*/
-
-      return result;
-    }
-
-    /**
-     * Convert Jsonary Data to result model for rendering form
-     *
-     * @param resource
-     * @returns {*}
-     */
-    function fieldsToFormFormat(resource) {
-      var data = resource.own;
-      var fields = data.property('attributes').value();
-
-      _.forEach(resource.relationships, function(relation, key) {
-        fields[key] = _.map(relation, function(relationItem) {
-          return relationItem.property('data').propertyValue('id');
-        });
-        /** check if data as array then return string else array */
-        if (!Array.isArray(data.property('relationships').property(key).propertyValue('data'))) {
-          fields[key] = fields[key][0];
-        }
-      });
-
-      return fields;
-    }
-
-    /**
-     * Convert array Jsonary Data to result array for rendering table
-     *
-     * @param rows
-     * @returns {Array}
-     */
-    function rowsToTableFormat(rows) {
-      var result = [];
-      _.forEach(rows, function(row) {
-        var data = row.own;
-        var rowResult = data.property('attributes').value();
-
-        _.forEach(row.relationships, function(relation, key) {
-          rowResult[key] = _.map(relation, function(relationItem) {
-            var field = row.own.property('relationships').property(key).schemas()[0].data.propertyValue('name');
-            /** name additional field(relation row) */
-            if (field) {
-              return relationItem.property('data').property('attributes').propertyValue(field);
-            }
-            return relationItem.property('data').propertyValue('id');
-
-          }).join(', ');
-        });
-
-        rowResult.links = [];
-        _.forOwn(data.links(), function(link) {
-          rowResult.links.push(link);
-        });
-        result.push(rowResult);
-      });
-      return result;
-    }
-
-    /**
-     * Get array rows by Jsonary Data
-     *
-     * @param data Jsonary
-     * @returns {Array}
-     */
-    function _getRowsByData(data, callback) {
-      var self = this;
-      var rows = [];
-      var included = [];
-      data.property('data').items(function(index, value) {
-
-        included.push(self._getRelationResource(value));
-
-        rows.push(value);
-      });
-
-      self._batchLoadData(included, batchLoaded);
-
-      function batchLoaded(relationResources) {
-        var res = [];
-
-        _.forEach(rows, function(row, index) {
-          var tmpRow = {
-            own: row,
-            relationships: _.mapValues(relationResources[index], function(n) {
-              _.forEach(n, function(item, index){
-                n[index] = item.data;
-              });
-              return n;
-            })
-          };
-
-          res.push(tmpRow);
-        });
-
-        callback(res);
-      }
-
     }
 
     /**
@@ -723,14 +274,14 @@ function gridEntity() {
         var linkArray = [];
         _.forEach(relItem.data, function(dataObj) {
           linkArray.push({
-            url: getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: dataObj.id})
+            url: self.getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: dataObj.id})
           });
         });
         resource = linkArray;
 
       } else {
         resource = [{
-          url: getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: relItem.data.id})
+          url: self.getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: relItem.data.id})
         }];
       }
       return resource;
@@ -777,25 +328,6 @@ function gridEntity() {
         callback(result);
 
       });
-    }
-
-    /**
-     * Generate config for rendering buttons from schema links
-     *
-     * @param links
-     * @returns {Array}
-     */
-    function getFormButtonBySchema(links) {
-      var result = [];
-      _.forEach(links, function(value) {
-        result.push({
-          type: 'button',
-          title: value.title,
-          link: value,
-          onClick: 'edit($event, form)'
-        });
-      });
-      return result;
     }
 
   }

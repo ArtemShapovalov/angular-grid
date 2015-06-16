@@ -1,1 +1,98 @@
-Angular Grid module
+Angular VMS Grid module
+=======================
+
+Модуль для AngularJS который занимается отрисовкой интерфейса и предоставляет CRUD функционал для манипуляции с данными ресурса.
+
+Используемые стандарты
+ 1. RESTApi
+ 2. [JsonApi](http://jsonapi.org)
+ 3. [Json-schema](https://tools.ietf.org/html/draft-zyp-json-schema-04) draft-04 и [Hyper-schema](https://tools.ietf.org/html/draft-luff-json-hyper-schema-00)
+
+Basic Usage
+
+Создаем сервис 
+
+```javascript
+app.factory('Users', [{
+    return {
+      /**
+       * create - SCHEMA -> jsonary/users/schema#/definitions/create
+       * list   - DATA   -> jsonary/users
+       * update - DATA   -> jsonary/users/:id
+       * read   - DATA   -> jsonary/users/:id
+       */
+       url: 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
+       /**
+       * {
+       *    id:   undefined|string
+       *    type: create|read|update|delete
+       *    resource: users|other
+       * }
+       */
+       params: {}
+    };
+}]);
+```
+
+Добавляем контроллер для передачи сервиса в директиву 
+
+```javascript
+app.controller('TestCtrl', ['$scope', '$routeParams', 'GridSrv', function($scope,        $routeParams, GridSrv) {
+    GridSrv.params = {
+      'resource': $routeParams.resource,
+      'id': $routeParams.id,
+      'type': $routeParams.action
+    };
+    $scope.gridSrv = GridSrv;
+}]);
+```
+
+И подключаем директиву
+
+```html
+  <vms-grid grid-model="gridSrv"></vms-grid>
+```
+
+##Installation
+
+Проще всего установить VMS-Grid через [Bower](http://bower.io/).
+
+```bash
+bower install VertaMedia/angular-grid#v0.2.0
+```
+
+Это позволит подгрузить все необходимые зависимости. Смотрите [раздел зависимостей](#dependencies)
+
+### Manual
+
+Вы также можете просто загрузить контент с папки `dist/` и добавить вручную все необходимые зависимости.
+Смотрите [раздел зависимостей](#dependencies)
+
+### Dependencies
+
+Schema form has a lot of dependencies, most of which are optional. Schema Form depends on:
+
+ 1. [AngularJS](https://github.com/angular/angular.js) version 1.3.x
+ 2. [Angular schema form](https://github.com/Textalk/angular-schema-form) version 0.8.2
+ 3. [Lodash](https://lodash.com) version 3.6.x
+ 4. [JsonAry](https://github.com/jsonary-js/jsonary-release) version 0.0.18
+
+
+Tests
+-----
+Unit тесты запускаются при помощи [karma](http://karma-runner.github.io) и написаны используя
+[jasmine](http://jasmine.github.io/)
+
+Для запуска тестов необходимо:
+
+1. Install all dependencies via NPM.
+2. Install dev dependencies with bower.
+3. Install the Karma CLI.
+4. Run the tests.
+
+```bash
+$ npm install
+$ bower install
+$ sudo npm install -g karma-cli
+$ karma start karma.conf.js
+```

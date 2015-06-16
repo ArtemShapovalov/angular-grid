@@ -13,20 +13,20 @@ Basic Usage
 Создаем сервис 
 
 ```javascript
-app.factory('Users', [{
+app.factory('GridSrv', [{
     return {
       /**
-       * create - SCHEMA -> jsonary/users/schema#/definitions/create
-       * list   - DATA   -> jsonary/users
-       * update - DATA   -> jsonary/users/:id
-       * read   - DATA   -> jsonary/users/:id
+       * create - SCHEMA -> /:resource/schema#/definitions/:type
+       * list   - DATA   -> /:resource
+       * update - DATA   -> /:resource/:id
+       * read   - DATA   -> /:resource/:id
        */
        url: 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
        /**
        * {
-       *    id:   undefined|string
-       *    type: create|read|update|delete
-       *    resource: users|other
+       *    id:       string | undefined 
+       *    type:     create | read | update | delete
+       *    resource: users | other
        * }
        */
        params: {}
@@ -37,7 +37,7 @@ app.factory('Users', [{
 Добавляем контроллер для передачи сервиса в директиву 
 
 ```javascript
-app.controller('TestCtrl', ['$scope', '$routeParams', 'GridSrv', function($scope,        $routeParams, GridSrv) {
+app.controller('TestCtrl', ['$scope', '$routeParams', 'GridSrv', function($scope, $routeParams, GridSrv) {
     GridSrv.params = {
       'resource': $routeParams.resource,
       'id': $routeParams.id,
@@ -73,7 +73,7 @@ bower install VertaMedia/angular-grid#v0.2.0
 Schema form has a lot of dependencies, most of which are optional. Schema Form depends on:
 
  1. [AngularJS](https://github.com/angular/angular.js) version 1.3.x
- 2. [Angular schema form](https://github.com/Textalk/angular-schema-form) version 0.8.2
+ 2. [Angular Schema Form](https://github.com/Textalk/angular-schema-form) version 0.8.2
  3. [Lodash](https://lodash.com) version 3.6.x
  4. [JsonAry](https://github.com/jsonary-js/jsonary-release) version 0.0.18
 

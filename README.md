@@ -23,20 +23,7 @@ and their options.
 ```javascript
 app.factory('GridSrv', [{
     return {
-      /**
-       * create - SCHEMA -> /:resource/schema#/definitions/:type
-       * list   - DATA   -> /:resource
-       * update - DATA   -> /:resource/:id
-       * read   - DATA   -> /:resource/:id
-       */
-       url: 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
-       /**
-       * {
-       *    id:       string | undefined 
-       *    type:     create | read | update | delete
-       *    resource: users | other
-       * }
-       */
+       url: 'http://url_to_resource',
        params: {}
     };
 }]);

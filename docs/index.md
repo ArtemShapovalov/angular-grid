@@ -24,7 +24,7 @@ app.factory('GridSrv', [{
        * update - DATA   -> /:resource/:id
        * read   - DATA   -> /:resource/:id
        */
-       url: 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
+       url: 'http://url_to_resource',
        /**
        * {
        *    id:       string | undefined 

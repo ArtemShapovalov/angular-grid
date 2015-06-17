@@ -120,7 +120,7 @@ app.controller('TestCtrl', ['$scope', '$routeParams', 'GridSrv', function($scope
         "barRelation": {
             "type": "object",
             "title": "Bar relation title",
-            "name": "someFieldForVisible",  <-- require for visible field
+            "name": "someFieldForVisible",  <--require_for_visible_field
             "additionalProperties": true,
             "properties": {
                 "links": {
@@ -216,7 +216,7 @@ app.controller('TestCtrl', ['$scope', '$routeParams', 'GridSrv', function($scope
     },
     "required": ["type", "id", "attributes"],
     "additionalProperties": false,
-    "links": [          <-- this is magic block links
+    "links": [          <--this_is_magic_block_links
         {
             "title": "Update",
             "description": "Edit Resource",

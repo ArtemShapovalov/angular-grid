@@ -1,14 +1,16 @@
 Angular VMS Grid module
 =======================
 
-Модуль для AngularJS который занимается отрисовкой интерфейса и предоставляет CRUD функционал для манипуляции с данными ресурса.
+Модуль для AngularJS занимается отрисовкой интерфейса для функционала CRUD и предоставляет возможность манипуляции
+ данными ресурса. Цель модуля: генерация интерфейса по hyper схеме описывающей данный ресурс.
 
-Используемые стандарты
+##Using standards
+
  1. RESTApi
  2. [JsonApi](http://jsonapi.org)
  3. [Json-schema](https://tools.ietf.org/html/draft-zyp-json-schema-04) draft-04 и [Hyper-schema](https://tools.ietf.org/html/draft-luff-json-hyper-schema-00)
 
-Basic Usage
+##Basic Usage
 
 Создаем сервис 
 
@@ -77,9 +79,8 @@ Schema form has a lot of dependencies, most of which are optional. Schema Form d
  3. [Lodash](https://lodash.com) version 3.6.x
  4. [JsonAry](https://github.com/jsonary-js/jsonary-release) version 0.0.18
 
+##Tests
 
-Tests
------
 Unit тесты запускаются при помощи [karma](http://karma-runner.github.io) и написаны используя
 [jasmine](http://jasmine.github.io/)
 

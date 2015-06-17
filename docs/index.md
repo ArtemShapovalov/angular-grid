@@ -1,4 +1,60 @@
-#Documentation
+Documentation
+=============
+
+Модуль `Angular VMS Grid` для AngularJS предоставляет функционал CRUD для различных ресурсов. Целью является генерация
+интерфейса и манипуляция с данными ресурса по схеме описывающей этот ресурс, при этом главным условием остается то, что 
+изначально модуль не располагает информацией о структуре ресурса, объеме данных, количестве полей и типу данных.
+
+##Using standards
+
+ 1. RESTApi
+ 2. [JsonApi](http://jsonapi.org)
+ 3. [Json-schema](https://tools.ietf.org/html/draft-zyp-json-schema-04) draft-04 и [Hyper-schema](https://tools.ietf.org/html/draft-luff-json-hyper-schema-00)
+
+##Basic Usage
+
+Создаем сервис 
+
+```javascript
+app.factory('GridSrv', [{
+    return {
+      /**
+       * create - SCHEMA -> /:resource/schema#/definitions/:type
+       * list   - DATA   -> /:resource
+       * update - DATA   -> /:resource/:id
+       * read   - DATA   -> /:resource/:id
+       */
+       url: 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
+       /**
+       * {
+       *    id:       string | undefined 
+       *    type:     create | read | update | delete
+       *    resource: users | other
+       * }
+       */
+       params: {}
+    };
+}]);
+```
+
+Добавляем контроллер для передачи сервиса в директиву 
+
+```javascript
+app.controller('TestCtrl', ['$scope', '$routeParams', 'GridSrv', function($scope, $routeParams, GridSrv) {
+    GridSrv.params = {
+      'resource': $routeParams.resource,
+      'id': $routeParams.id,
+      'type': $routeParams.action
+    };
+    $scope.gridSrv = GridSrv;
+}]);
+```
+
+И подключаем директиву
+
+```html
+  <vms-grid grid-model="gridSrv"></vms-grid>
+```
 
 ###Global Options
 
@@ -129,8 +185,7 @@
 ```
 
 ##Actions
-Для описания какого-либо поведения с ресурсом необходимо добавить атрибут Links в гиперсхему описывающую данный ресурс
-на пример:
+Для описания какого-либо поведения с ресурсом необходимо добавить `links` в схему данного ресурса на пример:
 
 ```json
 {
@@ -161,7 +216,7 @@
     },
     "required": ["type", "id", "attributes"],
     "additionalProperties": false,
-    "links": [
+    "links": [          <-- this is magic block links
         {
             "title": "Update",
             "description": "Edit Resource",
@@ -173,6 +228,7 @@
     ]
 }
 ```
+Подробнее о `links` вы можете прочесть [здесь](http://json-schema.org/latest/json-schema-hypermedia.html)
 
 `rel` - обязательный параметр, относительно которого выбирается действие над ресурсом.
 

@@ -1,14 +1,20 @@
 Angular VMS Grid module
 =======================
 
-Модуль для AngularJS занимается отрисовкой интерфейса для функционала CRUD и предоставляет возможность манипуляции
- данными ресурса. Цель модуля: генерация интерфейса по hyper схеме описывающей данный ресурс.
+Модуль `Angular VMS Grid` для AngularJS предоставляет функционал CRUD для различных ресурсов. Целью является генерация
+интерфейса и манипуляция с данными ресурса по схеме описывающей этот ресурс, при этом главным условием остается то, что 
+изначально модуль не располагает информацией о структуре ресурса, объеме данных, количестве полей и типу данных.
 
 ##Using standards
 
  1. RESTApi
  2. [JsonApi](http://jsonapi.org)
  3. [Json-schema](https://tools.ietf.org/html/draft-zyp-json-schema-04) draft-04 и [Hyper-schema](https://tools.ietf.org/html/draft-luff-json-hyper-schema-00)
+
+##Documentation
+
+You can find [all documentation here](docs/index.md), it covers all the different field types
+and their options.
 
 ##Basic Usage
 

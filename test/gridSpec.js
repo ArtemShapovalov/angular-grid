@@ -82,7 +82,7 @@ describe('GridEntity testing', function() {
   beforeEach(function () {
     jasmine.Ajax.install();
 
-    jasmine.Ajax.stubRequest(domain + '/targets', '', 'GET')
+    jasmine.Ajax.stubRequest(domain + '/targets?page[offset]=0&page[limit]=1', '', 'GET')
       .andReturn(TestResponses.targets.data.list.success);
     jasmine.Ajax.stubRequest(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
       .andReturn(TestResponses.targets.data.update.success);

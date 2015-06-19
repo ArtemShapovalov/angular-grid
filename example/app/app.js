@@ -27,6 +27,8 @@ app.config([
         templateUrl: '/views/test.html',
         controller: 'TestCtrl'
       });
+
+    $locationProvider.html5Mode(true);
   }
 ]);
 

@@ -1,8 +1,12 @@
 angular.module('grid').factory('gridTable', gridTable);
-gridTable.$inject = ['grid-entity', '$timeout', '$interval', '_'];
-function gridTable(gridEntity, $timeout, $interval, _) {
+gridTable.$inject = ['grid-entity', 'gridPagination', '$timeout', '_'];
+function gridTable(gridEntity, gridPagination, $timeout, _) {
 
   function Table() {
+    /**
+     * @type {gridPagination}
+     */
+    this.pagination = new gridPagination(),
     this.rows = [];
     this.columns = {};
     this.schema = {};
@@ -35,15 +39,16 @@ function gridTable(gridEntity, $timeout, $interval, _) {
       model = self.getModel(),
       url;
 
-    url = self.getResourceUrl(model.url, model.params);
+    url = self.pagination.getPageUrl(self.getResourceUrl(model.url, model.params));
 
     $timeout(function() {
       self.fetchData(url, fetchDataSuccess);
     });
 
     function fetchDataSuccess(data, schema) {
-
       var schemaWithoutRef = self.mergeRelSchema(data.schemas()[0].data.value(), schema);
+
+      self.pagination.setTotalCount(data.property('meta').propertyValue('total'));
 
       self.type = self.TYPE_TABLE;
 

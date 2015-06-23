@@ -3,7 +3,6 @@ describe('GridEntity testing', function() {
   var domain = 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary';
 
   var gridEntity;
-  var gridTable;
   var gridForm;
   var userModel;
   var $timeout;
@@ -30,13 +29,6 @@ describe('GridEntity testing', function() {
     },
     targets: {
       data: {
-        list: {
-          success: {
-            contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/list',
-            status: 200,
-            responseText: JSON.stringify(readJSON('test/mock/targetDataList.json'))
-          }
-        },
         read: {
           success: {
             contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/read',
@@ -68,7 +60,7 @@ describe('GridEntity testing', function() {
     module(function($provide) {
       $provide.factory('userModel', function(){
         return {
-          'url': 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary',
+          'url': domain,
           'params': {
             resource: 'targets',
             type: '',
@@ -82,8 +74,6 @@ describe('GridEntity testing', function() {
   beforeEach(function () {
     jasmine.Ajax.install();
 
-    jasmine.Ajax.stubRequest(domain + '/targets?page[offset]=0&page[limit]=1', '', 'GET')
-      .andReturn(TestResponses.targets.data.list.success);
     jasmine.Ajax.stubRequest(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
       .andReturn(TestResponses.targets.data.update.success);
     jasmine.Ajax.stubRequest(domain + '/targets/schema', '', 'GET')
@@ -104,7 +94,6 @@ describe('GridEntity testing', function() {
     $timeout = $injector.get('$timeout');
     $interval = $injector.get('$interval');
     gridEntity = $injector.get('grid-entity');
-    gridTable = $injector.get('gridTable');
     gridForm = $injector.get('gridForm');
     userModel = $injector.get('userModel');
 
@@ -114,24 +103,6 @@ describe('GridEntity testing', function() {
 
   afterEach(function() {
     jasmine.Ajax.uninstall();
-  });
-
-  it ('check get table info', function () {
-    var table;
-
-    var tableInst = new gridTable();
-    tableInst.getTableInfo(function(data) {
-      table = data;
-    });
-
-    $timeout.flush();
-    $interval.flush(100);
-
-    expect(Array.isArray(table)).toEqual(false);
-    expect(table.rows).toBeDefined();
-    expect(table.columns).toBeDefined();
-    expect(table.links).toBeDefined();
-
   });
 
   it('check create title map for checkbox list by full schema', function() {

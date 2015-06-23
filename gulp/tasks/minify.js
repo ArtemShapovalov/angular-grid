@@ -1,19 +1,36 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
-//var umd = require('gulp-umd');
-//var wrapUmd = require('gulp-wrap-umd');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
 var ngAnnotate = require('gulp-ng-annotate');
 var wrapJS = require("gulp-wrap-js");
+var templateCache = require('gulp-angular-templatecache');
+var streamqueue = require('streamqueue');
 
 gulp.task('minify', function() {
-  gulp.src([
-    'src/**/module.js',
-    'src/**/*.js'
-  ])
+
+  var stream = streamqueue({objectMode: true});
+  stream.queue(
+    gulp.src([
+      'src/**/module.js',
+      'src/**/*.js'
+    ])
+  );
+  stream.queue(
+    gulp.src('templates/**/*.html')
+      /*.pipe(minifyHtml({
+       empty: true,
+       spare: true,
+       quotes: true
+       }))*/
+      .pipe(templateCache({
+        module: 'grid',
+        root: 'templates/grid'
+      }))
+  );
+  stream.done()
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(gulp.dest('example/bower_components/angular-grid/src'))
     .pipe(concat('grid.js'))
@@ -32,56 +49,6 @@ gulp.task('minify', function() {
         "return vmsGrid;"+
       "}));"
     ))
-    /*.pipe(umd({
-     dependencies: function() {
-     return [
-     {name: 'angular'},
-     {
-     name: 'Jsonary',
-     amd: 'jsonary'
-     },
-     {
-     name: 'angularBootstrap',
-     amd: 'angular-bootstrap'
-     },
-     {
-     name: 'bootstrapDecorator',
-     amd: 'bootstrap-decorator'
-     },
-     {
-     name: 'lodash',
-     amd: 'lodash',
-     global: '_'
-     }
-     ]
-     },
-     exports: function() {return 'vmsGrid';},
-     namespace: function() {return 'vmsGrid';}
-     }))*/
-    /*.pipe(wrapUmd({
-      deps: [
-          {name: 'angular'},
-          {
-            name: 'Jsonary',
-            amdName: 'jsonary'
-          },
-          {
-            name: 'angularBootstrap',
-            amdName: 'angular-bootstrap'
-          },
-          {
-            name: 'bootstrapDecorator',
-            amdName: 'bootstrap-decorator'
-          },
-          {
-            name: 'lodash',
-            amdName: 'lodash',
-            globalName: '_'
-          }
-        ],
-      exports: 'vmsGrid',
-      namespace: 'vmsGrid'
-    }))*/
     .pipe(sourcemaps.write({includeContent: true, sourceRoot: '../src/'}))
     .pipe(gulp.dest('./dist/'))
     .pipe(gulp.dest('example/bower_components/angular-grid/dist'))

@@ -1,15 +1,22 @@
 angular.module('grid').factory('gridTable', gridTable);
-gridTable.$inject = ['grid-entity', 'gridPagination', '$timeout', '_'];
-function gridTable(gridEntity, gridPagination, $timeout, _) {
+gridTable.$inject = ['grid-entity', 'gridPagination', 'Sorting', '$timeout', '_'];
+function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
+  /**
+   * @class
+   * @constructor
+   */
   function Table() {
     /**
      * @type {gridPagination}
      */
     this.pagination = new gridPagination(),
+    /**
+     * @type {Sorting}
+     */
+    this.sorting = new Sorting(),
     this.rows = [];
     this.columns = {};
-    this.schema = {};
     this.links = {};
   }
 
@@ -18,6 +25,8 @@ function gridTable(gridEntity, gridPagination, $timeout, _) {
     getTableInfo: getTableInfo,
     getColumnsBySchema: getColumnsBySchema,
     rowsToTableFormat: rowsToTableFormat,
+    getSortingParamByField: getSortingParamByField,
+    setSorting: setSorting,
     _getRowsByData: _getRowsByData
   }, gridEntity);
 
@@ -28,7 +37,6 @@ function gridTable(gridEntity, gridPagination, $timeout, _) {
     return {
       rows: self.rows,
       columns: self.columns,
-      schema: self.schema,
       links: self.links
     }
   }
@@ -39,7 +47,10 @@ function gridTable(gridEntity, gridPagination, $timeout, _) {
       model = self.getModel(),
       url;
 
+    /** add page to url */
     url = self.pagination.getPageUrl(self.getResourceUrl(model.url, model.params));
+    /** add sort to url */
+    url = self.sorting.getUrl(url);
 
     $timeout(function() {
       self.fetchData(url, fetchDataSuccess);
@@ -57,6 +68,9 @@ function gridTable(gridEntity, gridPagination, $timeout, _) {
         self.rows = self.rowsToTableFormat(rows);
         self.links = data.links();
         self.columns = self.getColumnsBySchema(schemaWithoutRef);
+
+        self.sorting.setSortFields(_.map(self.columns, 'attributeName'));
+
         self.columns.push({
           title: 'Actions',
           type: 'string',
@@ -72,6 +86,28 @@ function gridTable(gridEntity, gridPagination, $timeout, _) {
 
   }
 
+  function setSorting(field, direction) {
+    field = this.getSortingParamByField(field);
+    this.sorting.setSorting(field, direction)
+  }
+
+  /**
+   * @name Table#getSortingParamByField
+   * @param field
+   * @returns {*}
+   */
+  function getSortingParamByField(field) {
+    var result = field;
+    var rel = this.data.property('data').item(0).property('relationships').property(field);
+
+    if (rel.value()) {
+      var fieldName = rel.schemas()[0].data.value().name;
+      result += '.'+fieldName;
+    }
+
+    return result;
+  }
+
   /**
    * Get Columns info by schema
    *
@@ -81,7 +117,6 @@ function gridTable(gridEntity, gridPagination, $timeout, _) {
   function getColumnsBySchema(schemaWithoutRef) {
     var result = [];
     var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
-
 
     _.forEach(columns, function(value, key) {
       value.attributeName = key;

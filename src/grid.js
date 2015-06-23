@@ -1,8 +1,6 @@
 angular.module('grid').provider('grid-entity', gridEntity);
 
 function gridEntity() {
-  var data,
-      schema;
 
   var provider = {
     $get: gridEntityGet
@@ -20,6 +18,13 @@ function gridEntity() {
           successUpdated: 'Successfully update',
           serverError: 'Oops! server error'
         };
+
+    /**
+     * Jsonary data object
+     *
+     * @type {Jsonary}
+     */
+    this.data = {};
 
     return {
       default: {
@@ -152,6 +157,7 @@ function gridEntity() {
       }
 
       function fetchDataSuccess(data, schema) {
+        self.data = data;
 
         if (callback !== undefined) {
           callback(data, schema);

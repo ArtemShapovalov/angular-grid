@@ -1,6 +1,6 @@
 angular.module('grid').factory('gridPagination', gridPagination);
-gridPagination.$inject = ['_'];
-function gridPagination(_) {
+gridPagination.$inject = ['Helper', '_'];
+function gridPagination(Helper, _) {
 
   function Pagination() {
     /** Name of the parameter storing the current page index */
@@ -73,44 +73,19 @@ function gridPagination(_) {
 
   function getPageUrl(url) {
     var result;
-    var searchParams = {};
-    var pos = url.indexOf('?');
+    var searchParams;
 
-    result = url;
-
-    if (pos>=0) {
-      searchParams = getLocationSearch(url);
-      result = url.slice(0, pos);
-    }
+    searchParams = Helper.parseLocationSearch(url);
 
     searchParams[this.pageParam + '[offset]'] = this.getOffset();
     searchParams[this.pageParam + '[limit]'] = this.getPerPage();
 
-    var searchPath = Object.keys(searchParams).map(function(k) {
-      return k + '=' + encodeURIComponent(searchParams[k])
-    }).join('&');
+    result = Helper.setLocationSearch(url, searchParams);
 
-    searchPath = searchPath ? '?'+searchPath: '';
-
-    return result + searchPath;
+    return result;
   }
 
-  function getLocationSearch(url) {
-    var params;
 
-    // Remove the '?' at the start of the string and split out each assignment
-    params = _.chain( url.slice(url.indexOf('?') + 1).split('&') )
-      // Split each array item into [key, value] ignore empty string if search is empty
-      .map(function(item) { if (item) return item.split('='); })
-      // Remove undefined in the case the search is empty
-      .compact()
-      // Turn [key, value] arrays into object parameters
-      .object()
-      // Return the value of the chain operation
-      .value();
-
-    return params;
-  }
 
 }
 

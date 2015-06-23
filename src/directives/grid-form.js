@@ -1,20 +1,3 @@
-angular.module('grid').run(['$templateCache', function ($templateCache) {
-  $templateCache.put('templates/grid/form.html',
-    '<grid-form>' +
-    '<span ng-repeat="link in links">' +
-    '<a href="javascript:void(0);" ng-click="go(link)">{{link.title}}</a> ' +
-    '</span>'+
-    '<div>' +
-    '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
-    '</div>' +
-    '<form novalidate name="gridForm" ng-init="setFormScope(this)"' +
-    'sf-schema="schema" sf-form="form" sf-model="model"' +
-    'class="form-horizontal" role="form" ng-if="hideForm !== true">'+
-    '</form>'+
-    '</grid-form>'
-  );
-}]);
-
 angular.module('grid').directive('gridForm', gridFormDirective);
 
 //TODO: should be set require ... depends on vmsGrid

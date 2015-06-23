@@ -1,0 +1,23 @@
+<grid-table>
+    <span ng-repeat="link in links">
+        <a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a>
+      </span>
+    <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+
+    <table class="table grid">
+        <thead grid-thead table="tableInst" columns="columns"></thead>
+        <tbody>
+            <tr ng-repeat="row in rows">
+                <td ng-repeat="column in columns">
+                    <span ng-if="column.attributeName !== 'links'">{{row[column.attributeName]}}</span>
+                    <span ng-if="column.attributeName == 'links'">
+                        <span ng-repeat="link in row.links">
+                            <a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a>
+                        </span>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</grid-table>
+<pagination ng-if="rows" direction-links="false" boundary-links="true" items-per-page="itemsPerPage" total-items="totalItems" ng-model="currentPage" ng-change="pageChanged(currentPage)"></pagination>

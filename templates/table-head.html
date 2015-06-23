@@ -1,0 +1,10 @@
+<tr>
+    <th ng-repeat="column in columns">
+        <div ng-if="sortFields.indexOf(column.attributeName)>=0" class="th-inner sortable" ng-click="sortBy(column, $event)">{{column.title}}
+            <span ng-if="column.sorting" class="order" ng-class="{'dropup': column.sorting=='desc'}">
+                <span class="caret" style="margin: 0px 5px;"></span>
+            </span>
+        </div>
+        <div ng-if="sortFields.indexOf(column.attributeName)<0" class="th-inner">{{column.title}}</div>
+    </th>
+</tr>

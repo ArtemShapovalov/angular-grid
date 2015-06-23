@@ -1,42 +1,8 @@
-angular.module('grid').run(['$templateCache', function ($templateCache) {
-  $templateCache.put('templates/grid/table.html',
-    '<grid-table>' +
-      '<span ng-repeat="link in links">' +
-        '<a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a> ' +
-      '</span>'+
-      '<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>'+
-      '<table class="table grid">'+
-        '<thead>'+
-          '<tr>'+
-            '<th ' +
-              'ng-repeat="column in columns"' +
-              'ng-class="{ \'sortable\': column.sortable(this), \'sort-asc\': params.sorting()[column.sortable(this)]==\'asc\', \'sort-desc\': params.sorting()[column.sortable(this)]==\'desc\' }"'+
-              'ng-click="sortBy(column, $event)">{{column.title}}</th>'+
-          '</tr>'+
-        '</thead>'+
-        '<tbody>'+
-          '<tr ng-repeat="row in rows">'+
-          '<td ng-repeat="column in columns">'+
-          '<span ng-if="column.attributeName !== \'links\'">{{row[column.attributeName]}}</span>'+
-          '<span ng-if="column.attributeName == \'links\'">'+
-          '<span ng-repeat="link in row.links">' +
-          '<a href="javascript:void(0);" ng-click="edit(link)">{{link.title}}</a> ' +
-          '</span>'+
-          '</span>'+
-          '</td>'+
-          '</tr>'+
-        '</tbody>'+
-      '</table>' +
-    '</grid-table>'+
-    '<pagination ng-if="rows" direction-links="false" boundary-links="true" items-per-page="itemsPerPage" total-items="totalItems" ng-model="currentPage" ng-change="pageChanged(currentPage)"></pagination>'
-  );
-}]);
-
 angular.module('grid').directive('gridTable', gridTableDirective);
 
 gridTableDirective.$inject = ['grid-entity', 'gridTable', 'grid-actions'];
 
-//TODO: should be set require ... depends on vmsGrid
+//TODO: should be set require ...  depends on vmsGrid
 function gridTableDirective(gridEntity, gridTable, gridActions) {
   var directive = {
       restrict: 'E',
@@ -59,7 +25,10 @@ function gridTableDirective(gridEntity, gridTable, gridActions) {
      */
     var pagination = tableInst.pagination;
 
+    $scope.tableInst = tableInst;
+
     pagination.setCurrentPage($location.search().page);
+    setSortingBySearch($location.search());
 
     tableInst.getTableInfo(function(table) {
       $scope.setPagination();
@@ -88,5 +57,19 @@ function gridTableDirective(gridEntity, gridTable, gridActions) {
       $scope.currentPage = pagination.getCurrentPage();
       $location.search('page', pageNo);
     };
+
+    function setSortingBySearch(fields) {
+      var sorting = tableInst.sorting;
+
+      if (!fields[sorting.sortParam]) {
+        return false;
+      }
+      var pos = fields[sorting.sortParam].lastIndexOf('_');
+      var field = fields[sorting.sortParam].slice(0, pos);
+      var direction = fields[sorting.sortParam].slice(pos + 1);
+
+      sorting.setSorting(field, direction);
+    }
+
   }
 }

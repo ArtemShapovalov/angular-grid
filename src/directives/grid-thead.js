@@ -5,8 +5,7 @@ gridTheadDirective.$inject = [];
 function gridTheadDirective() {
   var directive = {
       scope: {
-        tableInst: '=table',
-        columns: '=columns'
+        tableInst: '=table'
       },
       require: '^gridTable',
       templateUrl: 'templates/grid/table-head.html',
@@ -26,18 +25,17 @@ function gridTheadDirective() {
     /** @type {Sorting} */
     var sorting = $scope.tableInst.sorting;
 
-    $scope.$watch('columns', function(newVal){
-      if (newVal) {
-        $scope.sortFields = sorting.sortFields;
-        $scope.setSorting();
-      }
+    $scope.$on('onLoadData', function() {
+      $scope.columns = $scope.tableInst.columns;
+      $scope.sortFields = sorting.sortFields;
+      $scope.setSorting();
     });
 
     $scope.setSorting = function() {
       var field = sorting.getColumn();
 
       if (field) {
-        _.where($scope.columns, {'attributeName': field})[0].sorting = sorting.direction;
+        _.where(this.columns, {'attributeName': field})[0].sorting = sorting.direction;
       }
     };
 
@@ -50,7 +48,7 @@ function gridTheadDirective() {
       var field = $scope.tableInst.getSortingParamByField(column.attributeName);
 
       if (column.sorting) {
-        $location.search('sort', field +'_'+ direction);
+        $location.search('sort', field +'_'+ column.sorting);
       } else {
         $location.search('sort', null);
       }

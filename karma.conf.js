@@ -40,29 +40,37 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/**/*.js': ['wrap']
+      'src/**/*.js': ['wrap', 'coverage']
+    },
+
+    // optionally, configure the reporter
+    coverageReporter: {
+      type : 'html',
+      dir : 'coverage/'
     },
 
     wrapPreprocessor: {
       template:
+      '/* istanbul ignore next */' +
       '(function(root, factory) {'+
-      "if (typeof define === 'function' && define.amd) {"+
-      'define(["angular","jsonary","angular-bootstrap","bootstrap-decorator","lodash"], factory);'+
-      "} else if (typeof exports === 'object') {"+
-      "module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));"+
-      '} else {'+
-      "root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root._);"+
-      "}"+
-      "}(this, function(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {"+
+        "if (typeof define === 'function' && define.amd) {"+
+        'define(["angular","jsonary","angular-bootstrap","bootstrap-decorator","lodash"], factory);'+
+        "} else if (typeof exports === 'object') {"+
+        "module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));"+
+        '} else {'+
+        "root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root._);"+
+        "}"+
+      "})(this, main);" +
+      "function main(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {"+
       " <%= contents %> "+
       "return vmsGrid;"+
-      "}));"
+      "}"
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
 
 
     // web server port

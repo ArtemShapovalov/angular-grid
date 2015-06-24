@@ -6,7 +6,9 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    * @class
    * @constructor
    */
-  function Table() {
+  function Table(model) {
+
+    this.setModel(model);
     /**
      * @type {gridPagination}
      */

@@ -5,7 +5,7 @@
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 
     <table class="table grid">
-        <thead grid-thead table="tableInst" columns="columns"></thead>
+        <thead grid-thead table="tableInst"></thead>
         <tbody>
             <tr ng-repeat="row in rows">
                 <td ng-repeat="column in columns">

@@ -30,12 +30,28 @@ describe('GridEntity testing', function() {
     pagination.setPerPage(10);
     expect(pagination.getPageCount()).toEqual(9);
 
-    pagination.setTotalCount(80);
-    pagination.setPerPage(20);
-    expect(pagination.getPageCount()).toEqual(4);
+    pagination.setPerPage(1);
+    pagination.setTotalCount(0);
+    expect(pagination.getPageCount()).toEqual(1);
 
     expect(pagination.perPage).toBeDefined();
-  })
+  });
+
+  it ('check count items on one page as 0', function(){
+    pagination.setPerPage(0);
+    expect(pagination.getPageCount()).toEqual(1);
+  });
+
+  it('check offset if not set current page', function() {
+    pagination.setCurrentPage(undefined);
+    expect(pagination.getOffset()).toEqual(0);
+  });
+
+  it('check getters', function () {
+    expect(pagination.getPageParam()).toEqual('page');
+    expect(pagination.getTotalCount()).toEqual(2);
+    expect(pagination.getCurrentPage()).toEqual(1);
+  });
 
   it('create url', function() {
 

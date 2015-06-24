@@ -1,9 +1,9 @@
 angular.module('grid').directive('gridTable', gridTableDirective);
 
-gridTableDirective.$inject = ['grid-entity', 'gridTable', 'grid-actions'];
+gridTableDirective.$inject = ['gridTable', 'grid-actions'];
 
 //TODO: should be set require ...  depends on vmsGrid
-function gridTableDirective(gridEntity, gridTable, gridActions) {
+function gridTableDirective(gridTable, gridActions) {
   var directive = {
       restrict: 'E',
       controller: gridTableDirectiveCtrl
@@ -19,7 +19,7 @@ function gridTableDirective(gridEntity, gridTable, gridActions) {
     /**
      * @type {gridTable}
      */
-    var tableInst = new gridTable();
+    var tableInst = new gridTable($scope.gridModel);
     /**
      * @type {gridPagination}
      */
@@ -36,6 +36,8 @@ function gridTableDirective(gridEntity, gridTable, gridActions) {
       $scope.rows = table.rows;
       $scope.columns = table.columns;
       $scope.links = table.links;
+
+      $scope.$broadcast('onLoadData');
     });
 
     $scope.edit = function(link) {

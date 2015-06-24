@@ -8,23 +8,22 @@ function gridFormDirective() {
     controller: gridFormDirectiveCtrl
   };
 
-  gridFormDirectiveCtrl.$inject = ['$scope', 'grid-entity', 'gridForm', 'grid-actions'];
+  gridFormDirectiveCtrl.$inject = ['$scope', 'gridForm', 'grid-actions'];
 
   return directive;
 
-  function gridFormDirectiveCtrl($scope, gridEntity, gridForm, gridActions) {
+  function gridFormDirectiveCtrl($scope, gridForm, gridActions) {
     $scope.alerts = [];
 
     $scope.scopeForm = {
       gridForm: {}
     };
 
-    $scope.setFormScope= function(scope){
+    $scope.setFormScope = function(scope) {
       $scope.scopeForm = scope;
     };
 
-
-    var formInst = new gridForm();
+    var formInst = new gridForm($scope.gridModel);
 
     formInst.getFormInfo(function (form) {
       $scope.schema = form.schema;

@@ -13,11 +13,11 @@ function vmsGridDirective() {
     }
   };
 
-  vmsGridDirectiveCtrl.$inject = ['$scope', 'grid-entity'];
+  vmsGridDirectiveCtrl.$inject = ['$scope'];
 
   return directive;
 
-  function vmsGridDirectiveCtrl($scope, gridEntity) {
+  function vmsGridDirectiveCtrl($scope) {
     $scope.getTemplateUrl = function() {
       if ($scope.gridModel.params.type) {
         return 'templates/grid/form.html';
@@ -25,6 +25,5 @@ function vmsGridDirective() {
       return 'templates/grid/table.html';
     };
 
-    gridEntity.setModel($scope.gridModel);
   }
 }

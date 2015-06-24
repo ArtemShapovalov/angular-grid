@@ -92,9 +92,7 @@ describe('GridEntity testing', function() {
     gridTable = $injector.get('gridTable');
     userModel = $injector.get('userModel');
 
-    gridEntity.setModel(userModel);
-
-    table = new gridTable();
+    table = new gridTable(userModel);
   }));
 
   afterEach(function() {

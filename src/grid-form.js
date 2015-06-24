@@ -2,7 +2,9 @@ angular.module('grid').factory('gridForm', gridForm);
 gridForm.$inject = ['grid-entity', '$timeout', '$interval', '_'];
 function gridForm(gridEntity, $timeout, $interval, _) {
 
-  function Form() {
+  function Form(model) {
+    this.setModel(model);
+
     this.form = [];
     this.model = {};
     this.schema = {};

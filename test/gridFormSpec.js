@@ -7,6 +7,7 @@ describe('GridEntity testing', function() {
   var userModel;
   var $timeout;
   var $interval;
+  var form;
 
   var TestResponses = {
     users: {
@@ -97,8 +98,7 @@ describe('GridEntity testing', function() {
     gridForm = $injector.get('gridForm');
     userModel = $injector.get('userModel');
 
-    gridEntity.setModel(userModel);
-
+    form = new gridForm(userModel);
   }));
 
   afterEach(function() {
@@ -127,14 +127,12 @@ describe('GridEntity testing', function() {
       titleMap: titleMapUser
     };
 
-    var formInst = new gridForm();
-
-    formInst.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
+    form.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
       resource.data = data;
       resource.schema = schema;
     });
 
-    formInst._createTitleMap(resource.data.property('data'), function(responce) {
+    form._createTitleMap(resource.data.property('data'), function(responce) {
         titleMap = responce;
     });
 
@@ -144,9 +142,9 @@ describe('GridEntity testing', function() {
     expect(titleMap.user).toEqual(titleMapUser);
     expect(resource.schema).toBeDefined();
 
-    formInst._getFormConfig(resource.data, function(form) {
-      expect(form).toContain(formConfigUsers);
-      expect(form).toContain(formConfigUser);
+    form._getFormConfig(resource.data, function(formConfig) {
+      expect(formConfig).toContain(formConfigUsers);
+      expect(formConfig).toContain(formConfigUser);
     });
 
     $timeout.flush();
@@ -160,11 +158,11 @@ describe('GridEntity testing', function() {
     userModel.params.id = 'de205d54-75b4-431b-adb2-eb6b9e546013';
     userModel.params.type = 'update';
 
-    var form;
+    var formData;
 
-    var formInst = new gridForm();
-    formInst.getFormInfo(function(data) {
-      form = data;
+    var form = new gridForm(userModel);
+    form.getFormInfo(function(data) {
+      formData = data;
     });
 
     $timeout.flush();
@@ -172,7 +170,7 @@ describe('GridEntity testing', function() {
     $interval.flush(100);
     $timeout.flush();
 
-    expect(form.links).toBeDefined();
+    expect(formData.links).toBeDefined();
   });
 
 

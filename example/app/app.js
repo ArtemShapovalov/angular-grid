@@ -42,6 +42,8 @@ function mainController($scope, $routeParams, UserGrid) {
     'type': $routeParams.action
   };
   $scope.userGrid = UserGrid;
+  /*$scope.user2Grid = angular.copy(UserGrid);
+  $scope.user2Grid.params.resource = 'users';*/
 }
 
 app.factory('userGrid', userSrv);

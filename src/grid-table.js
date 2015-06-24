@@ -12,15 +12,17 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     /**
      * @type {gridPagination}
      */
-    this.pagination = new gridPagination(),
+    this.pagination = new gridPagination();
     /**
      * @type {Sorting}
      */
-    this.sorting = new Sorting(),
+    this.sorting = new Sorting();
     this.rows = [];
     this.columns = {};
     this.links = {};
   }
+
+  Table.prototype = new gridEntity();
 
   angular.extend(Table.prototype, {
     getConfig: getConfig,
@@ -30,7 +32,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     getSortingParamByField: getSortingParamByField,
     setSorting: setSorting,
     _getRowsByData: _getRowsByData
-  }, gridEntity);
+  });
 
   return Table;
 

@@ -2,7 +2,6 @@ describe('GridEntity testing', function() {
 
   var domain = 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary';
 
-  var gridEntity;
   var gridForm;
   var userModel;
   var $timeout;
@@ -94,7 +93,6 @@ describe('GridEntity testing', function() {
   beforeEach(inject(function($injector){
     $timeout = $injector.get('$timeout');
     $interval = $injector.get('$interval');
-    gridEntity = $injector.get('grid-entity');
     gridForm = $injector.get('gridForm');
     userModel = $injector.get('userModel');
 

@@ -8,7 +8,7 @@ function gridPagination(Helper, _) {
     /** The zero-based current page number */
     this.currentPage = 1;
     /** Number of pages */
-    this.pageCount = 0;
+    //this.pageCount = 0;
     /** The number of items per page */
     this.perPage = 1;
     /** Total number of items */

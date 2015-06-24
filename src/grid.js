@@ -6,11 +6,11 @@ function gridEntity() {
     $get: gridEntityGet
   };
 
-  gridEntityGet.$inject = ['$timeout', '$interval', '_'];
+  gridEntityGet.$inject = ['Helper', '$interval', '_'];
 
   return provider;
 
-  function gridEntityGet($timeout, $interval, _) {
+  function gridEntityGet(Helper, $interval, _) {
     var model,
         messages = {
           successDeleted: 'Successfully delete',
@@ -20,13 +20,21 @@ function gridEntity() {
         };
 
     /**
+     * @class
+     * @constructor
+     */
+    function Entity() {
+
+    }
+
+    /**
      * Jsonary data object
      *
      * @type {Jsonary}
      */
     this.data = {};
 
-    return {
+    angular.extend(Entity.prototype, {
       default: {
         actionGetResource: 'read'
       },
@@ -48,7 +56,9 @@ function gridEntity() {
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
       _batchLoadData: _batchLoadData
-    };
+    });
+
+    return Entity;
 
     function setModel(Model) {
       model = Model;
@@ -227,7 +237,7 @@ function gridEntity() {
       for (var key in haystack) {
         if (haystack.hasOwnProperty(key)) {
           if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && haystack[key].$ref) {
-            haystack[key] = Object.byString(schemaFull, haystack[key].$ref.substring(2));
+            haystack[key] = Helper.strToObject(schemaFull, haystack[key].$ref.substring(2));
             _replaceFromFull(haystack[key], schemaFull);
           }
           if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && (haystack[key] !== 'links')) {
@@ -367,19 +377,3 @@ function gridEntity() {
 
   }
 }
-
-Object.byString = function(obj, path) {
-  path = path.replace(/\[(\w+)]/g, '.$1'); // convert indexes to properties
-  path = path.replace(/\/(\w+)/g, '.$1'); // convert indexes to properties
-  path = path.replace(/^\./, '');           // strip a leading dot
-  var a = path.split('.');
-  for (var i = 0, n = a.length; i < n; ++i) {
-    var k = a[i];
-    if (k in obj) {
-      obj = obj[k];
-    } else {
-      return;
-    }
-  }
-  return obj;
-};

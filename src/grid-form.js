@@ -1,6 +1,6 @@
 angular.module('grid').factory('gridForm', gridForm);
-gridForm.$inject = ['grid-entity', '$timeout', '$interval', '_'];
-function gridForm(gridEntity, $timeout, $interval, _) {
+gridForm.$inject = ['grid-entity', '$timeout', '_'];
+function gridForm(gridEntity, $timeout, _) {
 
   function Form(model) {
     this.setModel(model);
@@ -10,6 +10,8 @@ function gridForm(gridEntity, $timeout, $interval, _) {
     this.schema = {};
     this.links = {};
   }
+
+  Form.prototype = new gridEntity();
 
   angular.extend(Form.prototype, {
     getFormInfo: getFormInfo,
@@ -21,7 +23,7 @@ function gridForm(gridEntity, $timeout, $interval, _) {
     _fieldsToFormFormat: _fieldsToFormFormat,
     _getEmptyData: _getEmptyData,
     _getFormButtonBySchema: _getFormButtonBySchema
-  }, gridEntity);
+  });
 
   return Form;
 
@@ -57,7 +59,7 @@ function gridForm(gridEntity, $timeout, $interval, _) {
 
       self.type = self.TYPE_FORM;
 
-      self._getFieldsForm(data, function(fields, relations) {
+      self._getFieldsForm(data, function(fields) {
 
         self.links = data.links();
         self.schema = schemaWithoutRef;

@@ -38,9 +38,6 @@ function gridEntity() {
       default: {
         actionGetResource: 'read'
       },
-      TYPE_FORM: 'form',
-      TYPE_TABLE: 'table',
-      type: '',
       config: {},
       setModel: setModel,
       getModel: getModel,
@@ -108,11 +105,6 @@ function gridEntity() {
      */
     function loadData(url, callback) {
       /*jshint validthis: true */
-
-      if (model === undefined) {
-        alert('Please set model before call fetch data');
-        return false;
-      }
 
       Jsonary.getData(url, function (jData, request) {
         var data = jData;

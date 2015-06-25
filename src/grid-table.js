@@ -65,8 +65,6 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
       self.pagination.setTotalCount(data.property('meta').propertyValue('total'));
 
-      self.type = self.TYPE_TABLE;
-
       self._getRowsByData(data, function(rows) {
 
         self.rows = self.rowsToTableFormat(rows);

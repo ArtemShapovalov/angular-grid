@@ -1,6 +1,6 @@
 angular.module('grid').factory('grid-action-create', gridActionCreate);
-gridActionCreate.$inject = ['$http', 'grid-entity'];
-function gridActionCreate($http, gridEntity) {
+gridActionCreate.$inject = ['$http'];
+function gridActionCreate($http) {
   return function(obj, link, scope) {
     var params = {
       method: link.method,

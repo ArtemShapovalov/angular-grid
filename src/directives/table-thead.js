@@ -25,6 +25,11 @@ function gridTheadDirective() {
     /** @type {Sorting} */
     var sorting = $scope.tableInst.sorting;
 
+    $scope.$on('onBeforeLoadData', function() {
+      console.log('sorting before load');
+      setSortingBySearch($location.search());
+    });
+
     $scope.$on('onLoadData', function() {
       $scope.columns = $scope.tableInst.columns;
       $scope.sortFields = sorting.sortFields;
@@ -54,6 +59,19 @@ function gridTheadDirective() {
       }
 
     };
+
+    function setSortingBySearch(fields) {
+      var sorting = $scope.tableInst.sorting;
+
+      if (!fields[sorting.sortParam]) {
+        return false;
+      }
+      var pos = fields[sorting.sortParam].lastIndexOf('_');
+      var field = fields[sorting.sortParam].slice(0, pos);
+      var direction = fields[sorting.sortParam].slice(pos + 1);
+
+      sorting.setSorting(field, direction);
+    }
 
   }
 }

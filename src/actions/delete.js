@@ -1,6 +1,6 @@
 angular.module('grid').factory('grid-action-delete', gridActionDelete);
-gridActionDelete.$inject = ['$http', 'grid-entity'];
-function gridActionDelete($http, gridEntity) {
+gridActionDelete.$inject = ['$http', 'gridTable', 'gridForm'];
+function gridActionDelete($http, gridTable, gridForm) {
   return function(obj, link, scope) {
     var params = {
       method: link.method,
@@ -10,13 +10,13 @@ function gridActionDelete($http, gridEntity) {
     $http(params).then(actionDeleteSuccess, actionDeleteError);
 
     function actionDeleteSuccess() {
-      if (obj.type === obj.TYPE_TABLE) {
+      if (obj instanceof gridTable) {
         obj.getTableInfo(function (table) {
           scope.rows = table.rows;
           scope.columns = table.columns;
           scope.links = table.links;
         });
-      } else if (obj.type === obj.TYPE_FORM) {
+      } else if (obj instanceof gridForm) {
         scope.hideForm = true;
       }
 

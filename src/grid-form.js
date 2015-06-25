@@ -57,8 +57,6 @@ function gridForm(gridEntity, $timeout, _) {
       var newData = data.property('data').property('attributes');
       var schemaWithoutRef = self.mergeRelSchema(newData.schemas()[0].data.value(), schema);
 
-      self.type = self.TYPE_FORM;
-
       self._getFieldsForm(data, function(fields) {
 
         self.links = data.links();

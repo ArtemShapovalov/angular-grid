@@ -2,42 +2,34 @@ angular.module('grid').directive('gridTable', gridTableDirective);
 
 gridTableDirective.$inject = ['gridTable', 'grid-actions'];
 
-//TODO: should be set require ...  depends on vmsGrid
 function gridTableDirective(gridTable, gridActions) {
   var directive = {
       restrict: 'E',
       controller: gridTableDirectiveCtrl
     };
 
-  gridTableDirectiveCtrl.$inject = ['$scope', '$location'];
+  gridTableDirectiveCtrl.$inject = ['$timeout', '$scope'];
 
   return directive;
 
-  function gridTableDirectiveCtrl($scope, $location) {
-    $scope.alerts = [];
-
-    /**
-     * @type {gridTable}
-     */
+  function gridTableDirectiveCtrl($timeout, $scope) {
+    /** @type {gridTable} */
     var tableInst = new gridTable($scope.gridModel);
-    /**
-     * @type {gridPagination}
-     */
-    var pagination = tableInst.pagination;
 
+    $scope.alerts = [];
     $scope.tableInst = tableInst;
 
-    pagination.setCurrentPage($location.search().page);
-    setSortingBySearch($location.search());
+    $timeout(function(){
+      $scope.$broadcast('onBeforeLoadData');
 
-    tableInst.getTableInfo(function(table) {
-      $scope.setPagination();
+      tableInst.getTableInfo(function(table) {
+        $scope.rows = table.rows;
+        $scope.columns = table.columns;
+        $scope.links = table.links;
 
-      $scope.rows = table.rows;
-      $scope.columns = table.columns;
-      $scope.links = table.links;
+        $scope.$broadcast('onLoadData');
+      });
 
-      $scope.$broadcast('onLoadData');
     });
 
     $scope.edit = function(link) {
@@ -47,31 +39,5 @@ function gridTableDirective(gridTable, gridActions) {
     $scope.closeAlert = function(index) {
       $scope.alerts.splice(index, 1);
     };
-
-    $scope.setPagination = function() {
-      $scope.totalItems = pagination.getTotalCount();
-      $scope.currentPage = pagination.getCurrentPage();
-      $scope.itemsPerPage = pagination.getPerPage();
-    };
-
-    $scope.pageChanged = function(pageNo) {
-      pagination.setCurrentPage(pageNo);
-      $scope.currentPage = pagination.getCurrentPage();
-      $location.search('page', pageNo);
-    };
-
-    function setSortingBySearch(fields) {
-      var sorting = tableInst.sorting;
-
-      if (!fields[sorting.sortParam]) {
-        return false;
-      }
-      var pos = fields[sorting.sortParam].lastIndexOf('_');
-      var field = fields[sorting.sortParam].slice(0, pos);
-      var direction = fields[sorting.sortParam].slice(pos + 1);
-
-      sorting.setSorting(field, direction);
-    }
-
   }
 }

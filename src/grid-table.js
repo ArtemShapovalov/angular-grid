@@ -30,6 +30,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     getColumnsBySchema: getColumnsBySchema,
     rowsToTableFormat: rowsToTableFormat,
     getSortingParamByField: getSortingParamByField,
+    getSortingParamValue: getSortingParamValue,
     setSorting: setSorting,
     _getRowsByData: _getRowsByData
   });
@@ -108,6 +109,17 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     }
 
     return result;
+  }
+
+  /**
+   * Get value for GET sorting param
+   * @returns {*}
+   */
+  function getSortingParamValue() {
+    if (this.sorting.direction) {
+      return this.getSortingParamByField(this.sorting.field) +'_'+ this.sorting.direction
+    }
+    return null
   }
 
   /**

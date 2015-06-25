@@ -1,4 +1,4 @@
-describe('GridEntity testing', function() {
+describe('Sorting service testing', function() {
 
   var Sorting;
   var sorting;

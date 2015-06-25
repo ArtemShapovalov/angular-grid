@@ -1,4 +1,4 @@
-angular.module('grid').directive('gridThead', gridTheadDirective);
+angular.module('grid').directive('tableThead', gridTheadDirective);
 
 gridTheadDirective.$inject = [];
 
@@ -44,19 +44,12 @@ function gridTheadDirective() {
       }
     };
 
-    $scope.sortBy = function(column, event) {
+    $scope.sortBy = function(column) {
+      var direction;
 
-      column.sorting = sorting.getDirectionColumn(column.sorting);
-
-      $scope.tableInst.setSorting(column.attributeName, column.sorting);
-
-      var field = $scope.tableInst.getSortingParamByField(column.attributeName);
-
-      if (column.sorting) {
-        $location.search('sort', field +'_'+ column.sorting);
-      } else {
-        $location.search('sort', null);
-      }
+      column.sorting = direction = sorting.getDirectionColumn(column.sorting);
+      $scope.tableInst.setSorting(column.attributeName, direction);
+      $location.search('sort', $scope.tableInst.getSortingParamValue());
 
     };
 

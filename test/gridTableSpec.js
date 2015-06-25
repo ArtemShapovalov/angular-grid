@@ -1,4 +1,4 @@
-describe('GridEntity testing', function() {
+describe('Table testing', function() {
 
   var domain = 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary';
 

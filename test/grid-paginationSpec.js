@@ -1,4 +1,4 @@
-describe('GridEntity testing', function() {
+describe('Pagination service testing', function() {
 
   var gridPagination;
   var pagination;

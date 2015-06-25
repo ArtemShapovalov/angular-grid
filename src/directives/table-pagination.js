@@ -23,7 +23,6 @@ function tablePaginationDirective() {
     var pagination = $scope.tableInst.pagination;
 
     $scope.$on('onBeforeLoadData', function() {
-      console.log('pagination before load');
       pagination.setCurrentPage($location.search().page);
     });
 

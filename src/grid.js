@@ -182,9 +182,9 @@ function gridEntity() {
 
       links = _.uniq(linkResources);
 
-      _.forEach(links, function (url) {
+      _.forEach(links, function(url) {
 
-        self.loadData(url, function (data, schema, request) {
+        self.loadData(url, function(data, schema, request) {
           resources[url] = {
             data: data,
             schema: schema,

@@ -1,8 +1,6 @@
 Angular VMS Grid module
 =======================
 
-[![Coverage Status](https://coveralls.io/repos/artemshapovalov/angular-grid/badge.svg)](https://coveralls.io/r/artemshapovalov/angular-grid)
-
 Модуль `Angular VMS Grid` для AngularJS предоставляет функционал CRUD для различных ресурсов. Целью является генерация
 интерфейса и манипуляция с данными ресурса по схеме описывающей этот ресурс, при этом главным условием остается то, что 
 изначально модуль не располагает информацией о структуре ресурса, объеме данных, количестве полей и типу данных.

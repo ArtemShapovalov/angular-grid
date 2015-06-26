@@ -208,7 +208,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
         var tmpRow = {
           own: row,
           relationships: _.mapValues(relationResources[index], function(n) {
-            _.forEach(n, function(item, index){
+            _.forEach(n, function(item, index) {
               n[index] = item.data;
             });
             return n;

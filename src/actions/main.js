@@ -23,7 +23,7 @@ function gridActions() {
       create: ActionCreate
     };
     return {
-      action: function (obj, link, scope) {
+      action: function(obj, link, scope) {
         this.actions[link.definition.data.propertyValue('rel')](obj, link, scope);
       }.bind(this)
     };

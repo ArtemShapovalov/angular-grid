@@ -47,7 +47,7 @@ function sortingSrv(Helper, _) {
    */
   function getColumn() {
     if (this.field) {
-      if (this.field.indexOf('.')>=0) {
+      if (this.field.indexOf('.') >= 0) {
         return this.field.slice(0, this.field.indexOf('.'));
       }
 
@@ -90,14 +90,12 @@ function sortingSrv(Helper, _) {
 
     searchParams = Helper.parseLocationSearch(url);
 
-    searchParams[this.sortParam + '['+ this.field +']'] = this.direction;
+    searchParams[this.sortParam + '[' + this.field + ']'] = this.direction;
 
     result = Helper.setLocationSearch(url, searchParams);
 
     return result;
   }
-
-
 
 }
 

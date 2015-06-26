@@ -35,17 +35,17 @@ function helperSrv() {
     var searchParams;
     var pos = url.indexOf('?');
 
-    if (pos>=0) {
+    if (pos >= 0) {
       // Remove the '?' at the start of the string and split out each assignment
-      searchParams = _.chain( url.slice(url.indexOf('?') + 1).split('&') )
-          // Split each array item into [key, value] ignore empty string if search is empty
-          .map(function(item) { if (item) return item.split('='); })
-          // Remove undefined in the case the search is empty
-          .compact()
-          // Turn [key, value] arrays into object parameters
-          .object()
-          // Return the value of the chain operation
-          .value();
+      searchParams = _.chain(url.slice(url.indexOf('?') + 1).split('&'))
+        // Split each array item into [key, value] ignore empty string if search is empty
+        .map(function(item) { if (item) return item.split('='); })
+        // Remove undefined in the case the search is empty
+        .compact()
+        // Turn [key, value] arrays into object parameters
+        .object()
+        // Return the value of the chain operation
+        .value();
     }
 
     return searchParams || {};
@@ -56,7 +56,7 @@ function helperSrv() {
     var pos = url.indexOf('?');
     var result = url;
 
-    if (pos>=0) {
+    if (pos >= 0) {
       result = url.slice(0, pos);
     }
 
@@ -64,7 +64,7 @@ function helperSrv() {
       return k + '=' + encodeURIComponent(searchParams[k])
     }).join('&');
 
-    searchPath = searchPath ? '?'+searchPath: '';
+    searchPath = searchPath ? '?' + searchPath : '';
 
     return result + searchPath;
   }

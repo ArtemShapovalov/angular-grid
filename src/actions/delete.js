@@ -11,7 +11,7 @@ function gridActionDelete($http, gridTable, gridForm) {
 
     function actionDeleteSuccess() {
       if (obj instanceof gridTable) {
-        obj.getTableInfo(function (table) {
+        obj.getTableInfo(function(table) {
           scope.rows = table.rows;
           scope.columns = table.columns;
           scope.links = table.links;

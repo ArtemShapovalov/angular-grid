@@ -43,9 +43,9 @@ function gridForm(gridEntity, $timeout, _) {
    */
   function getFormInfo(callback) {
     /*jshint validthis: true */
-    var self = this,
-      model = self.getModel(),
-      url;
+    var self = this;
+    var model = self.getModel();
+    var url;
 
     url = self.getResourceUrl(model.url, model.params);
 
@@ -81,8 +81,6 @@ function gridForm(gridEntity, $timeout, _) {
     }
 
   }
-
-
 
   /**
    * Convert Jsonary Data to result model for rendering form
@@ -156,7 +154,7 @@ function gridForm(gridEntity, $timeout, _) {
       var result = {
         own: fields,
         relationships: _.mapValues(relationResources[0], function(n) {
-          _.forEach(n, function(item, index){
+          _.forEach(n, function(item, index) {
             n[index] = item.data;
           });
           return n;
@@ -184,7 +182,10 @@ function gridForm(gridEntity, $timeout, _) {
       var resourceLink = item.links.self;
       /** get name from schema */
       var attributeName = dataRelations.property(key).schemas()[0].data.propertyValue('name');
-      var schemaAttributeWithoutRef = self._replaceFromFull(dataAttributes.schemas()[0].data.value(), documentSchema)['properties'][key];
+      var schemaAttributeWithoutRef = self._replaceFromFull(
+        dataAttributes.schemas()[0].data.value(),
+        documentSchema
+      )['properties'][key];
 
       var sourceEnum = {};
 
@@ -194,7 +195,7 @@ function gridForm(gridEntity, $timeout, _) {
         sourceEnum = schemaAttributeWithoutRef.enum
       }
 
-      _.forEach(sourceEnum, function (enumItem) {
+      _.forEach(sourceEnum, function(enumItem) {
         var url = self.getResourceUrl(resourceLink, {type: self.default.actionGetResource, id: enumItem});
 
         sourceTitleMaps.push({
@@ -223,7 +224,7 @@ function gridForm(gridEntity, $timeout, _) {
     self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
       var titleMaps = {};
 
-      _.forEach(sourceTitleMaps, function (item) {
+      _.forEach(sourceTitleMaps, function(item) {
 
         if (!titleMaps[item.relationName]) {
           titleMaps[item.relationName] = [];
@@ -232,7 +233,8 @@ function gridForm(gridEntity, $timeout, _) {
         titleMaps[item.relationName].push({
           value: item.enumItem,
           //value: data.property('data').propertyValue('id'),
-          name: resources[item.url].data.property('data').property('attributes').propertyValue(item.attributeName) || item.enumItem
+          name: resources[item.url].data.property('data').property('attributes')
+            .propertyValue(item.attributeName) || item.enumItem
         });
       });
 
@@ -256,13 +258,15 @@ function gridForm(gridEntity, $timeout, _) {
 
     result = _.clone(schemaWithoutRef.properties);
     result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
-    result.data.attributes = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties.attributes.properties));
+    result.data.attributes = getTypeProperty(
+      _.clone(schemaWithoutRef.properties.data.properties.attributes.properties)
+    );
 
     function getTypeProperty(obj) {
       var tmpObj = obj;
       _.forEach(tmpObj, function(value, key) {
         if (value.type) {
-          switch(value.type) {
+          switch (value.type) {
             case 'object':
               tmpObj[key] = {};
               break;
@@ -282,7 +286,6 @@ function gridForm(gridEntity, $timeout, _) {
     }
     return result;
   }
-
 
   /**
    * Generate config for rendering buttons from schema links

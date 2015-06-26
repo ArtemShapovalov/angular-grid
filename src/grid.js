@@ -11,13 +11,13 @@ function gridEntity() {
   return provider;
 
   function gridEntityGet(Helper, $interval, _) {
-    var model,
-        messages = {
-          successDeleted: 'Successfully delete',
-          successCreated: 'Successfully create',
-          successUpdated: 'Successfully update',
-          serverError: 'Oops! server error'
-        };
+    var model;
+    var messages = {
+      successDeleted: 'Successfully delete',
+      successCreated: 'Successfully create',
+      successUpdated: 'Successfully update',
+      serverError: 'Oops! server error'
+    };
 
     /**
      * @class
@@ -106,7 +106,7 @@ function gridEntity() {
     function loadData(url, callback) {
       /*jshint validthis: true */
 
-      Jsonary.getData(url, function (jData, request) {
+      Jsonary.getData(url, function(jData, request) {
         var data = jData;
         var schema = jData.property('data').schemas()[0].data.document.raw.value();
 
@@ -127,7 +127,7 @@ function gridEntity() {
       /*jshint validthis: true */
       var self = this;
 
-      Jsonary.getSchema(url, function (jSchema) {
+      Jsonary.getSchema(url, function(jSchema) {
 
         var schema = jSchema.data.document.raw.value();
         var data = Jsonary.create(self._getEmptyData(jSchema.data.value(), schema));

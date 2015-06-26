@@ -4,13 +4,13 @@ tablePaginationDirective.$inject = [];
 
 function tablePaginationDirective() {
   var directive = {
-      scope: {
-        tableInst: '=table'
-      },
-      require: '^gridTable',
-      templateUrl: 'templates/grid/table-pagination.html',
-      restrict: 'A',
-      controller: tablePaginationCtrl
+    scope: {
+      tableInst: '=table'
+    },
+    require: '^gridTable',
+    templateUrl: 'templates/grid/table-pagination.html',
+    restrict: 'A',
+    controller: tablePaginationCtrl
   };
 
   tablePaginationCtrl.$inject = ['$scope', '$location'];

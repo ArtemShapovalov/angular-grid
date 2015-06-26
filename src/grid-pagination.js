@@ -85,7 +85,5 @@ function gridPagination(Helper, _) {
     return result;
   }
 
-
-
 }
 

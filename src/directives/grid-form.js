@@ -25,7 +25,7 @@ function gridFormDirective() {
 
     var formInst = new gridForm($scope.gridModel);
 
-    formInst.getFormInfo(function (form) {
+    formInst.getFormInfo(function(form) {
       $scope.schema = form.schema;
       $scope.form = form.form;
       $scope.model = form.model;

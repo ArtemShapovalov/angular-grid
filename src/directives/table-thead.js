@@ -4,16 +4,16 @@ gridTheadDirective.$inject = [];
 
 function gridTheadDirective() {
   var directive = {
-      scope: {
-        tableInst: '=table'
-      },
-      require: '^gridTable',
-      templateUrl: 'templates/grid/table-head.html',
-      restrict: 'A',
-      controller: gridTheadCtrl,
-      link: function (scope, element, attr) {
-        //console.log(attr);
-      }
+    scope: {
+      tableInst: '=table'
+    },
+    require: '^gridTable',
+    templateUrl: 'templates/grid/table-head.html',
+    restrict: 'A',
+    controller: gridTheadCtrl,
+    link: function(scope, element, attr) {
+      //console.log(attr);
+    }
   };
 
   gridTheadCtrl.$inject = ['$scope', '$location'];

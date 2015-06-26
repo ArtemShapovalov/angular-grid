@@ -17,6 +17,6 @@ try {
 
 var vmsGrid = angular.module('grid', deps);
 
-angular.module('grid').factory('_', function () {
+angular.module('grid').factory('_', function() {
   return lodash;
 });

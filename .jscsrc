@@ -1,0 +1,15 @@
+{
+  "disallowSpacesInsideArrayBrackets": {
+    "allExcept": [
+      "[",
+      "]",
+      "{",
+      "}"
+    ]
+  },
+  "disallowSpacesInAnonymousFunctionExpression": {
+    "beforeOpeningRoundBrace": true
+  },
+  "maximumLineLength": 120,
+  "validateQuoteMarks": "'"
+}

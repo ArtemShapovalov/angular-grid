@@ -16,7 +16,7 @@ function gridActionCreate($http) {
     $http(params).then(actionCreateSuccess, actionCreateError);
 
     function actionCreateSuccess() {
-      obj.getFormInfo(function (form) {
+      obj.getFormInfo(function(form) {
         scope.schema = form.schema;
         scope.form = form.form;
         scope.model = form.model;

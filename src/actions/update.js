@@ -16,7 +16,7 @@ function gridActionUpdate($http, gridEntity) {
     $http(params).then(actionUpdateSuccess, actionUpdateError);
 
     function actionUpdateSuccess() {
-      obj.getFormInfo(function (form) {
+      obj.getFormInfo(function(form) {
         scope.schema = form.schema;
         scope.form = form.form;
         scope.model = form.model;

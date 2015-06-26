@@ -48,9 +48,9 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
   function getTableInfo(callback) {
     /*jshint validthis: true */
-    var self = this,
-      model = self.getModel(),
-      url;
+    var self = this;
+    var model = self.getModel();
+    var url;
 
     /** add page to url */
     url = self.pagination.getPageUrl(self.getResourceUrl(model.url, model.params));
@@ -105,7 +105,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
     if (rel.value()) {
       var fieldName = rel.schemas()[0].data.value().name;
-      result += '.'+fieldName;
+      result += '.' + fieldName;
     }
 
     return result;
@@ -117,7 +117,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    */
   function getSortingParamValue() {
     if (this.sorting.direction) {
-      return this.getSortingParamByField(this.sorting.field) +'_'+ this.sorting.direction
+      return this.getSortingParamByField(this.sorting.field) + '_' + this.sorting.direction
     }
     return null
   }
@@ -224,7 +224,3 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
   }
 
 }
-
-
-
-

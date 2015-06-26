@@ -19,7 +19,7 @@ function gridTableDirective(gridTable, gridActions) {
     $scope.alerts = [];
     $scope.tableInst = tableInst;
 
-    $timeout(function(){
+    $timeout(function() {
       $scope.$broadcast('onBeforeLoadData');
 
       tableInst.getTableInfo(function(table) {

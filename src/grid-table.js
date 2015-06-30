@@ -163,7 +163,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
       _.forEach(row.relationships, function(relation, key) {
         rowResult[key] = _.map(relation, function(relationItem) {
-          var field = row.own.property('relationships').property(key).schemas()[0].data.propertyValue('name');
+          var field = row.own.property('relationships').property(key).schemas().relationField();
           /** name additional field(relation row) */
           if (field) {
             return relationItem.property('data').property('attributes').propertyValue(field);

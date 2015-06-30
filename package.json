@@ -3,8 +3,12 @@
   "version": "0.3.0",
   "description": "Angular module for render UI by Hyper-schema",
   "main": "dist/grid.js",
+  "scripts": {
+    "test": "rm -fr coverage && ./node_modules/karma/bin/karma start --single-run --browsers PhantomJS karma.conf.js && find coverage/ -name lcov.info -print0 | xargs -0 cat | ./node_modules/coveralls/bin/coveralls.js"
+  },
   "dependencies": {},
   "devDependencies": {
+    "coveralls": "^2.11.2",
     "gulp": "^3.8.11",
     "gulp-angular-templatecache": "^1.6.0",
     "gulp-bower": "0.0.10",

@@ -45,25 +45,25 @@ module.exports = function(config) {
 
     // optionally, configure the reporter
     coverageReporter: {
-      type : 'html',
+      type : 'lcov',
       dir : 'coverage/'
     },
 
     wrapPreprocessor: {
       template:
       '/* istanbul ignore next */' +
-      '(function(root, factory) {'+
-        "if (typeof define === 'function' && define.amd) {"+
-        'define(["angular","jsonary","angular-bootstrap","bootstrap-decorator","lodash"], factory);'+
-        "} else if (typeof exports === 'object') {"+
-        "module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));"+
-        '} else {'+
-        "root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root._);"+
-        "}"+
+      '(function(root, factory) {' +
+        "if (typeof define === 'function' && define.amd) {" +
+        'define(["angular","jsonary","angular-bootstrap","bootstrap-decorator","lodash"], factory);' +
+        "} else if (typeof exports === 'object') {" +
+        "module.exports = factory(require('angular'), require('Jsonary'), require('angularBootstrap'), require('bootstrapDecorator'), require('lodash'));" +
+        '} else {' +
+        "root.vmsGrid = factory(root.angular, root.Jsonary, root.angularBootstrap, root.bootstrapDecorator, root._);" +
+        "}" +
       "})(this, main);" +
-      "function main(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {"+
-      " <%= contents %> "+
-      "return vmsGrid;"+
+      "function main(angular, Jsonary, angularBootstrap, bootstrapDecorator, lodash) {" +
+      " <%= contents %> " +
+      "return vmsGrid;" +
       "}"
     },
 

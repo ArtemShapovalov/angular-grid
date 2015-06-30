@@ -6,247 +6,94 @@ FORMAT: 1A
 JSON Schemas
 
 
-## Extand schema [/vms-schema]
-### Get schema [GET]
-+ Response 200 (application/schema+json)
-
-        {
-            "$schema": "http://private-c9370-hyperschemavms.apiary-mock.com/vms-schema#",
-            "id": "http://private-c9370-hyperschemavms.apiary-mock.com/vms-schema#",
-            "title": "JSON Hyper-Schema",
-            "allOf": [
-                {
-                    "$ref": "http://json-schema.org/draft-04/schema#"
-                }
-            ],
-            "properties": {
-                "additionalItems": {
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "$ref": "#"
-                        }
-                    ]
-                },
-                "additionalProperties": {
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "$ref": "#"
-                        }
-                    ]
-                },
-                "dependencies": {
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "$ref": "#"
-                            },
-                            {
-                                "type": "array"
-                            }
-                        ]
-                    }
-                },
-                "items": {
-                    "anyOf": [
-                        {
-                            "$ref": "#"
-                        },
-                        {
-                            "$ref": "#/definitions/schemaArray"
-                        }
-                    ]
-                },
-                "definitions": {
-                    "additionalProperties": {
-                        "$ref": "#"
-                    }
-                },
-                "patternProperties": {
-                    "additionalProperties": {
-                        "$ref": "#"
-                    }
-                },
-                "properties": {
-                    "additionalProperties": {
-                        "$ref": "#"
-                    }
-                },
-                "allOf": {
-                    "$ref": "#/definitions/schemaArray"
-                },
-                "anyOf": {
-                    "$ref": "#/definitions/schemaArray"
-                },
-                "oneOf": {
-                    "$ref": "#/definitions/schemaArray"
-                },
-                "not": {
-                    "$ref": "#"
-                },
-        
-                "links": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/linkDescription"
-                    }
-                },
-                "fragmentResolution": {
-                    "type": "string"
-                },
-                "media": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "description": "A media type, as described in RFC 2046",
-                            "type": "string"
-                        },
-                        "binaryEncoding": {
-                            "description": "A content encoding scheme, as described in RFC 2045",
-                            "type": "string"
-                        }
-                    }
-                },
-                "pathStart": {
-                    "description": "Instances' URIs must start with this value for this schema to apply to them",
-                    "type": "string",
-                    "format": "uri"
-                }
-            },
-            "definitions": {
-                "schemaArray": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#"
-                    }
-                },
-                "linkDescription": {
-                    "title": "Link Description Object",
-                    "type": "object",
-                    "required": [ "href", "rel" ],
-                    "properties": {
-                        "href": {
-                            "description": "a URI template, as defined by RFC 6570, with the addition of the $, ( and ) characters for pre-processing",
-                            "type": "string"
-                        },
-                        "rel": {
-                            "description": "relation to the target resource of the link",
-                            "type": "string"
-                        },
-                        "title": {
-                            "description": "a title for the link",
-                            "type": "string"
-                        },
-                        "targetSchema": {
-                            "description": "JSON Schema describing the link target",
-                            "$ref": "#"
-                        },
-                        "mediaType": {
-                            "description": "media type (as defined by RFC 2046) describing the link target",
-                            "type": "string"
-                        },
-                        "method": {
-                            "description": "method for requesting the target of the link (e.g. for HTTP this might be \"GET\" or \"DELETE\")",
-                            "type": "string"
-                        },
-                        "encType": {
-                            "description": "The media type in which to submit data along with the request",
-                            "type": "string",
-                            "default": "application/json"
-                        },
-                        "schema": {
-                            "description": "Schema describing the data to submit along with the request",
-                            "$ref": "#"
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Targets Data List [/jsonary/targets]
+## List Target [/jsonary/targets]
 ### Get targets list [GET]
 + Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/list)
 
-        {
-            "data": [{
-                "type": "targets",
-                "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
-                "attributes": {
-                    "title": "My Favorite Target",
-                    "editable": 1,
-                    "scope": 1
-                },
-                "relationships": {
-                    "users": {
-                        "links": {
-                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
-                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
-                        },
-                        "data": [
-                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
-                        ]
-                    },
-                    "user": {
-                        "links": {
-                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
-                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
-                        },
-                        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
-                    }
-                }
-            },
+    + Headers 
+
+    + Body
+
             {
-                "type": "targets",
-                "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
-                "attributes": {
-                    "title": "My Favorite Target",
-                    "editable": 1,
-                    "scope": 1
+                "meta": {
+                    "total": 2
                 },
-                "relationships": {
-                    "users": {
-                        "links": {
-                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
-                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
-                        },
-                        "data": [
-                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
-                        ]
+                "data": [{
+                    "type": "targets",
+                    "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
+                    "attributes": {
+                        "title": "My Favorite Target",
+                        "editable": 1,
+                        "scope": 1
                     },
-                    "user": {
-                        "links": {
-                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
-                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                    "relationships": {
+                        "users": {
+                            "links": {
+                              "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                              "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                            },
+                            "data": [
+                                { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+                                { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                            ]
                         },
-                        "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                        "us": {
+                            "links": {
+                              "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                              "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                            },
+                            "data": [
+                                { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
+                            ]
+                        },
+                        "user": {
+                            "links": {
+                              "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                              "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                            },
+                            "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                        }
                     }
-                }
-            }]
-        }
+                },
+                {
+                    "type": "targets",
+                    "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
+                    "attributes": {
+                        "title": "My Favorite Target",
+                        "editable": 1,
+                        "scope": 1
+                    },
+                    "relationships": {
+                        "users": {
+                            "links": {
+                              "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                              "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                            },
+                            "data": [
+                                { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
+                                { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                            ]
+                        },
+                        "us": {
+                            "links": {
+                              "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                              "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                            },
+                            "data": [
+                                { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
+                            ]
+                        },
+                        "user": {
+                            "links": {
+                              "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                              "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                            },
+                            "data": { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                        }
+                    }
+                }]
+            }
+
         
 ### Create single target [POST]
 + Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets/schema#/definitions/create)
@@ -275,8 +122,7 @@ JSON Schemas
                           "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
                         },
                         "data": [
-                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                            { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
                         ]
                     },
                     "user": {
@@ -310,8 +156,16 @@ JSON Schemas
                           "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
                         },
                         "data": [
-                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
+                        ]
+                    },
+                    "us": {
+                        "links": {
+                          "self": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users",
+                          "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
+                        },
+                        "data": [
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
                         ]
                     },
                     "user": {
@@ -372,15 +226,41 @@ JSON Schemas
                 "users": {
                     "title": "Users",
                     "type": "array",
+                    "minItems": 2,
+                    "uniqueItems": true,
+                    "additionalItems": true,
                     "items": {
                         "type": "string",
-                        "enum": ["de105d54-75b4-431b-adb2-eb6b9e546013","de205d54-75b4-431b-adb2-eb6b9e546013","de305d54-75b4-431b-adb2-eb6b9e546013"]
+                        "enum": [
+                            "de105d54-75b4-431b-adb2-eb6b9e546013",
+                            "de205d54-75b4-431b-adb2-eb6b9e546014",
+                            "de305d54-75b4-431b-adb2-eb6b9e546013"
+                        ]
+                    }
+                },
+                "us": {
+                    "title": "Us",
+                    "type": "array",
+                    "minItems": 2,
+                    "uniqueItems": true,
+                    "additionalItems": true,
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "de105d54-75b4-431b-adb2-eb6b9e546013",
+                            "de205d54-75b4-431b-adb2-eb6b9e546014",
+                            "de305d54-75b4-431b-adb2-eb6b9e546013"
+                        ]
                     }
                 },
                 "user": {
                     "title": "User",
                     "type": "string",
-                    "enum": ["de105d54-75b4-431b-adb2-eb6b9e546013","de205d54-75b4-431b-adb2-eb6b9e546013"]
+                    "enum": [
+                        "de105d54-75b4-431b-adb2-eb6b9e546013",
+                        "de205d54-75b4-431b-adb2-eb6b9e546014",
+                        "de305d54-75b4-431b-adb2-eb6b9e546013"
+                    ]
                 },
                 "attributes": {
                     "type": "object",
@@ -397,11 +277,14 @@ JSON Schemas
                         "users": {
                             "$ref": "#/definitions/users"
                         },
+                        "us": {
+                            "$ref": "#/definitions/us"
+                        },
                         "user": {
                             "$ref": "#/definitions/user"
                         }
                     },
-                    "required": ["title", "editable", "scope"],
+                    "required": ["title", "editable", "scope", "users", "user"],
                     "additionalProperties": false
                 },
                 "relationships": {
@@ -409,16 +292,26 @@ JSON Schemas
                     "additionalProperties": true,
                     "properties": {
                         "users": {
-                            "$ref": "#/definitions/relationshipUsers"
+                            "title": "User",
+                            "name": "email",
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/relationshipsItem"
+                                }
+                            ]
+                        },
+                        "us": {
+                            "$ref": "#/definitions/relationshipsItem"
                         },
                         "user": {
-                            "$ref": "#/definitions/relationshipUser"
+                            "$ref": "#/definitions/relationshipsItem"
                         }
                     }
                 },
                 "relationshipUser": {
                     "type": "object",
                     "title": "User",
+                    "name": "email", 
                     "additionalProperties": true,
                     "properties": {
                         "links": {
@@ -432,6 +325,20 @@ JSON Schemas
                 "relationshipUsers": {
                     "type": "object",
                     "title": "Users",
+                    "name": "fullname", 
+                    "additionalProperties": true,
+                    "properties": {
+                        "links": {
+                            "$ref": "#/definitions/relationshipLinks"
+                        },
+                        "data": {
+                           "$ref": "#/definitions/relationshipDataList"
+                        }
+                    }
+                },
+                "relationshipUs": {
+                    "type": "object",
+                    "title": "Us",
                     "name": "fullname", 
                     "additionalProperties": true,
                     "properties": {
@@ -484,6 +391,40 @@ JSON Schemas
                         }
                     }
                 },
+                "relationshipData": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/type"
+                        }
+                    }
+                },
+                "relationshipsItem": {
+                    "type": "object",
+                    "properties": {
+                        "links": {
+                            "$ref": "#/definitions/relationshipLinks"
+                        },
+                        "data": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/relationshipData"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/relationshipData"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "targetRead": {
                     "type": "object",
                     "properties": {
@@ -510,6 +451,15 @@ JSON Schemas
                                     "title": "Scope",
                                     "type": "string",
                                     "readOnly": true
+                                },
+                                "users": {
+                                    "$ref": "#/definitions/users"
+                                },
+                                "us": {
+                                    "$ref": "#/definitions/us"
+                                },
+                                "user": {
+                                    "$ref": "#/definitions/user"
                                 }
                             },
                             "additionalProperties": false
@@ -542,7 +492,7 @@ JSON Schemas
                         {
                             "title": "Update",
                             "description": "Update Target",
-                            "href": "/jsonary/targets/{id}",
+                            "href": "/jsonary/{type}/{id}",
                             "rel": "update",
                             "method": "PUT",
                             "encType": "application/vnd.api+json"
@@ -550,7 +500,7 @@ JSON Schemas
                         {
                             "title": "Delete",
                             "description": "Delete Target",
-                            "href": "/jsonary/targets/{id}",
+                            "href": "/jsonary/{type}/{id}",
                             "rel": "delete",
                             "method": "DELETE",
                             "encType": "application/vnd.api+json",
@@ -614,7 +564,7 @@ JSON Schemas
                         {
                             "title": "Read",
                             "description": "Get single Target",
-                            "href": "/grid/targets/read/{id}",
+                            "href": "/grid/{type}/read/{id}",
                             "rel": "read",
                             "method": "GET",
                             "encType": "application/vnd.api+json"
@@ -622,7 +572,7 @@ JSON Schemas
                         {
                             "title": "Edit",
                             "description": "Go to update Target",
-                            "href": "/grid/targets/update/{id}",
+                            "href": "/grid/{type}/update/{id}",
                             "rel": "goToUpdate",
                             "method": "GET",
                             "encType": "application/vnd.api+json"
@@ -630,7 +580,7 @@ JSON Schemas
                         {
                             "title": "Delete",
                             "description": "Delete Target",
-                            "href": "/jsonary/targets/{id}",
+                            "href": "/jsonary/{type}/{id}",
                             "rel": "delete",
                             "method": "DELETE",
                             "encType": "application/vnd.api+json"
@@ -700,12 +650,20 @@ JSON Schemas
                 "list": {
                     "type": "object",
                     "properties": {
-                      "data": {
-                        "type": "array",
-                        "items": {
-                           "$ref": "#/definitions/targetList"
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "total": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "data": {
+                            "type": "array",
+                            "items": {
+                               "$ref": "#/definitions/targetList"
+                            }
                         }
-                      }
                     },
                     "required": ["data"],
                     "links": [
@@ -1052,9 +1010,9 @@ JSON Schemas
                             "encType": "application/vnd.api+json"
                         },
                         {
-                            "title": "Go to Agencies",
-                            "description": "Go to list Agencies",
-                            "href": "/grid/agencies",
+                            "title": "Go to Targets",
+                            "description": "Go to list Targets",
+                            "href": "/grid/targets",
                             "rel": "goToList",
                             "method": "GET",
                             "encType": "application/vnd.api+json"

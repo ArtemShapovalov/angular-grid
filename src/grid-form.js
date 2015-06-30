@@ -181,7 +181,7 @@ function gridForm(gridEntity, $timeout, _) {
 
       var resourceLink = item.links.self;
       /** get name from schema */
-      var attributeName = dataRelations.property(key).schemas()[0].data.propertyValue('name');
+      var attributeName = dataRelations.property(key).schemas().relationField();
       var schemaAttributeWithoutRef = self._replaceFromFull(
         dataAttributes.schemas()[0].data.value(),
         documentSchema

@@ -24,6 +24,23 @@ function gridEntity() {
      * @constructor
      */
     function Entity() {
+      Jsonary.extendSchema({
+        relationField: function() {
+          return this.data.propertyValue('relationField');
+        }
+      });
+      Jsonary.extendSchemaList({
+        relationField: function() {
+          var relationField = null;
+          this.each(function(index, schema) {
+            var value = schema.relationField();
+            if (value != null && (relationField == null || value < relationField)) {
+              relationField = value;
+            }
+          });
+          return relationField;
+        }
+      });
 
     }
 

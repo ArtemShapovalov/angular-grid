@@ -13,7 +13,7 @@ describe('Form testing', function() {
       data: {
         read: {
           success: {
-            contentType: 'application/vnd.api+json; profile='+domain+'/users/schema#/definitions/read',
+            contentType: 'application/vnd.api+json; profile=' + domain + '/users/schema#/definitions/read',
             status: 200,
             responseText: JSON.stringify(readJSON('test/mock/userDataRead.json'))
           }
@@ -31,14 +31,14 @@ describe('Form testing', function() {
       data: {
         read: {
           success: {
-            contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/read',
+            contentType: 'application/vnd.api+json; profile=' + domain + '/targets/schema#/definitions/read',
             status: 200,
             responseText: JSON.stringify(readJSON('test/mock/targetDataRead.json'))
           }
         },
         update: {
           success: {
-            contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/update',
+            contentType: 'application/vnd.api+json; profile=' + domain + '/targets/schema#/definitions/update',
             status: 200,
             responseText: JSON.stringify(readJSON('test/mock/targetDataUpdate.json'))
           }
@@ -54,11 +54,11 @@ describe('Form testing', function() {
     }
   };
 
-  beforeEach(function () {
+  beforeEach(function() {
     module('grid');
 
     module(function($provide) {
-      $provide.factory('userModel', function(){
+      $provide.factory('userModel', function() {
         return {
           'url': domain,
           'params': {
@@ -71,7 +71,7 @@ describe('Form testing', function() {
     });
   });
 
-  beforeEach(function () {
+  beforeEach(function() {
     jasmine.Ajax.install();
 
     jasmine.Ajax.stubRequest(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
@@ -90,7 +90,7 @@ describe('Form testing', function() {
 
   });
 
-  beforeEach(inject(function($injector){
+  beforeEach(inject(function($injector) {
     $timeout = $injector.get('$timeout');
     $interval = $injector.get('$interval');
     gridForm = $injector.get('gridForm');
@@ -107,21 +107,21 @@ describe('Form testing', function() {
     var resource = {};
     var titleMap = {};
     var titleMapUsers = [
-      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" },
-      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "John3 Doe" },
-      { value: "de305d54-75b4-431b-adb2-eb6b9e546013", name: "John3 Doe" }
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'John3 Doe'},
+      {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'}
     ];
     var titleMapUser = [
-      { value: "de105d54-75b4-431b-adb2-eb6b9e546013", name: "dimon3@gmail.com" },
-      { value: "de205d54-75b4-431b-adb2-eb6b9e546014", name: "dimon3@gmail.com" },
-      { value: "de305d54-75b4-431b-adb2-eb6b9e546013", name: "dimon3@gmail.com" }
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'dimon3@gmail.com'},
+      {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'}
     ];
     var formConfigUsers = {
-      key: "users",
+      key: 'users',
       titleMap: titleMapUsers
     };
     var formConfigUser = {
-      key: "user",
+      key: 'user',
       titleMap: titleMapUser
     };
 
@@ -131,7 +131,7 @@ describe('Form testing', function() {
     });
 
     form._createTitleMap(resource.data.property('data'), function(responce) {
-        titleMap = responce;
+      titleMap = responce;
     });
 
     $interval.flush(100);
@@ -151,7 +151,7 @@ describe('Form testing', function() {
     $timeout.flush();
   });
 
-  it ('check get form info', function () {
+  it ('check get form info', function() {
 
     userModel.params.id = 'de205d54-75b4-431b-adb2-eb6b9e546013';
     userModel.params.type = 'update';
@@ -171,5 +171,34 @@ describe('Form testing', function() {
     expect(formData.links).toBeDefined();
   });
 
+  it('check create', function() {
+    var resource = {};
+    var titleMap;
+    var titleMapUsers = [
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'John3 Doe'},
+      {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'}
+    ];
+    var titleMapUser = [
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'dimon3@gmail.com'},
+      {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'}
+    ];
 
+    form.loadSchema(domain + '/targets/schema#/definitions/create', function(data, schema) {
+      resource.data = data;
+      resource.schema = schema;
+    });
+
+    form._createTitleMap(resource.data.property('data'), function(responce) {
+      titleMap = responce;
+    });
+
+    $interval.flush(100);
+
+    //expect(titleMap.users).toEqual(titleMapUsers);
+    //expect(titleMap.user).toEqual(titleMapUser);
+    //expect(resource.schema).toBeDefined();
+
+  })
 });

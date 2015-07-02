@@ -6,11 +6,11 @@ describe('GridEntity testing', function() {
   var Entity;
   var entity;
 
-  beforeEach(function () {
+  beforeEach(function() {
     module('grid');
 
     module(function($provide) {
-      $provide.factory('userModel', function(){
+      $provide.factory('userModel', function() {
         return {
           'url': domain,
           'params': {
@@ -24,12 +24,31 @@ describe('GridEntity testing', function() {
 
   });
 
-  beforeEach(inject(function($injector){
+  beforeEach(inject(function($injector) {
     Entity = $injector.get('grid-entity');
     userModel = $injector.get('userModel');
     entity = new Entity();
   }));
 
+  describe('Jsonary extend data', function() {
+
+    var data;
+
+    beforeEach(inject(function($injector) {
+      data = Jsonary.create({
+        relationships: true,
+        attributes: false
+      })
+    }));
+
+    it('relationships', function() {
+      expect(data.relationships()).toEqual(true)
+    });
+
+    it('attributes', function() {
+      expect(data.attributes()).toEqual(false)
+    });
+  });
 
   it('test set entity', function() {
     var paramsUpdate = {
@@ -57,7 +76,59 @@ describe('GridEntity testing', function() {
 
   it('load data check callback params', function() {
     expect(entity.loadData('http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets')).toBe(undefined);
-  })
+  });
 
+  it('test allOf _replaceFromFull', function() {
+    var schema = {
+      'users': {
+        'allOf': [
+          {
+            '$ref': '#/definitions/users'
+          },
+          {
+            'readOnly': true
+          }
+        ]
+      }
+    };
+    var fullSchema = readJSON('test/mock/schemas/targets.json');
+
+    var expectResult = {
+      'users': {
+        'allOf': [
+          {
+            'title': 'Users',
+            'type': 'array',
+            'minItems': 2,
+            'uniqueItems': true,
+            'additionalItems': true,
+            'items': {
+              'type': 'string',
+              'enum': [
+                'de105d54-75b4-431b-adb2-eb6b9e546013',
+                'de205d54-75b4-431b-adb2-eb6b9e546014',
+                'de305d54-75b4-431b-adb2-eb6b9e546013'
+              ]
+            }
+          },
+          {
+            'readOnly': true
+          }
+        ]
+
+      }
+    };
+
+    var result = entity._replaceFromFull(schema, fullSchema);
+
+    expect(result.users.allOf[0].title).toEqual(expectResult.users.allOf[0].title);
+
+  });
+
+  it('', function() {
+    var schemaWithoutRef = readJSON('test/mock/targetSchema.json').definitions.create;
+    var fullSchema = readJSON('test/mock/targetSchema.json');
+    entity._getEmptyDataRelations(schemaWithoutRef, fullSchema)
+  })
 
 });

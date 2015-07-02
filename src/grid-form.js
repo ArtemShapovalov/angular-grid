@@ -16,12 +16,12 @@ function gridForm(gridEntity, $timeout, _) {
   angular.extend(Form.prototype, {
     getFormInfo: getFormInfo,
     getConfig: getConfig,
+    _getEnumValues: _getEnumValues,
     _getTitleMapsForRelations: _getTitleMapsForRelations,
     _createTitleMap: _createTitleMap,
     _getFormConfig: _getFormConfig,
     _getFieldsForm: _getFieldsForm,
     _fieldsToFormFormat: _fieldsToFormFormat,
-    _getEmptyData: _getEmptyData,
     _getFormButtonBySchema: _getFormButtonBySchema
   });
 
@@ -165,6 +165,31 @@ function gridForm(gridEntity, $timeout, _) {
     }
   }
 
+  /**
+   * Get enum values for schema with allOf
+   *
+   * @param schema
+   * @returns {{}}
+   * @private
+   */
+  function _getEnumValues(schema) {
+    var enumValues = {};
+    var schemaList = schema.andSchemas().length ? schema.andSchemas() : schema.asList();
+
+    if (schemaList.enumValues()) {
+      enumValues = schemaList.enumValues()
+    } else {
+
+      schemaList.each(function(index, value) {
+        if (value.itemSchemas().enumValues()) {
+          enumValues = value.itemSchemas().enumValues();
+        }
+      })
+    }
+
+    return enumValues;
+  }
+
   function _getTitleMapsForRelations(data) {
     var self = this;
     var sourceTitleMaps = [];
@@ -172,12 +197,9 @@ function gridForm(gridEntity, $timeout, _) {
     var dataRelations = data.property('relationships');
     var dataAttributes = data.property('attributes');
 
-    var relations = dataRelations.value();
-    var attributes = dataAttributes.value();
-
     var documentSchema = data.schemas()[0].data.document.raw.value();
 
-    _.forEach(relations, function(item, key) {
+    _.forEach(data.relationships(), function(item, key) {
 
       var resourceLink = item.links.self;
       /** get name from schema */
@@ -187,13 +209,8 @@ function gridForm(gridEntity, $timeout, _) {
         documentSchema
       )['properties'][key];
 
-      var sourceEnum = {};
-
-      if (schemaAttributeWithoutRef.items && schemaAttributeWithoutRef.items.enum) {
-        sourceEnum = schemaAttributeWithoutRef.items.enum
-      } else if (schemaAttributeWithoutRef.enum) {
-        sourceEnum = schemaAttributeWithoutRef.enum
-      }
+      var schema = Jsonary.createSchema(schemaAttributeWithoutRef);
+      var sourceEnum = self._getEnumValues(schema);
 
       _.forEach(sourceEnum, function(enumItem) {
         var url = self.getResourceUrl(resourceLink, {type: self.default.actionGetResource, id: enumItem});
@@ -241,50 +258,6 @@ function gridForm(gridEntity, $timeout, _) {
       callback(titleMaps)
     });
 
-  }
-
-  /**
-   * Generate empty model for create form
-   *
-   * @param schema
-   * @param fullSchema
-   * @returns {*}
-   * @private
-   */
-  function _getEmptyData(schema, fullSchema) {
-    var self = this;
-    var result;
-    var schemaWithoutRef = self.mergeRelSchema(schema, fullSchema);
-
-    result = _.clone(schemaWithoutRef.properties);
-    result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
-    result.data.attributes = getTypeProperty(
-      _.clone(schemaWithoutRef.properties.data.properties.attributes.properties)
-    );
-
-    function getTypeProperty(obj) {
-      var tmpObj = obj;
-      _.forEach(tmpObj, function(value, key) {
-        if (value.type) {
-          switch (value.type) {
-            case 'object':
-              tmpObj[key] = {};
-              break;
-            case 'string':
-              tmpObj[key] = '';
-              break;
-            case 'array':
-              tmpObj[key] = [];
-              break;
-            case 'integer':
-              tmpObj[key] = '';
-              break;
-          }
-        }
-      });
-      return tmpObj;
-    }
-    return result;
   }
 
   /**

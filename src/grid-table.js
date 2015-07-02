@@ -104,8 +104,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     var rel = this.data.property('data').item(0).property('relationships').property(field);
 
     if (rel.value()) {
-      var fieldName = rel.schemas()[0].data.value().name;
-      result += '.' + fieldName;
+      result += '.' + rel.schemas().relationField();
     }
 
     return result;

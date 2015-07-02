@@ -2,9 +2,50 @@ FORMAT: 1A
 
 # HyperSchema VMS
 
-# Group JSONARY Targets
+# Group JSONARY Extend Schema
 JSON Schemas
 
+## Extend Hyper Schema [/jsonary/extend-schema]
+### Get Extend Hyper Schema [GET]
++ Response 200 (application/schema+json)
+
+        {
+          "$schema": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/extend-schema#",
+          "id": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/extend-schema#",
+          "title": "Extend JSON Hyper-Schema",
+          "allOf": [
+            {
+              "$ref": "http://json-schema.org/draft-04/hyper-schema#"
+            }
+          ],
+          "properties": {
+            "extends": {
+                "type": "object",
+                "properties": {
+                    "relationField": {
+                        "type": "string"
+                    },
+                    "table": {
+                        "$ref": "#/definitions/tableDescription"
+                    }
+                },
+                "required": [ "relationField"],
+            }
+          },
+          "definitions": {
+            "tableDescription": {
+              "title": "Description render table",
+              "type": "object",
+              "properties": {
+
+              }
+            }
+          }
+        }
+
+
+# Group JSONARY Targets
+JSON Schemas
 
 ## List Target [/jsonary/targets]
 ### Get targets list [GET]
@@ -199,7 +240,7 @@ JSON Schemas
 + Response 200 (application/schema+json)
 
         {
-            "$schema": "http://json-schema.org/draft-04/hyper-schema#",
+            "$schema": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/extend-schema#",
             "title": "User",
             "type": "object",
             "definitions": {
@@ -293,7 +334,9 @@ JSON Schemas
                     "properties": {
                         "users": {
                             "title": "User",
-                            "name": "email",
+                            "extends": {
+                                "relationField": "fullname"
+                            },
                             "allOf": [
                                 {
                                     "$ref": "#/definitions/relationshipsItem"
@@ -301,10 +344,26 @@ JSON Schemas
                             ]
                         },
                         "us": {
-                            "$ref": "#/definitions/relationshipsItem"
+                            "title": "User",
+                            "extends": {
+                                "relationField": "fullname"
+                            },
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/relationshipsItem"
+                                }
+                            ]
                         },
                         "user": {
-                            "$ref": "#/definitions/relationshipsItem"
+                            "title": "User",
+                            "extends": {
+                                "relationField": "email"
+                            },
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/relationshipsItem"
+                                }
+                            ]
                         }
                     }
                 },

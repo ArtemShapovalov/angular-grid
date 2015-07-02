@@ -24,6 +24,16 @@ function gridEntity() {
      * @constructor
      */
     function Entity() {
+
+      Jsonary.extendData({
+        relationships: function() {
+          return this.propertyValue('relationships');
+        },
+        attributes: function() {
+          return this.propertyValue('attributes');
+        }
+      });
+
       Jsonary.extendSchema({
         relationField: function() {
           return this.data.propertyValue('relationField');
@@ -66,6 +76,9 @@ function gridEntity() {
       loadSchema: loadSchema,
       getResourceUrl: getResourceUrl,
       mergeRelSchema: mergeRelSchema,
+      getTypeProperty: getTypeProperty,
+      _getEmptyData: _getEmptyData,
+      _getEmptyDataRelations: _getEmptyDataRelations,
       _getRelationResource: _getRelationResource,
       _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
@@ -158,6 +171,78 @@ function gridEntity() {
       });
     }
 
+    function getTypeProperty(obj) {
+      var tmpObj = obj;
+      _.forEach(tmpObj, function(value, key) {
+        if (value.type) {
+          switch (value.type) {
+            case 'object':
+              tmpObj[key] = {};
+              break;
+            case 'string':
+              tmpObj[key] = '';
+              break;
+            case 'array':
+              tmpObj[key] = [];
+              break;
+            case 'integer':
+              tmpObj[key] = '';
+              break;
+          }
+        }
+      });
+      return tmpObj;
+    }
+
+    /**
+     * Generate empty model for create form
+     *
+     * @param schema
+     * @param fullSchema
+     * @returns {*}
+     * @private
+     */
+    function _getEmptyData(schema, fullSchema) {
+      var self = this;
+      var result;
+      var schemaWithoutRef = self.mergeRelSchema(schema, fullSchema);
+
+      result = _.clone(schemaWithoutRef.properties);
+      result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
+      result.data.attributes = self.getTypeProperty(
+        _.clone(schemaWithoutRef.properties.data.properties.attributes.properties)
+      );
+      //result.data.relationships = self._getEmptyDataRelations(schemaWithoutRef, fullSchema);
+
+      return result;
+    }
+
+    function _getEmptyDataRelations(schema, fullSchema) {
+      var self = this;
+      var relation = {};
+
+      var patchSchema = self.mergeRelSchema(schema, fullSchema);
+
+      var dataSchema = Jsonary.createSchema(patchSchema).propertySchemas('data');
+      var attributesSchema = dataSchema.propertySchemas('attributes');
+      var relationsSchema = dataSchema.propertySchemas('relationships');
+
+      _.forEach(relationsSchema.definedProperties(), function(relationName) {
+        var relationSchema = relationsSchema.propertySchemas(relationName).getFull().propertySchemas('data');
+        var attributeSchema = attributesSchema.propertySchemas(relationName).getFull();
+
+        relation[relationName] = {};
+        relation[relationName].links = {};
+        if (attributeSchema.basicTypes().toString() == 'array') {
+          relation[relationName].data = [];
+        } else {
+          relation[relationName].data = {};
+        }
+      });
+
+      return relation;
+    }
+
     /**
      * Load data by url and check type (create or other)
      * if create - fetch schema with create empty data,
@@ -187,6 +272,7 @@ function gridEntity() {
     /**
      * Multiple load resource by array links
      *
+     * @name Entity#fetchCollection
      * @param {array} linkResources
      * @param callback
      */
@@ -248,6 +334,17 @@ function gridEntity() {
           if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && haystack[key].$ref) {
             haystack[key] = Helper.strToObject(schemaFull, haystack[key].$ref.substring(2));
             _replaceFromFull(haystack[key], schemaFull);
+          } else if (
+            typeof haystack[key] === 'object' &&
+            Array.isArray(haystack[key]) &&
+            ['oneOf', 'allOf'].indexOf(key) >= 0
+          ) {
+            _.forEach(haystack[key], function(value, index) {
+              if (value.$ref) {
+                haystack[key][index] = Helper.strToObject(schemaFull, value.$ref.substring(2));
+                _replaceFromFull(haystack[key], schemaFull);
+              }
+            })
           }
           if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && (haystack[key] !== 'links')) {
             _replaceFromFull(haystack[key], schemaFull);
@@ -295,6 +392,7 @@ function gridEntity() {
      *      }
      *    }
      *}]
+     * @name Entity#_getRelationLink
      * @param relItem
      * @returns {Array}
      */
@@ -312,9 +410,13 @@ function gridEntity() {
         resource = linkArray;
 
       } else {
-        resource = [{
-          url: self.getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: relItem.data.id})
-        }];
+        if (!_.isEmpty(relItem.links) && !_.isEmpty(relItem.data)) {
+          resource = [{
+            url: self.getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: relItem.data.id})
+          }];
+        } else {
+          resource = [];
+        }
       }
       return resource;
     }
@@ -370,10 +472,10 @@ function gridEntity() {
         var result = [];
 
         _.forEach(rowsRelationships, function(row, kRow) {
+          result[kRow] = result[kRow] || {};
           _.forEach(row, function(rel, kRel) {
+            result[kRow][kRel] = result[kRow][kRel] || [];
             _.forEach(rel, function(relItem, kRelItem) {
-              result[kRow] = result[kRow] || {};
-              result[kRow][kRel] = result[kRow][kRel] || [];
               result[kRow][kRel][kRelItem] = resources[relItem.url];
             });
           });

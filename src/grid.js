@@ -42,7 +42,7 @@ function gridEntity() {
       Jsonary.extendSchemaList({
         relationField: function() {
           var relationField = null;
-          this.each(function(index, schema) {
+          this.getFull().each(function(index, schema) {
             var value = schema.relationField();
             if (value != null && (relationField == null || value < relationField)) {
               relationField = value;
@@ -160,7 +160,7 @@ function gridEntity() {
       Jsonary.getSchema(url, function(jSchema) {
 
         var schema = jSchema.data.document.raw.value();
-        var data = Jsonary.create(self._getEmptyData(jSchema.data.value(), schema));
+        var data = Jsonary.create(self._getEmptyData(jSchema));
         data.document.url = self.getModel().url;
         data.addSchema(jSchema);
 
@@ -202,17 +202,21 @@ function gridEntity() {
      * @returns {*}
      * @private
      */
-    function _getEmptyData(schema, fullSchema) {
+    function _getEmptyData(schema) {
       var self = this;
       var result;
-      var schemaWithoutRef = self.mergeRelSchema(schema, fullSchema);
 
-      result = _.clone(schemaWithoutRef.properties);
-      result.data = getTypeProperty(_.clone(schemaWithoutRef.properties.data.properties));
-      result.data.attributes = self.getTypeProperty(
-        _.clone(schemaWithoutRef.properties.data.properties.attributes.properties)
-      );
-      //result.data.relationships = self._getEmptyDataRelations(schemaWithoutRef, fullSchema);
+      result = schema.createValue();
+      result.data.attributes = {};
+
+      _.forEach(schema.propertySchemas('data').getFull().propertySchemas('attributes').definedProperties(), function(propertyName) {
+        result.data.attributes[propertyName] = schema.propertySchemas('data').getFull().propertySchemas('attributes').propertySchemas(propertyName).createValue();
+      });
+
+      /*result.data.attributes = self.getTypeProperty(
+        schema.propertySchemas('data').getFull().propertySchemas('attributes')[0].data.value().properties
+      );*/
+      //result.data.relationships = self._getEmptyDataRelations(schemaWithoutRef, fullSchema);git
 
       return result;
     }

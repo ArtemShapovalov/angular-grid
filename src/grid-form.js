@@ -118,12 +118,13 @@ function gridForm(gridEntity, $timeout, _) {
 
     self._createTitleMap(data.property('data'), function(titleMaps) {
 
-      var attributes = self.mergeRelSchema(
+      /*var attributes = self.mergeRelSchema(
         data.property('data').schemas()[0].data.value(),
         data.schemas()[0].data.document.raw.value()
-      ).properties.attributes.properties;
+      ).properties.attributes.properties;*/
+      var attributes = data.schemas().propertySchemas('data').getFull().propertySchemas('attributes').definedProperties();
 
-      _.forEach(attributes, function(value, key) {
+      _.forEach(attributes, function(key) {
         var obj = {key: key};
 
         if (titleMaps[key]) {
@@ -168,42 +169,70 @@ function gridForm(gridEntity, $timeout, _) {
   /**
    * Get enum values for schema with allOf
    *
-   * @param schema
+   * @name Form#_getEnumValues
+   * @param data
    * @returns {{}}
    * @private
    */
-  function _getEnumValues(schema) {
-    var enumValues = {};
-    var schemaList = schema.andSchemas().length ? schema.andSchemas() : schema.asList();
+  function _getEnumValues(data) {
+    var enumValues = [];
 
-    if (schemaList.enumValues()) {
-      enumValues = schemaList.enumValues()
-    } else {
-
-      schemaList.each(function(index, value) {
-        if (value.itemSchemas().enumValues()) {
-          enumValues = value.itemSchemas().enumValues();
-        }
-      })
-    }
+    data.property('data').items(function(index, value) {
+      enumValues.push(value.propertyValue('id'));
+    });
 
     return enumValues;
   }
 
-  function _getTitleMapsForRelations(data) {
+  function _getTitleMapsForRelations(data, callback) {
     var self = this;
     var sourceTitleMaps = [];
+    var resources = [];
 
-    var dataRelations = data.property('relationships');
-    var dataAttributes = data.property('attributes');
+    data.property('relationships').properties(function(propertyName, propertyData) {
 
+      if (!_.isEmpty(propertyData.links('relation'))) {
+        resources.push({
+          url: propertyData.links('relation')[0].href,
+          data: propertyData
+        });
+      }
+
+    });
+
+    self.fetchCollection(_.map(resources, 'url'), function(loadResources) {
+
+      _.forEach(resources, function(enums) {
+
+        var propertyData = enums.data;
+        var enumsData = loadResources[enums.url].data;
+
+        var sourceEnum = self._getEnumValues(enumsData);
+
+        _.forEach(sourceEnum, function(enumItem) {
+          var url = self.getResourceUrl(propertyData.links('relation')[0].href, {type: self.default.actionGetResource, id: enumItem});
+
+          sourceTitleMaps.push({
+            url: url,
+            enumItem: enumItem,
+            relationName: propertyData.parentKey(),
+            attributeName: propertyData.schemas().relationField()
+          })
+        });
+      });
+
+      callback(sourceTitleMaps);
+
+    });
+
+    /*var dataAttributes = data.property('attributes');
     var documentSchema = data.schemas()[0].data.document.raw.value();
 
     _.forEach(data.relationships(), function(item, key) {
 
       var resourceLink = item.links.self;
-      /** get name from schema */
-      var attributeName = dataRelations.property(key).schemas().relationField();
+      //var attributeName = dataAttributes.property(key).schemas().relationField();
+      var attributeName = dataAttributes.schemas()[0].propertySchemas(key).relationField();
       var schemaAttributeWithoutRef = self._replaceFromFull(
         dataAttributes.schemas()[0].data.value(),
         documentSchema
@@ -224,7 +253,7 @@ function gridForm(gridEntity, $timeout, _) {
       });
 
     });
-    return sourceTitleMaps;
+    return sourceTitleMaps;*/
   }
 
   /**
@@ -236,28 +265,29 @@ function gridForm(gridEntity, $timeout, _) {
   function _createTitleMap(data, callback) {
     var self = this;
 
-    var sourceTitleMaps = self._getTitleMapsForRelations(data);
+    self._getTitleMapsForRelations(data, function(sourceTitleMaps) {
 
-    self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
-      var titleMaps = {};
+      self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
+        var titleMaps = {};
 
-      _.forEach(sourceTitleMaps, function(item) {
+        _.forEach(sourceTitleMaps, function(item) {
 
-        if (!titleMaps[item.relationName]) {
-          titleMaps[item.relationName] = [];
-        }
+          if (!titleMaps[item.relationName]) {
+            titleMaps[item.relationName] = [];
+          }
 
-        titleMaps[item.relationName].push({
-          value: item.enumItem,
-          //value: data.property('data').propertyValue('id'),
-          name: resources[item.url].data.property('data').property('attributes')
-            .propertyValue(item.attributeName) || item.enumItem
+          titleMaps[item.relationName].push({
+            value: item.enumItem,
+            //value: data.property('data').propertyValue('id'),
+            name: resources[item.url].data.property('data').property('attributes')
+              .propertyValue(item.attributeName) || item.enumItem
+          });
         });
+
+        callback(titleMaps)
       });
 
-      callback(titleMaps)
     });
-
   }
 
   /**

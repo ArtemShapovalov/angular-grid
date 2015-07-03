@@ -70,7 +70,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
         self.rows = self.rowsToTableFormat(rows);
         self.links = data.links();
-        self.columns = self.getColumnsBySchema(schemaWithoutRef);
+        self.columns = self.getColumnsBySchema(data);
 
         self.sorting.setSortFields(_.map(self.columns, 'attributeName'));
 
@@ -101,10 +101,11 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    */
   function getSortingParamByField(field) {
     var result = field;
-    var rel = this.data.property('data').item(0).property('relationships').property(field);
+    //var rel = this.data.property('data').item(0).property('attributes').property(field);
+    var rel = this.data.property('data').item(0).property('relationships').property(field).schemas().relationField();
 
-    if (rel.value()) {
-      result += '.' + rel.schemas().relationField();
+    if (rel) {
+      result += '.' + rel;
     }
 
     return result;
@@ -124,14 +125,15 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
   /**
    * Get Columns info by schema
    *
+   * @name Table#getColumnsBySchema
    * @param schemaWithoutRef
    * @returns {Array}
    */
-  function getColumnsBySchema(schemaWithoutRef) {
+  function getColumnsBySchema(data) {
     var result = [];
-    var columns = schemaWithoutRef.properties.data.items.properties.attributes.properties;
-
-    _.forEach(columns, function(value, key) {
+    var columns = data.property('data').item(0).schemas().propertySchemas('attributes');
+    _.forEach(columns.definedProperties(), function(key) {
+      var value = columns.propertySchemas(key)[0].data.value();
       value.attributeName = key;
       result.push(value);
     });
@@ -162,8 +164,9 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
       _.forEach(row.relationships, function(relation, key) {
         rowResult[key] = _.map(relation, function(relationItem) {
-          var field = row.own.property('relationships').property(key).schemas().relationField();
-          /** name additional field(relation row) */
+          //var field = row.own.property('relationships').property(key).schemas().relationField();
+          var field = row.own.schemas().propertySchemas('relationships').propertySchemas(key).relationField();
+          /** relationField additional field(relation row) */
           if (field) {
             return relationItem.property('data').property('attributes').propertyValue(field);
           }

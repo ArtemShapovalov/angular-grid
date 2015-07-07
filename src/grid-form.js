@@ -16,6 +16,8 @@ function gridForm(gridEntity, $timeout, _) {
   angular.extend(Form.prototype, {
     getFormInfo: getFormInfo,
     getConfig: getConfig,
+    _convertExtendSchema: _convertExtendSchema,
+    _getExtendEnumSchema: _getExtendEnumSchema,
     _getEnumValues: _getEnumValues,
     _getTitleMapsForRelations: _getTitleMapsForRelations,
     _createTitleMap: _createTitleMap,
@@ -54,19 +56,21 @@ function gridForm(gridEntity, $timeout, _) {
     });
 
     function fetchDataSuccess(data, schema) {
-      var newData = data.property('data').property('attributes');
-      var schemaWithoutRef = self.mergeRelSchema(newData.schemas()[0].data.value(), schema);
 
       self._getFieldsForm(data, function(fields) {
 
         self.links = data.links();
-        self.schema = schemaWithoutRef;
         self.model = self._fieldsToFormFormat(fields);
 
         self._getFormConfig(data, callbackFormConfig);
 
         function callbackFormConfig(config) {
           self.form = config;
+
+          self.schema = data.property('data').property('attributes').schemas()[0].data.value();
+          _.forEach(self.schema.properties, function(value, key) {
+            self.schema.properties[key] = self._convertExtendSchema(data, key);
+          });
 
           /** add button to config form */
           self.form = _.union(self.form, self._getFormButtonBySchema(data.property('data').links()));
@@ -205,10 +209,11 @@ function gridForm(gridEntity, $timeout, _) {
       _.forEach(resources, function(enums) {
 
         var propertyData = enums.data;
-        var enumsData = loadResources[enums.url].data;
+        var attributeData = data.property('attributes').property(propertyData.parentKey());
 
-        var sourceEnum = self._getEnumValues(enumsData);
-        console.log(data);
+        var sourceEnum = self._getEnumValues(loadResources[enums.url].data);
+
+        attributeData.addSchema(self._getExtendEnumSchema(data.property('attributes').schemas().propertySchemas(propertyData.parentKey()), sourceEnum));
 
         _.forEach(sourceEnum, function(enumItem) {
           var url = self.getResourceUrl(propertyData.links('relation')[0].href, {type: self.default.actionGetResource, id: enumItem});
@@ -225,6 +230,52 @@ function gridForm(gridEntity, $timeout, _) {
       callback(sourceTitleMaps);
 
     });
+  }
+
+  /**
+   * Convert extended schema to simple schema. For example if schema has property allOf
+   * then will be replaced on schema which  merge all items allOf else return schema without changed
+   *
+   * @param schema
+   * @returns {*}
+   */
+  function _convertExtendSchema(data, key) {
+    var schemas = data.property('data').property('attributes').schemas().propertySchemas(key).getFull();
+    var schemasEnum = data.property('data').property('attributes').property(key).schemas().getFull();
+
+    if (schemas[0].andSchemas().length) {
+      var replaceAllOfSchema = schemas[0].data.value();
+      delete replaceAllOfSchema.allOf;
+
+      angular.forEach(schemas[0].andSchemas(), function(andSchema) {
+        replaceAllOfSchema = angular.extend(andSchema.data.value(), replaceAllOfSchema)
+      });
+      return replaceAllOfSchema;
+    }
+
+    return _.merge({}, schemas[0].data.value(), schemasEnum[0].data.value());
+  }
+
+  function _getExtendEnumSchema(schemaList, sourceEnum) {
+    var self = this;
+    var mergeObj;
+    var result;
+
+    if (schemaList.basicTypes().toString() == 'array') {
+      mergeObj = {
+        items: {
+          enum: sourceEnum
+        }
+      }
+    } else {
+      mergeObj = {enum: sourceEnum}
+    }
+
+    result = Jsonary.createSchema(
+      _.merge({}, schemaList[0].data.value(), mergeObj)
+    );
+
+    return result;
   }
 
   /**

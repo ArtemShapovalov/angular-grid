@@ -125,10 +125,9 @@ describe('GridEntity testing', function() {
 
   });
 
-  it('', function() {
-    var schemaWithoutRef = readJSON('test/mock/targetSchema.json').definitions.create;
-    var fullSchema = readJSON('test/mock/targetSchema.json');
-    entity._getEmptyDataRelations(schemaWithoutRef, fullSchema)
+  it('check create new form', function() {
+    var schema = Jsonary.createSchema(readJSON('test/mock/targetSchema.json').definitions.create);
+    entity._getEmptyDataRelations(schema)
   })
 
 });

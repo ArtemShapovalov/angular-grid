@@ -365,6 +365,16 @@ function gridEntity() {
       return haystack;
     }
 
+    /*function _replaceFromFull(schemas) {
+      _.forEach(schemas.getFull().definedProperties(), function(propertyName) {
+        schemas.getFull().propertySchemas(propertyName).concat(
+          _replaceFromFull(schemas.getFull().propertySchemas(propertyName))
+        );
+      });
+
+      return schemas;
+    }*/
+
     /**
      * Circumvention the array relationships and get links for late them load
      *

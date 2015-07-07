@@ -209,30 +209,37 @@ function gridEntity() {
       result = schema.createValue();
       result.data.attributes = {};
 
-      _.forEach(schema.propertySchemas('data').getFull().propertySchemas('attributes').definedProperties(), function(propertyName) {
-        result.data.attributes[propertyName] = schema.propertySchemas('data').getFull().propertySchemas('attributes').propertySchemas(propertyName).createValue();
+      var schemaAttributes = schema.propertySchemas('data').getFull().propertySchemas('attributes');
+      _.forEach(schemaAttributes.definedProperties(), function(propertyName) {
+
+        result.data.attributes[propertyName] = schemaAttributes.propertySchemas(propertyName).createValue() !== undefined
+          ? schemaAttributes.propertySchemas(propertyName).createValue()
+          : schemaAttributes.propertySchemas(propertyName)[0].defaultValue();
       });
 
-      /*result.data.attributes = self.getTypeProperty(
-        schema.propertySchemas('data').getFull().propertySchemas('attributes')[0].data.value().properties
-      );*/
-      //result.data.relationships = self._getEmptyDataRelations(schemaWithoutRef, fullSchema);git
+      result.data.relationships = self._getEmptyDataRelations(schema);
 
       return result;
     }
 
-    function _getEmptyDataRelations(schema, fullSchema) {
+
+    /**
+     * @name Entity#_getEmptyDataRelations
+     * @param schema
+     * @param fullSchema
+     * @returns {{}}
+     * @private
+     */
+    function _getEmptyDataRelations(schema) {
       var self = this;
       var relation = {};
 
-      var patchSchema = self.mergeRelSchema(schema, fullSchema);
-
-      var dataSchema = Jsonary.createSchema(patchSchema).propertySchemas('data');
+      var dataSchema = schema.propertySchemas('data').getFull();
       var attributesSchema = dataSchema.propertySchemas('attributes');
       var relationsSchema = dataSchema.propertySchemas('relationships');
 
       _.forEach(relationsSchema.definedProperties(), function(relationName) {
-        var relationSchema = relationsSchema.propertySchemas(relationName).getFull().propertySchemas('data');
+
         var attributeSchema = attributesSchema.propertySchemas(relationName).getFull();
 
         relation[relationName] = {};

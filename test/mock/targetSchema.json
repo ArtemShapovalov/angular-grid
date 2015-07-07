@@ -25,42 +25,33 @@
     },
     "users": {
       "title": "Users",
+      "default": [],
       "type": "array",
       "minItems": 2,
       "uniqueItems": true,
       "additionalItems": true,
       "items": {
         "type": "string",
-        "enum": [
-          "de105d54-75b4-431b-adb2-eb6b9e546013",
-          "de205d54-75b4-431b-adb2-eb6b9e546014",
-          "de305d54-75b4-431b-adb2-eb6b9e546013"
-        ]
+        "enum": []
       }
     },
     "us": {
       "title": "Us",
+      "default": [],
       "type": "array",
       "minItems": 2,
       "uniqueItems": true,
       "additionalItems": true,
       "items": {
         "type": "string",
-        "enum": [
-          "de105d54-75b4-431b-adb2-eb6b9e546013",
-          "de205d54-75b4-431b-adb2-eb6b9e546014",
-          "de305d54-75b4-431b-adb2-eb6b9e546013"
-        ]
+        "enum": []
       }
     },
     "user": {
+      "default": "",
       "title": "User",
       "type": "string",
-      "enum": [
-        "de105d54-75b4-431b-adb2-eb6b9e546013",
-        "de205d54-75b4-431b-adb2-eb6b9e546014",
-        "de305d54-75b4-431b-adb2-eb6b9e546013"
-      ]
+      "enum": []
     },
     "attributes": {
       "type": "object",
@@ -84,15 +75,17 @@
           "$ref": "#/definitions/user"
         }
       },
+      "default": {},
       "required": ["title", "editable", "scope", "users", "user"],
       "additionalProperties": false
     },
     "relationships": {
       "type": "object",
+      "default": {},
       "additionalProperties": true,
       "properties": {
         "users": {
-          "title": "User",
+          "title": "Users",
           "extends": {
             "relationField": "fullname"
           },
@@ -100,16 +93,34 @@
             {
               "$ref": "#/definitions/relationshipsItem"
             }
+          ],
+          "links": [
+            {
+              "title": "Load single resource",
+              "href": "/jsonary/users",
+              "rel": "relation",
+              "method": "GET",
+              "encType": "application/vnd.api+json"
+            }
           ]
         },
         "us": {
-          "title": "User",
+          "title": "Us",
           "extends": {
             "relationField": "fullname"
           },
           "allOf": [
             {
               "$ref": "#/definitions/relationshipsItem"
+            }
+          ],
+          "links": [
+            {
+              "title": "Load single resource",
+              "href": "/jsonary/users",
+              "rel": "relation",
+              "method": "GET",
+              "encType": "application/vnd.api+json"
             }
           ]
         },
@@ -121,6 +132,15 @@
           "allOf": [
             {
               "$ref": "#/definitions/relationshipsItem"
+            }
+          ],
+          "links": [
+            {
+              "title": "Load single resource",
+              "href": "/jsonary/users",
+              "rel": "relation",
+              "method": "GET",
+              "encType": "application/vnd.api+json"
             }
           ]
         }
@@ -187,35 +207,40 @@
           "type": "object",
           "properties": {
             "title": {
-              "title": "Title",
-              "type": "string",
-              "readOnly": true
+              "allOf": [
+                {"$ref": "#/definitions/editable"},
+                {"readOnly": true}
+              ]
             },
             "editable": {
-              "title": "Editable",
-              "type": "string",
-              "readOnly": true
+              "allOf": [
+                {"$ref": "#/definitions/editable"},
+                {"readOnly": true}
+              ]
             },
             "scope": {
-              "title": "Scope",
-              "type": "string",
-              "readOnly": true
+              "allOf": [
+                {"$ref": "#/definitions/scope"},
+                {"readOnly": true}
+              ]
             },
             "users": {
               "allOf": [
-                {
-                  "$ref": "#/definitions/users"
-                },
-                {
-                  "readOnly": true
-                }
+                {"$ref": "#/definitions/users"},
+                {"readOnly": true}
               ]
             },
             "us": {
-              "$ref": "#/definitions/us"
+              "allOf": [
+                {"$ref": "#/definitions/us"},
+                {"readOnly": true}
+              ]
             },
             "user": {
-              "$ref": "#/definitions/user"
+              "allOf": [
+                {"$ref": "#/definitions/user"},
+                {"readOnly": true}
+              ]
             }
           },
           "additionalProperties": false
@@ -226,7 +251,7 @@
       },
       "additionalProperties": false
     },
-    "targetUpdate": {
+    "target": {
       "type": "object",
       "properties": {
         "id": {
@@ -243,7 +268,12 @@
         }
       },
       "required": ["type", "id", "attributes"],
-      "additionalProperties": false,
+      "additionalProperties": false
+    },
+    "targetUpdate": {
+      "title": "Update target",
+      "default": {},
+      "allOf": [{"$ref": "#/definitions/target"}],
       "links": [
         {
           "title": "Update",
@@ -267,23 +297,8 @@
       ]
     },
     "targetCreate": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/id"
-        },
-        "type": {
-          "$ref": "#/definitions/type"
-        },
-        "attributes": {
-          "$ref": "#/definitions/attributes"
-        },
-        "relationships": {
-          "$ref": "#/definitions/relationships"
-        }
-      },
-      "required": ["type", "id", "attributes"],
-      "additionalProperties": false,
+      "default": {},
+      "allOf": [{"$ref": "#/definitions/target"}],
       "links": [
         {
           "title": "Create",
@@ -299,23 +314,8 @@
       ]
     },
     "targetList": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/id"
-        },
-        "type": {
-          "$ref": "#/definitions/type"
-        },
-        "attributes": {
-          "$ref": "#/definitions/attributes"
-        },
-        "relationships": {
-          "$ref": "#/definitions/relationships"
-        }
-      },
-      "required": ["type", "id", "attributes"],
-      "additionalProperties": false,
+      "default": {},
+      "allOf": [{"$ref": "#/definitions/target"}],
       "links": [
         {
           "title": "Read",
@@ -352,6 +352,7 @@
       },
       "required": ["data"],
       "additionalProperties": false,
+      "default": {},
       "links": [
         {
           "title": "Go to List",
@@ -372,6 +373,7 @@
       },
       "required": ["data"],
       "additionalProperties": false,
+      "default": {},
       "links": [
         {
           "title": "Go to List",
@@ -392,6 +394,7 @@
       },
       "required": ["data"],
       "additionalProperties": false,
+      "default": {},
       "links": [
         {
           "title": "Go to List",

@@ -62,7 +62,6 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     });
 
     function fetchDataSuccess(data, schema) {
-      var schemaWithoutRef = self.mergeRelSchema(data.schemas()[0].data.value(), schema);
 
       self.pagination.setTotalCount(data.property('meta').propertyValue('total'));
 
@@ -130,29 +129,29 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    * @returns {Array}
    */
   function getColumnsBySchema(data) {
-    var result = [];
-    var columns = data.property('data').item(0).schemas().propertySchemas('attributes');
-    _.forEach(columns.definedProperties(), function(key) {
-      var value = columns.propertySchemas(key)[0].data.value();
-      value.attributeName = key;
-      result.push(value);
-    });
 
-    /*var relationships = {};
-     if (schemaWithoutRef.properties.data.items.properties.relationships) {
-     relationships = schemaWithoutRef.properties.data.items.properties.relationships.properties;
-     }
-     _.forEach(relationships, function(value, key) {
-     value.attributeName = key;
-     result.push(value);
-     });*/
+    var getColumns = function(columns) {
+      var result = [];
 
-    return result;
+      columns.properties(function(key, property) {
+        var value = property.schemas()[0].data.value();
+        value.attributeName = key;
+        result.push(value);
+      });
+
+      return result;
+    };
+
+    var attributes = data.property('data').item(0).property('attributes');
+    var relationships = data.property('data').item(0).property('relationships');
+
+    return _.union(getColumns(attributes), getColumns(relationships));
   }
 
   /**
    * Convert array Jsonary Data to result array for rendering table
    *
+   * @name Table#rowsToTableFormat
    * @param rows
    * @returns {Array}
    */

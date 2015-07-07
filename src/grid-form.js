@@ -208,6 +208,7 @@ function gridForm(gridEntity, $timeout, _) {
         var enumsData = loadResources[enums.url].data;
 
         var sourceEnum = self._getEnumValues(enumsData);
+        console.log(data);
 
         _.forEach(sourceEnum, function(enumItem) {
           var url = self.getResourceUrl(propertyData.links('relation')[0].href, {type: self.default.actionGetResource, id: enumItem});
@@ -224,36 +225,6 @@ function gridForm(gridEntity, $timeout, _) {
       callback(sourceTitleMaps);
 
     });
-
-    /*var dataAttributes = data.property('attributes');
-    var documentSchema = data.schemas()[0].data.document.raw.value();
-
-    _.forEach(data.relationships(), function(item, key) {
-
-      var resourceLink = item.links.self;
-      //var attributeName = dataAttributes.property(key).schemas().relationField();
-      var attributeName = dataAttributes.schemas()[0].propertySchemas(key).relationField();
-      var schemaAttributeWithoutRef = self._replaceFromFull(
-        dataAttributes.schemas()[0].data.value(),
-        documentSchema
-      )['properties'][key];
-
-      var schema = Jsonary.createSchema(schemaAttributeWithoutRef);
-      var sourceEnum = self._getEnumValues(schema);
-
-      _.forEach(sourceEnum, function(enumItem) {
-        var url = self.getResourceUrl(resourceLink, {type: self.default.actionGetResource, id: enumItem});
-
-        sourceTitleMaps.push({
-          url: url,
-          enumItem: enumItem,
-          relationName: key,
-          attributeName: attributeName
-        })
-      });
-
-    });
-    return sourceTitleMaps;*/
   }
 
   /**

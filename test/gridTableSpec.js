@@ -9,15 +9,31 @@ describe('Table testing', function() {
 
   var table;
 
+  var userSuccessMain = {
+    contentType: 'application/vnd.api+json; profile=' + domain + '/users/schema#/definitions/read',
+    status: 200
+  };
+
   var TestResponses = {
     users: {
       data: {
         read: {
           success: {
-            contentType: 'application/vnd.api+json; profile='+domain+'/users/schema#/definitions/read',
-            status: 200,
-            responseText: JSON.stringify(readJSON('test/mock/userDataRead.json'))
+            de1: angular.extend({}, userSuccessMain, {
+              responseText: JSON.stringify(readJSON('test/mock/userDataRead.json').de1)
+            }),
+            de2: angular.extend({}, userSuccessMain, {
+              responseText: JSON.stringify(readJSON('test/mock/userDataRead.json').de2)
+            }),
+            de3: angular.extend({}, userSuccessMain, {
+              responseText: JSON.stringify(readJSON('test/mock/userDataRead.json').de3)
+            })
           }
+        },
+        list: {
+          success: angular.extend(userSuccessMain, {
+            responseText: JSON.stringify(readJSON('test/mock/userDataList.json'))
+          })
         }
       },
       schema: {
@@ -32,7 +48,7 @@ describe('Table testing', function() {
       data: {
         list: {
           success: {
-            contentType: 'application/vnd.api+json; profile='+domain+'/targets/schema#/definitions/list',
+            contentType: 'application/vnd.api+json; profile=' + domain + '/targets/schema#/definitions/list',
             status: 200,
             responseText: JSON.stringify(readJSON('test/mock/targetDataList.json'))
           }
@@ -74,11 +90,11 @@ describe('Table testing', function() {
       .andReturn(TestResponses.targets.schema.success);
 
     jasmine.Ajax.stubRequest(domain + '/users/read/de105d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
-      .andReturn(TestResponses.users.data.read.success);
-    jasmine.Ajax.stubRequest(domain + '/users/read/de205d54-75b4-431b-adb2-eb6b9e546014', '', 'GET')
-      .andReturn(TestResponses.users.data.read.success);
+      .andReturn(TestResponses.users.data.read.success.de1);
+    jasmine.Ajax.stubRequest(domain + '/users/read/de205d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
+      .andReturn(TestResponses.users.data.read.success.de2);
     jasmine.Ajax.stubRequest(domain + '/users/read/de305d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
-      .andReturn(TestResponses.users.data.read.success);
+      .andReturn(TestResponses.users.data.read.success.de3);
     jasmine.Ajax.stubRequest(domain + '/users/schema', '', 'GET')
       .andReturn(TestResponses.users.schema.success);
 
@@ -97,7 +113,7 @@ describe('Table testing', function() {
     jasmine.Ajax.uninstall();
   });
 
-  it ('check get table info', function () {
+  it ('check get table info', function() {
     var dataTable;
 
     table.getTableInfo(function(data) {

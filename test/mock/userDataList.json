@@ -1,32 +1,27 @@
 {
-  "de1": {
-    "data": {
+  "data": [
+    {
       "type": "users",
       "id": "de105d54-75b4-431b-adb2-eb6b9e546013",
       "attributes": {
         "email": "dimon1@gmail.com",
         "fullname": "John1 Doe"
       }
-    }
-  },
-  "de2": {
-    "data": {
+    },
+    {
       "type": "users",
       "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
       "attributes": {
         "email": "dimon2@gmail.com",
         "fullname": "John2 Doe"
       }
-    }
-  },
-  "de3": {
-    "data": {
+    },
+    {
       "type": "users",
       "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
       "attributes": {
         "email": "dimon3@gmail.com",
         "fullname": "John3 Doe"
       }
-    }
-  }
+    }]
 }

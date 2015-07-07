@@ -8,15 +8,31 @@ describe('Form testing', function() {
   var $interval;
   var form;
 
+  var userSuccessMain = {
+    contentType: 'application/vnd.api+json; profile=' + domain + '/users/schema#/definitions/read',
+    status: 200
+  };
+
   var TestResponses = {
     users: {
       data: {
         read: {
           success: {
-            contentType: 'application/vnd.api+json; profile=' + domain + '/users/schema#/definitions/read',
-            status: 200,
-            responseText: JSON.stringify(readJSON('test/mock/userDataRead.json'))
+            de1: angular.extend({}, userSuccessMain, {
+              responseText: JSON.stringify(readJSON('test/mock/userDataRead.json').de1)
+            }),
+            de2: angular.extend({}, userSuccessMain, {
+              responseText: JSON.stringify(readJSON('test/mock/userDataRead.json').de2)
+            }),
+            de3: angular.extend({}, userSuccessMain, {
+              responseText: JSON.stringify(readJSON('test/mock/userDataRead.json').de3)
+            })
           }
+        },
+        list: {
+          success: angular.extend(userSuccessMain, {
+            responseText: JSON.stringify(readJSON('test/mock/userDataList.json'))
+          })
         }
       },
       schema: {
@@ -80,11 +96,13 @@ describe('Form testing', function() {
       .andReturn(TestResponses.targets.schema.success);
 
     jasmine.Ajax.stubRequest(domain + '/users/read/de105d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
-      .andReturn(TestResponses.users.data.read.success);
-    jasmine.Ajax.stubRequest(domain + '/users/read/de205d54-75b4-431b-adb2-eb6b9e546014', '', 'GET')
-      .andReturn(TestResponses.users.data.read.success);
+      .andReturn(TestResponses.users.data.read.success.de1);
+    jasmine.Ajax.stubRequest(domain + '/users/read/de205d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
+      .andReturn(TestResponses.users.data.read.success.de2);
     jasmine.Ajax.stubRequest(domain + '/users/read/de305d54-75b4-431b-adb2-eb6b9e546013', '', 'GET')
-      .andReturn(TestResponses.users.data.read.success);
+      .andReturn(TestResponses.users.data.read.success.de3);
+    jasmine.Ajax.stubRequest(domain + '/users', '', 'GET')
+      .andReturn(TestResponses.users.data.list.success);
     jasmine.Ajax.stubRequest(domain + '/users/schema', '', 'GET')
       .andReturn(TestResponses.users.schema.success);
 
@@ -107,13 +125,13 @@ describe('Form testing', function() {
     var resource = {};
     var titleMap = {};
     var titleMapUsers = [
-      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'},
-      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'John3 Doe'},
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'John1 Doe'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546013', name: 'John2 Doe'},
       {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'}
     ];
     var titleMapUser = [
-      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'},
-      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'dimon3@gmail.com'},
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon1@gmail.com'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon2@gmail.com'},
       {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'}
     ];
     var formConfigUsers = {
@@ -134,6 +152,7 @@ describe('Form testing', function() {
       titleMap = responce;
     });
 
+    $interval.flush(100);
     $interval.flush(100);
 
     expect(titleMap.users).toEqual(titleMapUsers);
@@ -166,6 +185,7 @@ describe('Form testing', function() {
     $timeout.flush();
     $interval.flush(100);
     $interval.flush(100);
+    $interval.flush(100);
     $timeout.flush();
 
     expect(formData.links).toBeDefined();
@@ -175,13 +195,13 @@ describe('Form testing', function() {
     var resource = {};
     var titleMap;
     var titleMapUsers = [
-      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'},
-      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'John3 Doe'},
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'John1 Doe'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546013', name: 'John2 Doe'},
       {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'John3 Doe'}
     ];
     var titleMapUser = [
-      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'},
-      {value: 'de205d54-75b4-431b-adb2-eb6b9e546014', name: 'dimon3@gmail.com'},
+      {value: 'de105d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon1@gmail.com'},
+      {value: 'de205d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon2@gmail.com'},
       {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'}
     ];
 

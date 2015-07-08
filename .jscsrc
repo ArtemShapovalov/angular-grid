@@ -12,6 +12,7 @@
       "}"
     ]
   },
+  "safeContextKeyword": ["self"],
   "disallowSpacesInAnonymousFunctionExpression": {
     "beforeOpeningRoundBrace": true
   },

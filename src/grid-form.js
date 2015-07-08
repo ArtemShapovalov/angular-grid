@@ -56,7 +56,7 @@ function gridForm(gridEntity, $timeout, _) {
       self.fetchData(url, fetchDataSuccess);
     });
 
-    function fetchDataSuccess(data, schema) {
+    function fetchDataSuccess(data) {
 
       self._getFormConfig(data, callbackFormConfig);
 
@@ -107,6 +107,7 @@ function gridForm(gridEntity, $timeout, _) {
 
   /**
    * Generate form config for Angular schema form
+   *
    * @param data
    * @param callback
    * @private
@@ -117,7 +118,9 @@ function gridForm(gridEntity, $timeout, _) {
     var result = [];
 
     self._createTitleMap(data.property('data'), function(titleMaps) {
-      var attributes = data.schemas().propertySchemas('data').getFull().propertySchemas('attributes').definedProperties();
+      var attributes = data.schemas()
+        .propertySchemas('data').getFull()
+        .propertySchemas('attributes').definedProperties();
 
       _.forEach(attributes, function(key) {
         var obj = {key: key};
@@ -153,6 +156,13 @@ function gridForm(gridEntity, $timeout, _) {
     return enumValues;
   }
 
+  /**
+   * Generate titleMap for relation resource
+   *
+   * @param data
+   * @param callback
+   * @private
+   */
   function _getTitleMapsForRelations(data, callback) {
     var self = this;
     var sourceTitleMaps = [];
@@ -237,7 +247,6 @@ function gridForm(gridEntity, $timeout, _) {
    * @private
    */
   function _getExtendEnumSchema(schemaList, sourceEnum) {
-    var self = this;
     var mergeObj;
     var result;
 
@@ -260,6 +269,7 @@ function gridForm(gridEntity, $timeout, _) {
 
   /**
    * Create titleMap for form and load dependency resource
+   *
    * @param data
    * @param callback
    * @private

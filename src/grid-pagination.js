@@ -71,6 +71,12 @@ function gridPagination(Helper, _) {
     return result;
   }
 
+  /**
+   * Get url with set page params (offset, limit)
+   *
+   * @param url
+   * @returns {*}
+   */
   function getPageUrl(url) {
     var result;
     var searchParams;

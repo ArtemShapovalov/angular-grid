@@ -6,11 +6,11 @@ function gridEntity() {
     $get: gridEntityGet
   };
 
-  gridEntityGet.$inject = ['Helper', '$interval', '_'];
+  gridEntityGet.$inject = ['$interval', '_'];
 
   return provider;
 
-  function gridEntityGet(Helper, $interval, _) {
+  function gridEntityGet($interval, _) {
     var model;
     var messages = {
       successDeleted: 'Successfully delete',
@@ -20,6 +20,8 @@ function gridEntity() {
     };
 
     /**
+     * Base class with functionality handling resources
+     *
      * @class
      * @constructor
      */
@@ -157,7 +159,6 @@ function gridEntity() {
      * @param callback
      */
     function loadSchema(url, callback) {
-      /*jshint validthis: true */
       var self = this;
 
       Jsonary.getSchema(url, function(jSchema) {
@@ -178,7 +179,6 @@ function gridEntity() {
      * Generate empty model for create form
      *
      * @param schema
-     * @param fullSchema
      * @returns {*}
      * @private
      */
@@ -207,12 +207,10 @@ function gridEntity() {
      *
      * @name Entity#_getEmptyDataRelations
      * @param schema
-     * @param fullSchema
      * @returns {{}}
      * @private
      */
     function _getEmptyDataRelations(schema) {
-      var self = this;
       var relation = {};
 
       var dataSchema = schema.propertySchemas('data').getFull();

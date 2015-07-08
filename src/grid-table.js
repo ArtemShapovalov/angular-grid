@@ -73,8 +73,6 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
         self.links = data.links();
         self.columns = self.getColumns(data);
 
-        self.sorting.setSortFields(_.map(self.columns, 'attributeName'));
-
         if (callback !== undefined) {
           callback(self.getConfig());
         }
@@ -118,7 +116,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
   }
 
   /**
-   * Get Columns info by schema
+   * Get Columns info by schema and set sortable fields
    *
    * @name Table#getColumnsBySchema
    * @param data
@@ -130,6 +128,8 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     var relationships = data.property('data').item(0).property('relationships');
 
     var allColumns = _.union(self.getColumnsBySchema(attributes), self.getColumnsBySchema(relationships));
+
+    self.sorting.setSortFields(_.map(allColumns, 'attributeName'));
 
     allColumns.push({
       title: 'Actions',

@@ -85,7 +85,7 @@ function sortingSrv(Helper, _) {
    * @returns {string}
    */
   function getUrl(url) {
-    var result;
+    var self = this;
     var searchParams;
 
     if (!this.field) {
@@ -93,12 +93,9 @@ function sortingSrv(Helper, _) {
     }
 
     searchParams = Helper.parseLocationSearch(url);
+    searchParams[self.sortParam + '[' + self.field + ']'] = self.direction;
 
-    searchParams[this.sortParam + '[' + this.field + ']'] = this.direction;
-
-    result = Helper.setLocationSearch(url, searchParams);
-
-    return result;
+    return Helper.setLocationSearch(url, searchParams);
   }
 
 }

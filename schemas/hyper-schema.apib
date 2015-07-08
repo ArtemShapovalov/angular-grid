@@ -75,7 +75,7 @@ JSON Schemas
                             },
                             "data": [
                                 { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-                                { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                                { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546013" }
                             ]
                         },
                         "us": {
@@ -112,7 +112,7 @@ JSON Schemas
                             },
                             "data": [
                                 { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" },
-                                { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" }
+                                { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546013" }
                             ]
                         },
                         "us": {
@@ -181,7 +181,7 @@ JSON Schemas
                         },
                         "data": [
                             { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" },
-                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546014" },
+                            { "type": "users", "id": "de205d54-75b4-431b-adb2-eb6b9e546013" },
                             { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
                         ]
                     }
@@ -209,7 +209,8 @@ JSON Schemas
                           "related": "http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users"
                         },
                         "data": [
-                            { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" }
+                            { "type": "users", "id": "de305d54-75b4-431b-adb2-eb6b9e546013" },
+                            { "type": "users", "id": "de105d54-75b4-431b-adb2-eb6b9e546013" }
                         ]
                     },
                     "us": {
@@ -278,42 +279,33 @@ JSON Schemas
                 },
                 "users": {
                     "title": "Users",
+                    "default": [],
                     "type": "array",
                     "minItems": 2,
                     "uniqueItems": true,
                     "additionalItems": true,
                     "items": {
                         "type": "string",
-                        "enum": [
-                            "de105d54-75b4-431b-adb2-eb6b9e546013",
-                            "de205d54-75b4-431b-adb2-eb6b9e546014",
-                            "de305d54-75b4-431b-adb2-eb6b9e546013"
-                        ]
+                        "enum": []
                     }
                 },
                 "us": {
                     "title": "Us",
+                    "default": [],
                     "type": "array",
                     "minItems": 2,
                     "uniqueItems": true,
                     "additionalItems": true,
                     "items": {
                         "type": "string",
-                        "enum": [
-                            "de105d54-75b4-431b-adb2-eb6b9e546013",
-                            "de205d54-75b4-431b-adb2-eb6b9e546014",
-                            "de305d54-75b4-431b-adb2-eb6b9e546013"
-                        ]
+                        "enum": []
                     }
                 },
                 "user": {
+                    "default": "",
                     "title": "User",
                     "type": "string",
-                    "enum": [
-                        "de105d54-75b4-431b-adb2-eb6b9e546013",
-                        "de205d54-75b4-431b-adb2-eb6b9e546014",
-                        "de305d54-75b4-431b-adb2-eb6b9e546013"
-                    ]
+                    "enum": []
                 },
                 "attributes": {
                     "type": "object",
@@ -337,11 +329,13 @@ JSON Schemas
                             "$ref": "#/definitions/user"
                         }
                     },
+                    "default": {},
                     "required": ["title", "editable", "scope", "users", "user"],
                     "additionalProperties": false
                 },
                 "relationships": {
                     "type": "object",
+                    "default": {},
                     "additionalProperties": true,
                     "properties": {
                         "users": {
@@ -352,6 +346,15 @@ JSON Schemas
                             "allOf": [
                                 {
                                     "$ref": "#/definitions/relationshipsItem"
+                                }
+                            ],
+                            "links": [
+                                {
+                                    "title": "Load single resource",
+                                    "href": "/jsonary/users",
+                                    "rel": "relation",
+                                    "method": "GET",
+                                    "encType": "application/vnd.api+json"
                                 }
                             ]
                         },
@@ -364,6 +367,15 @@ JSON Schemas
                                 {
                                     "$ref": "#/definitions/relationshipsItem"
                                 }
+                            ],
+                            "links": [
+                                {
+                                    "title": "Load single resource",
+                                    "href": "/jsonary/users",
+                                    "rel": "relation",
+                                    "method": "GET",
+                                    "encType": "application/vnd.api+json"
+                                }
                             ]
                         },
                         "user": {
@@ -374,6 +386,15 @@ JSON Schemas
                             "allOf": [
                                 {
                                     "$ref": "#/definitions/relationshipsItem"
+                                }
+                            ],
+                            "links": [
+                                {
+                                    "title": "Load single resource",
+                                    "href": "/jsonary/users",
+                                    "rel": "relation",
+                                    "method": "GET",
+                                    "encType": "application/vnd.api+json"
                                 }
                             ]
                         }
@@ -484,7 +505,7 @@ JSON Schemas
                     },
                     "additionalProperties": false
                 },
-                "targetUpdate": {
+                "target": {
                     "type": "object",
                     "properties": {
                         "id": {
@@ -501,7 +522,12 @@ JSON Schemas
                         }
                     },
                     "required": ["type", "id", "attributes"],
-                    "additionalProperties": false,
+                    "additionalProperties": false
+                },
+                "targetUpdate": {
+                    "title": "Update target",
+                    "default": {},
+                    "allOf": [{"$ref": "#/definitions/target"}],
                     "links": [
                         {
                             "title": "Update",
@@ -525,23 +551,8 @@ JSON Schemas
                     ]
                 },
                 "targetCreate": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "$ref": "#/definitions/id"
-                        },
-                        "type": {
-                            "$ref": "#/definitions/type"
-                        },
-                        "attributes": {
-                            "$ref": "#/definitions/attributes"
-                        },
-                        "relationships": {
-                            "$ref": "#/definitions/relationships"
-                        }
-                    },
-                    "required": ["type", "id", "attributes"],
-                    "additionalProperties": false,
+                    "default": {},
+                    "allOf": [{"$ref": "#/definitions/target"}],
                     "links": [
                         {
                             "title": "Create",
@@ -557,23 +568,8 @@ JSON Schemas
                     ]
                 },
                 "targetList": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "$ref": "#/definitions/id"
-                        },
-                        "type": {
-                            "$ref": "#/definitions/type"
-                        },
-                        "attributes": {
-                            "$ref": "#/definitions/attributes"
-                        },
-                        "relationships": {
-                            "$ref": "#/definitions/relationships"
-                        }
-                    },
-                    "required": ["type", "id", "attributes"],
-                    "additionalProperties": false,
+                    "default": {},
+                    "allOf": [{"$ref": "#/definitions/target"}],
                     "links": [
                         {
                             "title": "Read",
@@ -610,6 +606,7 @@ JSON Schemas
                     },
                     "required": ["data"],
                     "additionalProperties": false,
+                    "default": {},
                     "links": [
                         {
                             "title": "Go to List",
@@ -630,6 +627,7 @@ JSON Schemas
                     },
                     "required": ["data"],
                     "additionalProperties": false,
+                    "default": {},
                     "links": [
                         {
                             "title": "Go to List",
@@ -650,6 +648,7 @@ JSON Schemas
                     },
                     "required": ["data"],
                     "additionalProperties": false,
+                    "default": {},
                     "links": [
                         {
                             "title": "Go to List",
@@ -716,7 +715,7 @@ JSON Schemas
             },
             {
               "type": "users",
-              "id": "de205d54-75b4-431b-adb2-eb6b9e546014",
+              "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
               "attributes": {
                 "email": "dimon2@gmail.com",
                 "fullname": "John2 Doe"
@@ -724,7 +723,7 @@ JSON Schemas
             },
             {
               "type": "users",
-              "id": "de305d54-75b4-431b-adb2-eb6b9e546015",
+              "id": "de305d54-75b4-431b-adb2-eb6b9e546013",
               "attributes": {
                 "email": "dimon3@gmail.com",
                 "fullname": "John3 Doe"
@@ -762,7 +761,7 @@ JSON Schemas
             }
         }
 
-## Users Data Read de2 [/jsonary/users/read/de205d54-75b4-431b-adb2-eb6b9e546014]
+## Users Data Read de2 [/jsonary/users/read/de205d54-75b4-431b-adb2-eb6b9e546013]
 ### Get read user [GET]
 
 + Response 200 (application/vnd.api+json; profile=http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/users/schema#/definitions/read)
@@ -770,10 +769,10 @@ JSON Schemas
         {
             "data": {
               "type": "users",
-              "id": "de205d54-75b4-431b-adb2-eb6b9e546014",
+              "id": "de205d54-75b4-431b-adb2-eb6b9e546013",
               "attributes": {
-                "email": "dimon3@gmail.com",
-                "fullname": "John3 Doe"
+                "email": "dimon2@gmail.com",
+                "fullname": "John2 Doe"
               }
             }
         }
@@ -788,8 +787,8 @@ JSON Schemas
               "type": "users",
               "id": "de105d54-75b4-431b-adb2-eb6b9e546013",
               "attributes": {
-                "email": "dimon3@gmail.com",
-                "fullname": "John3 Doe"
+                "email": "dimon1@gmail.com",
+                "fullname": "John1 Doe"
               }
             }
         }

@@ -31,6 +31,12 @@ function gridEntity() {
         },
         attributes: function() {
           return this.propertyValue('attributes');
+        },
+        relationshipsData: function() {
+          return this.property('data').property('relationships');
+        },
+        attributesData: function() {
+          return this.property('data').property('attributes');
         }
       });
 
@@ -75,12 +81,9 @@ function gridEntity() {
       loadData: loadData,
       loadSchema: loadSchema,
       getResourceUrl: getResourceUrl,
-      mergeRelSchema: mergeRelSchema,
-      getTypeProperty: getTypeProperty,
       _getEmptyData: _getEmptyData,
       _getEmptyDataRelations: _getEmptyDataRelations,
       _getRelationResource: _getRelationResource,
-      _replaceFromFull: _replaceFromFull,
       _getRelationLink: _getRelationLink,
       _batchLoadData: _batchLoadData
     });
@@ -171,29 +174,6 @@ function gridEntity() {
       });
     }
 
-    function getTypeProperty(obj) {
-      var tmpObj = obj;
-      _.forEach(tmpObj, function(value, key) {
-        if (value.type) {
-          switch (value.type) {
-            case 'object':
-              tmpObj[key] = {};
-              break;
-            case 'string':
-              tmpObj[key] = '';
-              break;
-            case 'array':
-              tmpObj[key] = [];
-              break;
-            case 'integer':
-              tmpObj[key] = '';
-              break;
-          }
-        }
-      });
-      return tmpObj;
-    }
-
     /**
      * Generate empty model for create form
      *
@@ -222,8 +202,9 @@ function gridEntity() {
       return result;
     }
 
-
     /**
+     * Create empty value relationships resource for model
+     *
      * @name Entity#_getEmptyDataRelations
      * @param schema
      * @param fullSchema
@@ -318,62 +299,6 @@ function gridEntity() {
         }
       }, 100);
     }
-
-    /**
-     * Convert schema with $ref link to schema without $ref
-     * @param schema
-     * @param schemaFull
-     * @returns {*}
-     */
-    function mergeRelSchema(schema, schemaFull) {
-      var schemaWithoutRef = schema;
-
-      schemaWithoutRef = _replaceFromFull(schemaWithoutRef, schemaFull);
-
-      return schemaWithoutRef;
-    }
-
-    /**
-     * Recursive function replacing $ref from schema
-     * @param haystack
-     * @param schemaFull
-     * @returns {*}
-     */
-    function _replaceFromFull(haystack, schemaFull) {
-      for (var key in haystack) {
-        if (haystack.hasOwnProperty(key)) {
-          if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && haystack[key].$ref) {
-            haystack[key] = Helper.strToObject(schemaFull, haystack[key].$ref.substring(2));
-            _replaceFromFull(haystack[key], schemaFull);
-          } else if (
-            typeof haystack[key] === 'object' &&
-            Array.isArray(haystack[key]) &&
-            ['oneOf', 'allOf'].indexOf(key) >= 0
-          ) {
-            _.forEach(haystack[key], function(value, index) {
-              if (value.$ref) {
-                haystack[key][index] = Helper.strToObject(schemaFull, value.$ref.substring(2));
-                _replaceFromFull(haystack[key], schemaFull);
-              }
-            })
-          }
-          if (typeof haystack[key] === 'object' && !Array.isArray(haystack[key]) && (haystack[key] !== 'links')) {
-            _replaceFromFull(haystack[key], schemaFull);
-          }
-        }
-      }
-      return haystack;
-    }
-
-    /*function _replaceFromFull(schemas) {
-      _.forEach(schemas.getFull().definedProperties(), function(propertyName) {
-        schemas.getFull().propertySchemas(propertyName).concat(
-          _replaceFromFull(schemas.getFull().propertySchemas(propertyName))
-        );
-      });
-
-      return schemas;
-    }*/
 
     /**
      * Circumvention the array relationships and get links for late them load

@@ -215,10 +215,11 @@ describe('Form testing', function() {
     });
 
     $interval.flush(100);
+    $interval.flush(100);
 
-    //expect(titleMap.users).toEqual(titleMapUsers);
-    //expect(titleMap.user).toEqual(titleMapUser);
-    //expect(resource.schema).toBeDefined();
-
+    expect(resource.data).toBeDefined();
+    expect(resource.schema).toBeDefined();
+    expect(titleMap.users).toEqual(titleMapUsers);
+    expect(titleMap.user).toEqual(titleMapUser);
   })
 });

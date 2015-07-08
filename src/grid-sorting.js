@@ -2,6 +2,8 @@ angular.module('grid').factory('Sorting', sortingSrv);
 sortingSrv.$inject = ['Helper', '_'];
 function sortingSrv(Helper, _) {
   /**
+   * Sorting table class
+   *
    * @class
    * @constructor
    */
@@ -76,6 +78,8 @@ function sortingSrv(Helper, _) {
   }
 
   /**
+   * Get url with set param sorting
+   *
    * @name Sorting#getUrl
    * @param url
    * @returns {string}

@@ -22,7 +22,6 @@ function gridForm(gridEntity, $timeout, _) {
     _getTitleMapsForRelations: _getTitleMapsForRelations,
     _createTitleMap: _createTitleMap,
     _getFormConfig: _getFormConfig,
-    _getFieldsForm: _getFieldsForm,
     _fieldsToFormFormat: _fieldsToFormFormat,
     _getFormButtonBySchema: _getFormButtonBySchema
   });
@@ -40,7 +39,9 @@ function gridForm(gridEntity, $timeout, _) {
   }
 
   /**
+   * Get all needed data for rendering CRUD
    *
+   * @name Form#getFormInfo
    * @param callback
    */
   function getFormInfo(callback) {
@@ -57,30 +58,26 @@ function gridForm(gridEntity, $timeout, _) {
 
     function fetchDataSuccess(data, schema) {
 
-      self._getFieldsForm(data, function(fields) {
+      self._getFormConfig(data, callbackFormConfig);
+
+      function callbackFormConfig(config) {
 
         self.links = data.links();
-        self.model = self._fieldsToFormFormat(fields);
+        self.model = self._fieldsToFormFormat(data);
+        self.form = config;
 
-        self._getFormConfig(data, callbackFormConfig);
+        self.schema = data.attributesData().schemas()[0].data.value();
+        _.forEach(self.schema.properties, function(value, key) {
+          self.schema.properties[key] = self._convertExtendSchema(data, key);
+        });
 
-        function callbackFormConfig(config) {
-          self.form = config;
+        /** add button to config form */
+        self.form = _.union(self.form, self._getFormButtonBySchema(data.property('data').links()));
 
-          self.schema = data.property('data').property('attributes').schemas()[0].data.value();
-          _.forEach(self.schema.properties, function(value, key) {
-            self.schema.properties[key] = self._convertExtendSchema(data, key);
-          });
-
-          /** add button to config form */
-          self.form = _.union(self.form, self._getFormButtonBySchema(data.property('data').links()));
-
-          if (callback !== undefined) {
-            callback(self.getConfig());
-          }
+        if (callback !== undefined) {
+          callback(self.getConfig());
         }
-
-      })
+      }
 
     }
 
@@ -89,21 +86,20 @@ function gridForm(gridEntity, $timeout, _) {
   /**
    * Convert Jsonary Data to result model for rendering form
    *
-   * @param resource
+   * @param data
    * @returns {*}
    */
-  function _fieldsToFormFormat(resource) {
-    var data = resource.own;
-    var fields = data.property('attributes').value();
+  function _fieldsToFormFormat(data) {
+    var fields = data.attributesData().value();
 
-    _.forEach(resource.relationships, function(relation, key) {
-      fields[key] = _.map(relation, function(relationItem) {
-        return relationItem.property('data').propertyValue('id');
-      });
-      /** check if data as array then return string else array */
-      if (!Array.isArray(data.property('relationships').property(key).propertyValue('data'))) {
-        fields[key] = fields[key][0];
+    data.relationshipsData().properties(function(key, relation) {
+
+      if (relation.property('data').schemas().basicTypes().indexOf('array') >= 0) {
+        fields[key] = _.map(relation.propertyValue('data'), 'id');
+      } else {
+        fields[key] = relation.propertyValue('data').id;
       }
+
     });
 
     return fields;
@@ -121,11 +117,6 @@ function gridForm(gridEntity, $timeout, _) {
     var result = [];
 
     self._createTitleMap(data.property('data'), function(titleMaps) {
-
-      /*var attributes = self.mergeRelSchema(
-        data.property('data').schemas()[0].data.value(),
-        data.schemas()[0].data.document.raw.value()
-      ).properties.attributes.properties;*/
       var attributes = data.schemas().propertySchemas('data').getFull().propertySchemas('attributes').definedProperties();
 
       _.forEach(attributes, function(key) {
@@ -144,38 +135,12 @@ function gridForm(gridEntity, $timeout, _) {
     });
   }
 
-  function _getFieldsForm(data, callback) {
-    var self = this;
-    var fields;
-    var included = [];
-
-    fields = data.property('data');
-    included.push(self._getRelationResource(data.property('data')));
-
-    self._batchLoadData(included, batchLoaded);
-
-    function batchLoaded(relationResources) {
-
-      var result = {
-        own: fields,
-        relationships: _.mapValues(relationResources[0], function(n) {
-          _.forEach(n, function(item, index) {
-            n[index] = item.data;
-          });
-          return n;
-        })
-      };
-
-      callback(result);
-    }
-  }
-
   /**
    * Get enum values for schema with allOf
    *
    * @name Form#_getEnumValues
    * @param data
-   * @returns {{}}
+   * @returns {[]}
    * @private
    */
   function _getEnumValues(data) {
@@ -213,10 +178,15 @@ function gridForm(gridEntity, $timeout, _) {
 
         var sourceEnum = self._getEnumValues(loadResources[enums.url].data);
 
-        attributeData.addSchema(self._getExtendEnumSchema(data.property('attributes').schemas().propertySchemas(propertyData.parentKey()), sourceEnum));
+        var attributeSchemas = data.property('attributes').schemas().propertySchemas(propertyData.parentKey());
+        attributeData.addSchema(self._getExtendEnumSchema(attributeSchemas, sourceEnum));
 
         _.forEach(sourceEnum, function(enumItem) {
-          var url = self.getResourceUrl(propertyData.links('relation')[0].href, {type: self.default.actionGetResource, id: enumItem});
+          var url = self.getResourceUrl(propertyData.links('relation')[0].href, {
+              type: self.default.actionGetResource,
+              id: enumItem
+            }
+          );
 
           sourceTitleMaps.push({
             url: url,
@@ -236,7 +206,8 @@ function gridForm(gridEntity, $timeout, _) {
    * Convert extended schema to simple schema. For example if schema has property allOf
    * then will be replaced on schema which  merge all items allOf else return schema without changed
    *
-   * @param schema
+   * @param data
+   * @param key Attribute or relationships key
    * @returns {*}
    */
   function _convertExtendSchema(data, key) {
@@ -256,6 +227,15 @@ function gridForm(gridEntity, $timeout, _) {
     return _.merge({}, schemas[0].data.value(), schemasEnum[0].data.value());
   }
 
+  /**
+   * Create SubSchema with dynamic load enums fields
+   *
+   * @name Form#_getExtendEnumSchema
+   * @param schemaList
+   * @param sourceEnum
+   * @returns {*}
+   * @private
+   */
   function _getExtendEnumSchema(schemaList, sourceEnum) {
     var self = this;
     var mergeObj;
@@ -300,7 +280,6 @@ function gridForm(gridEntity, $timeout, _) {
 
           titleMaps[item.relationName].push({
             value: item.enumItem,
-            //value: data.property('data').propertyValue('id'),
             name: resources[item.url].data.property('data').property('attributes')
               .propertyValue(item.attributeName) || item.enumItem
           });

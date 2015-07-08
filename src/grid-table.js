@@ -27,12 +27,15 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
   angular.extend(Table.prototype, {
     getConfig: getConfig,
     getTableInfo: getTableInfo,
+    getColumns: getColumns,
     getColumnsBySchema: getColumnsBySchema,
     rowsToTableFormat: rowsToTableFormat,
+    rowToTableFormat: rowToTableFormat,
     getSortingParamByField: getSortingParamByField,
     getSortingParamValue: getSortingParamValue,
     setSorting: setSorting,
-    _getRowsByData: _getRowsByData
+    _getRowsByData: _getRowsByData,
+    _getLinks: _getLinks
   });
 
   return Table;
@@ -64,20 +67,13 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     function fetchDataSuccess(data, schema) {
 
       self.pagination.setTotalCount(data.property('meta').propertyValue('total'));
-
       self._getRowsByData(data, function(rows) {
 
         self.rows = self.rowsToTableFormat(rows);
         self.links = data.links();
-        self.columns = self.getColumnsBySchema(data);
+        self.columns = self.getColumns(data);
 
         self.sorting.setSortFields(_.map(self.columns, 'attributeName'));
-
-        self.columns.push({
-          title: 'Actions',
-          type: 'string',
-          attributeName: 'links'
-        });
 
         if (callback !== undefined) {
           callback(self.getConfig());
@@ -100,7 +96,6 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    */
   function getSortingParamByField(field) {
     var result = field;
-    //var rel = this.data.property('data').item(0).property('attributes').property(field);
     var rel = this.data.property('data').item(0).property('relationships').property(field).schemas().relationField();
 
     if (rel) {
@@ -111,7 +106,8 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
   }
 
   /**
-   * Get value for GET sorting param
+   * Get value for sorting GET param
+   *
    * @returns {*}
    */
   function getSortingParamValue() {
@@ -125,27 +121,39 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    * Get Columns info by schema
    *
    * @name Table#getColumnsBySchema
-   * @param schemaWithoutRef
+   * @param data
    * @returns {Array}
    */
-  function getColumnsBySchema(data) {
-
-    var getColumns = function(columns) {
-      var result = [];
-
-      columns.properties(function(key, property) {
-        var value = property.schemas()[0].data.value();
-        value.attributeName = key;
-        result.push(value);
-      });
-
-      return result;
-    };
-
+  function getColumns(data) {
+    var self = this;
     var attributes = data.property('data').item(0).property('attributes');
     var relationships = data.property('data').item(0).property('relationships');
 
-    return _.union(getColumns(attributes), getColumns(relationships));
+    var allColumns = _.union(self.getColumnsBySchema(attributes), self.getColumnsBySchema(relationships));
+
+    allColumns.push({
+      title: 'Actions',
+      type: 'string',
+      attributeName: 'links'
+    });
+
+    return allColumns;
+  }
+
+  /**
+   * Get columns and attach attributeName in column for rendering
+   *
+   * @param columns
+   * @returns {Array}
+   */
+  function getColumnsBySchema(columns) {
+    var result = [];
+    columns.properties(function(key, property) {
+      var value = property.schemas()[0].data.value();
+      value.attributeName = key;
+      result.push(value);
+    });
+    return result;
   }
 
   /**
@@ -156,29 +164,52 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    * @returns {Array}
    */
   function rowsToTableFormat(rows) {
+    var self = this;
     var result = [];
     _.forEach(rows, function(row) {
-      var data = row.own;
-      var rowResult = data.property('attributes').value();
+      result.push(self.rowToTableFormat(row));
+    });
+    return result;
+  }
 
-      _.forEach(row.relationships, function(relation, key) {
-        rowResult[key] = _.map(relation, function(relationItem) {
-          //var field = row.own.property('relationships').property(key).schemas().relationField();
-          var field = row.own.schemas().propertySchemas('relationships').propertySchemas(key).relationField();
-          /** relationField additional field(relation row) */
-          if (field) {
-            return relationItem.property('data').property('attributes').propertyValue(field);
-          }
-          return relationItem.property('data').propertyValue('id');
+  /**
+   * Convert Jsonary data to render view data in table
+   *
+   * @param row Consists of own and relationships data
+   * @returns {*}
+   */
+  function rowToTableFormat(row) {
+    var self = this;
+    var rowResult = row.own.property('attributes').value();
 
-        }).join(', ');
-      });
+    _.forEach(row.relationships, function(relation, key) {
 
-      rowResult.links = [];
-      _.forOwn(data.links(), function(link) {
-        rowResult.links.push(link);
-      });
-      result.push(rowResult);
+      rowResult[key] = _.map(relation, function(relationItem) {
+        var field = row.own.schemas().propertySchemas('relationships').propertySchemas(key).relationField();
+        if (field) {
+          return relationItem.property('data').property('attributes').propertyValue(field);
+        }
+        return relationItem.property('data').propertyValue('id');
+      }).join(', ');
+
+    });
+
+    rowResult.links = self._getLinks(row.own);
+
+    return rowResult;
+  }
+
+  /**
+   * Get links for current data
+   *
+   * @param data
+   * @returns {Array}
+   * @private
+   */
+  function _getLinks(data) {
+    var result = [];
+    _.forOwn(data.links(), function(link) {
+      result.push(link);
     });
     return result;
   }
@@ -186,6 +217,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
   /**
    * Get array rows by Jsonary Data
    *
+   * @name Table#_getRowsByData
    * @param data Jsonary
    * @returns {Array}
    */
@@ -194,9 +226,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     var rows = [];
     var included = [];
     data.property('data').items(function(index, value) {
-
       included.push(self._getRelationResource(value));
-
       rows.push(value);
     });
 

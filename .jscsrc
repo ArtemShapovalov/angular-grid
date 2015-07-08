@@ -1,4 +1,9 @@
 {
+  "excludeFiles": [
+    "node_modules/**",
+    "bower_components/**",
+    "example/bower_components/**"
+  ],
   "disallowSpacesInsideArrayBrackets": {
     "allExcept": [
       "[",

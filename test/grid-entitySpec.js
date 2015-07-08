@@ -78,56 +78,56 @@ describe('GridEntity testing', function() {
     expect(entity.loadData('http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets')).toBe(undefined);
   });
 
-  it('test allOf _replaceFromFull', function() {
-    var schema = {
-      'users': {
-        'allOf': [
-          {
-            '$ref': '#/definitions/users'
-          },
-          {
-            'readOnly': true
-          }
-        ]
-      }
-    };
-    var fullSchema = readJSON('test/mock/schemas/targets.json');
+  describe('Empty Data Relations', function() {
 
-    var expectResult = {
-      'users': {
-        'allOf': [
-          {
-            'title': 'Users',
-            'type': 'array',
-            'minItems': 2,
-            'uniqueItems': true,
-            'additionalItems': true,
-            'items': {
-              'type': 'string',
-              'enum': [
-                'de105d54-75b4-431b-adb2-eb6b9e546013',
-                'de205d54-75b4-431b-adb2-eb6b9e546014',
-                'de305d54-75b4-431b-adb2-eb6b9e546013'
-              ]
-            }
-          },
-          {
-            'readOnly': true
+    var domain = 'http://private-c9370-hyperschemavms.apiary-mock.com/jsonary';
+    var $timeout;
+    var TestResponses = {
+      targets: {
+        schema: {
+          success: {
+            status: 200,
+            contentType: 'application/schema+json',
+            responseText: JSON.stringify(readJSON('test/mock/targetSchema.json'))
           }
-        ]
-
+        }
       }
     };
 
-    var result = entity._replaceFromFull(schema, fullSchema);
+    beforeEach(function() {
+      jasmine.Ajax.install();
 
-    expect(result.users.allOf[0].title).toEqual(expectResult.users.allOf[0].title);
+      jasmine.Ajax.stubRequest(domain + '/targets/schema', '', 'GET')
+        .andReturn(TestResponses.targets.schema.success);
+    });
+
+    beforeEach(inject(function($injector) {
+      $timeout = $injector.get('$timeout');
+    }));
+
+    afterEach(function() {
+      jasmine.Ajax.uninstall();
+    });
+
+    it('check create new form', function() {
+      var schema;
+      var relationArray = {
+        links: {},
+        data: []
+      };
+      var relationObject = {
+        links: {},
+        data: {}
+      };
+
+      Jsonary.getSchema(domain + '/targets/schema#/definitions/create', function(jSchema) {
+        schema = jSchema
+      });
+
+      expect(entity._getEmptyDataRelations(schema).users).toEqual(relationArray);
+      expect(entity._getEmptyDataRelations(schema).user).toEqual(relationObject);
+    })
 
   });
-
-  it('check create new form', function() {
-    var schema = Jsonary.createSchema(readJSON('test/mock/targetSchema.json').definitions.create);
-    entity._getEmptyDataRelations(schema)
-  })
 
 });

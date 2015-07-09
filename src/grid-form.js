@@ -16,10 +16,11 @@ function gridForm(gridEntity, $timeout, _) {
   angular.extend(Form.prototype, {
     getFormInfo: getFormInfo,
     getConfig: getConfig,
-    _convertExtendSchema: _convertExtendSchema,
+    _getRelationResources: _getRelationResources,
+    _simplifyExtendedSchema: _simplifyExtendedSchema,
     _getExtendEnumSchema: _getExtendEnumSchema,
     _getEnumValues: _getEnumValues,
-    _getTitleMapsForRelations: _getTitleMapsForRelations,
+    _getInfoRelationResourcesForTitleMap: _getInfoRelationResourcesForTitleMap,
     _createTitleMap: _createTitleMap,
     _getFormConfig: _getFormConfig,
     _fieldsToFormFormat: _fieldsToFormFormat,
@@ -66,9 +67,9 @@ function gridForm(gridEntity, $timeout, _) {
         self.model = self._fieldsToFormFormat(data);
         self.form = config;
 
-        self.schema = data.attributesData().schemas()[0].data.value();
+        self.schema = data.attributes().schemas()[0].data.value();
         _.forEach(self.schema.properties, function(value, key) {
-          self.schema.properties[key] = self._convertExtendSchema(data, key);
+          self.schema.properties[key] = self._simplifyExtendedSchema(data, key);
         });
 
         /** add button to config form */
@@ -90,9 +91,9 @@ function gridForm(gridEntity, $timeout, _) {
    * @returns {*}
    */
   function _fieldsToFormFormat(data) {
-    var fields = data.attributesData().value();
+    var fields = data.attributes().value();
 
-    data.relationshipsData().properties(function(key, relation) {
+    data.relationships().properties(function(key, relation) {
 
       if (relation.property('data').schemas().basicTypes().indexOf('array') >= 0) {
         fields[key] = _.map(relation.propertyValue('data'), 'id');
@@ -117,7 +118,7 @@ function gridForm(gridEntity, $timeout, _) {
 
     var result = [];
 
-    self._createTitleMap(data.property('data'), function(titleMaps) {
+    self._createTitleMap(data, function(titleMaps) {
       var attributes = data.schemas()
         .propertySchemas('data').getFull()
         .propertySchemas('attributes').definedProperties();
@@ -163,32 +164,20 @@ function gridForm(gridEntity, $timeout, _) {
    * @param callback
    * @private
    */
-  function _getTitleMapsForRelations(data, callback) {
+  function _getInfoRelationResourcesForTitleMap(data, callback) {
     var self = this;
     var sourceTitleMaps = [];
-    var resources = [];
 
-    data.property('relationships').properties(function(propertyName, propertyData) {
-
-      if (!_.isEmpty(propertyData.links('relation'))) {
-        resources.push({
-          url: propertyData.links('relation')[0].href,
-          data: propertyData
-        });
-      }
-
-    });
-
-    self.fetchCollection(_.map(resources, 'url'), function(loadResources) {
+    self._getRelationResources(data, function(resources) {
 
       _.forEach(resources, function(enums) {
 
-        var propertyData = enums.data;
-        var attributeData = data.property('attributes').property(propertyData.parentKey());
+        var propertyData = enums.relationData;
+        var attributeData = data.attributes().property(propertyData.parentKey());
 
-        var sourceEnum = self._getEnumValues(loadResources[enums.url].data);
+        var sourceEnum = self._getEnumValues(enums.resourceData);
+        var attributeSchemas = data.attributes().schemas().propertySchemas(propertyData.parentKey());
 
-        var attributeSchemas = data.property('attributes').schemas().propertySchemas(propertyData.parentKey());
         attributeData.addSchema(self._getExtendEnumSchema(attributeSchemas, sourceEnum));
 
         _.forEach(sourceEnum, function(enumItem) {
@@ -213,6 +202,46 @@ function gridForm(gridEntity, $timeout, _) {
   }
 
   /**
+   * Download resource for all relationships
+   * callback object where
+   *    relationData - Jsonary object definition relationships part,
+   *    resourceData - Object loaded resources
+   *
+   * @param data
+   * @param callback
+   */
+  function _getRelationResources(data, callback) {
+    var self = this;
+    var resources = [];
+    var result = [];
+
+    data.property('data').property('relationships').properties(function(propertyName, propertyData) {
+
+      if (!_.isEmpty(propertyData.links('relation'))) {
+        resources.push({
+          url: propertyData.links('relation')[0].href,
+          data: propertyData
+        });
+      }
+
+    });
+
+    self.fetchCollection(_.map(resources, 'url'), function(loadResources) {
+
+      _.forEach(resources, function(res, key) {
+        result[key] = {
+          relationData: res.data,
+          resourceData: loadResources[res.url].data
+        }
+      });
+
+      callback(result);
+
+    })
+
+  }
+
+  /**
    * Convert extended schema to simple schema. For example if schema has property allOf
    * then will be replaced on schema which  merge all items allOf else return schema without changed
    *
@@ -220,9 +249,9 @@ function gridForm(gridEntity, $timeout, _) {
    * @param key Attribute or relationships key
    * @returns {*}
    */
-  function _convertExtendSchema(data, key) {
-    var schemas = data.property('data').property('attributes').schemas().propertySchemas(key).getFull();
-    var schemasEnum = data.property('data').property('attributes').property(key).schemas().getFull();
+  function _simplifyExtendedSchema(data, key) {
+    var schemas = data.attributes().schemas().propertySchemas(key).getFull();
+    var schemasEnum = data.attributes().property(key).schemas().getFull();
 
     if (schemas[0].andSchemas().length) {
       var replaceAllOfSchema = schemas[0].data.value();
@@ -277,12 +306,12 @@ function gridForm(gridEntity, $timeout, _) {
   function _createTitleMap(data, callback) {
     var self = this;
 
-    self._getTitleMapsForRelations(data, function(sourceTitleMaps) {
+    self._getInfoRelationResourcesForTitleMap(data, function(infoRelationResource) {
 
-      self.fetchCollection(_.map(sourceTitleMaps, 'url'), function(resources) {
+      self.fetchCollection(_.map(infoRelationResource, 'url'), function(resources) {
         var titleMaps = {};
 
-        _.forEach(sourceTitleMaps, function(item) {
+        _.forEach(infoRelationResource, function(item) {
 
           if (!titleMaps[item.relationName]) {
             titleMaps[item.relationName] = [];
@@ -290,7 +319,7 @@ function gridForm(gridEntity, $timeout, _) {
 
           titleMaps[item.relationName].push({
             value: item.enumItem,
-            name: resources[item.url].data.property('data').property('attributes')
+            name: resources[item.url].data.attributes()
               .propertyValue(item.attributeName) || item.enumItem
           });
         });

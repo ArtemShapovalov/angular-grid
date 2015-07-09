@@ -42,11 +42,11 @@ describe('GridEntity testing', function() {
     }));
 
     it('relationships', function() {
-      expect(data.relationships()).toEqual(true)
+      expect(data.relationshipsValue()).toEqual(true)
     });
 
     it('attributes', function() {
-      expect(data.attributes()).toEqual(false)
+      expect(data.attributesValue()).toEqual(false)
     });
   });
 
@@ -72,10 +72,6 @@ describe('GridEntity testing', function() {
     expect(entity.getResourceUrl('http://domain.com', paramsRead)).toEqual('http://domain.com/targets/read/123');
     expect(entity.getResourceUrl('http://domain.com', paramsCreate)).toEqual('http://domain.com/targets/schema#/definitions/create');
     expect(entity.getResourceUrl('http://domain.com', paramsResource)).toEqual('http://domain.com/targets');
-  });
-
-  it('load data check callback params', function() {
-    expect(entity.loadData('http://private-c9370-hyperschemavms.apiary-mock.com/jsonary/targets')).toBe(undefined);
   });
 
   describe('Empty Data Relations', function() {

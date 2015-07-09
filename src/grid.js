@@ -3,21 +3,22 @@ angular.module('grid').provider('grid-entity', gridEntity);
 function gridEntity() {
 
   var provider = {
-    $get: gridEntityGet
-  };
-
-  gridEntityGet.$inject = ['$interval', '_'];
-
-  return provider;
-
-  function gridEntityGet($interval, _) {
-    var model;
-    var messages = {
+    messages: {
       successDeleted: 'Successfully delete',
       successCreated: 'Successfully create',
       successUpdated: 'Successfully update',
       serverError: 'Oops! server error'
-    };
+    },
+    $get: gridEntityGet
+  };
+
+  gridEntityGet.$inject = ['_', '$q'];
+
+  return provider;
+
+  function gridEntityGet(_, $q) {
+    var model;
+    var messages = this.messages;
 
     /**
      * Base class with functionality handling resources
@@ -28,16 +29,16 @@ function gridEntity() {
     function Entity() {
 
       Jsonary.extendData({
-        relationships: function() {
+        relationshipsValue: function() {
           return this.propertyValue('relationships');
         },
-        attributes: function() {
+        attributesValue: function() {
           return this.propertyValue('attributes');
         },
-        relationshipsData: function() {
+        relationships: function() {
           return this.property('data').property('relationships');
         },
-        attributesData: function() {
+        attributes: function() {
           return this.property('data').property('attributes');
         }
       });
@@ -62,18 +63,12 @@ function gridEntity() {
 
     }
 
-    /**
-     * Jsonary data object
-     *
-     * @type {Jsonary}
-     */
-    this.data = {};
+    Entity.prototype.config = {};
+    Entity.prototype.default = {
+      actionGetResource: 'read'
+    };
 
     angular.extend(Entity.prototype, {
-      default: {
-        actionGetResource: 'read'
-      },
-      config: {},
       setModel: setModel,
       getModel: getModel,
       setMessage: setMessage,
@@ -122,14 +117,17 @@ function gridEntity() {
         result = url + '/' + params.resource;
       }
 
-      if (params.type) {
-        if (params.type === 'update' || params.type === 'read') {
-          result += '/' + params.type + '/' + params.id;
-        } else if (params.type === 'create') {
-          result += '/schema#/definitions/create';
-        }
+      if (!params.type) {
+        return result;
       }
-      return result
+
+      if (params.type === 'update' || params.type === 'read') {
+        result += '/' + params.type + '/' + params.id;
+      } else if (params.type === 'create') {
+        result += '/schema#/definitions/create';
+      }
+
+      return result;
     }
 
     /**
@@ -138,19 +136,22 @@ function gridEntity() {
      * @param callback
      * @returns {boolean}
      */
-    function loadData(url, callback) {
-      /*jshint validthis: true */
+    function loadData(url) {
+      return $q(function(resolve) {
 
-      Jsonary.getData(url, function(jData, request) {
-        var data = jData;
-        var schema = jData.property('data').schemas()[0].data.document.raw.value();
+        Jsonary.getData(url, function(jData, request) {
+          var data = jData;
+          var schema = jData.property('data').schemas()[0].data.document.raw.value();
 
-        if (callback !== undefined) {
-          callback(data, schema, request);
-        }
+          resolve({
+            data: data,
+            schema: schema,
+            request: request
+          });
 
-      });
+        });
 
+      })
     }
 
     /**
@@ -158,20 +159,20 @@ function gridEntity() {
      * @param url
      * @param callback
      */
-    function loadSchema(url, callback) {
+    function loadSchema(url) {
       var self = this;
 
-      Jsonary.getSchema(url, function(jSchema) {
+      return $q(function(resolve) {
+        Jsonary.getSchema(url, function(jSchema) {
 
-        var schema = jSchema.data.document.raw.value();
-        var data = Jsonary.create(self._getEmptyData(jSchema));
-        data.document.url = self.getModel().url;
-        data.addSchema(jSchema);
+          var schema = jSchema.data.document.raw.value();
+          var data = Jsonary.create(self._getEmptyData(jSchema));
+          data.document.url = self.getModel().url;
+          data.addSchema(jSchema);
 
-        if (callback !== undefined) {
-          callback(data, schema);
-        }
+          resolve({data: data, schema: schema});
 
+        });
       });
     }
 
@@ -220,14 +221,11 @@ function gridEntity() {
       _.forEach(relationsSchema.definedProperties(), function(relationName) {
 
         var attributeSchema = attributesSchema.propertySchemas(relationName).getFull();
+        relation[relationName] = {
+          links: {},
+          data: attributeSchema.basicTypes().indexOf('array') >= 0 ? [] : {}
+        };
 
-        relation[relationName] = {};
-        relation[relationName].links = {};
-        if (attributeSchema.basicTypes().toString() == 'array') {
-          relation[relationName].data = [];
-        } else {
-          relation[relationName].data = {};
-        }
       });
 
       return relation;
@@ -241,20 +239,19 @@ function gridEntity() {
      * @param callback
      */
     function fetchData(url, callback) {
-      /*jshint validthis: true */
       var self = this;
 
       if (model.params.type === 'create') {
-        self.loadSchema(url, fetchDataSuccess);
+        self.loadSchema(url).then(fetchDataSuccess);
       } else {
-        self.loadData(url, fetchDataSuccess);
+        self.loadData(url).then(fetchDataSuccess);
       }
 
-      function fetchDataSuccess(data, schema) {
-        self.data = data;
+      function fetchDataSuccess(response) {
+        self.data = response.data;
 
         if (callback !== undefined) {
-          callback(data, schema);
+          callback(response.data, response.schema);
         }
       }
     }
@@ -268,34 +265,22 @@ function gridEntity() {
      */
     function fetchCollection(linkResources, callback) {
       var self = this;
-      var loaded = 0;
-      var total = 0;
+      var allRequest = [];
       var resources = {};
-      var links;
-
-      links = _.uniq(linkResources);
+      var links = _.uniq(linkResources);
 
       _.forEach(links, function(url) {
 
-        self.loadData(url, function(data, schema, request) {
-          resources[url] = {
-            data: data,
-            schema: schema,
-            request: request
-          };
-          loaded++;
+        var request = self.loadData(url).then(function(response) {
+          resources[url] = response;
         });
-        total++;
+
+        allRequest.push(request);
       });
 
-      var interval = $interval(function() {
-        if (total === loaded) {
-          $interval.cancel(interval);
-          if (callback !== undefined) {
-            callback(resources);
-          }
-        }
-      }, 100);
+      $q.all(allRequest).then(function() {
+        callback(resources);
+      });
     }
 
     /**

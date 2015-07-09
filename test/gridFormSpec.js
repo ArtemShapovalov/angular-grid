@@ -6,6 +6,7 @@ describe('Form testing', function() {
   var userModel;
   var $timeout;
   var $interval;
+  var $rootScope;
   var form;
 
   var userSuccessMain = {
@@ -109,6 +110,7 @@ describe('Form testing', function() {
   });
 
   beforeEach(inject(function($injector) {
+    $rootScope = $injector.get('$rootScope');
     $timeout = $injector.get('$timeout');
     $interval = $injector.get('$interval');
     gridForm = $injector.get('gridForm');
@@ -143,31 +145,33 @@ describe('Form testing', function() {
       titleMap: titleMapUser
     };
 
-    form.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013', function(data, schema) {
-      resource.data = data;
-      resource.schema = schema;
+    form.loadData(domain + '/targets/update/de205d54-75b4-431b-adb2-eb6b9e546013').then(function(response) {
+      resource = response;
     });
 
-    form._createTitleMap(resource.data.property('data'), function(responce) {
+    $rootScope.$digest();
+
+    form._createTitleMap(resource.data, function(responce) {
       titleMap = responce;
     });
 
-    $interval.flush(100);
-    $interval.flush(100);
+    $rootScope.$digest();
+    //$interval.flush(100);
+    //$interval.flush(100);
 
     expect(titleMap.users).toEqual(titleMapUsers);
     expect(titleMap.user).toEqual(titleMapUser);
     expect(resource.schema).toBeDefined();
 
-    form._getFormConfig(resource.data, function(formConfig) {
-      expect(formConfig).toContain(formConfigUsers);
-      expect(formConfig).toContain(formConfigUser);
+    var formConfig;
+    form._getFormConfig(resource.data, function(conf) {
+      formConfig = conf;
     });
 
     $timeout.flush();
-    $interval.flush(100);
-    $interval.flush(100);
-    $timeout.flush();
+
+    expect(formConfig).toContain(formConfigUsers);
+    expect(formConfig).toContain(formConfigUser);
   });
 
   it ('check get form info', function() {
@@ -182,10 +186,6 @@ describe('Form testing', function() {
       formData = data;
     });
 
-    $timeout.flush();
-    $interval.flush(100);
-    $interval.flush(100);
-    $interval.flush(100);
     $timeout.flush();
 
     expect(formData.links).toBeDefined();
@@ -205,17 +205,17 @@ describe('Form testing', function() {
       {value: 'de305d54-75b4-431b-adb2-eb6b9e546013', name: 'dimon3@gmail.com'}
     ];
 
-    form.loadSchema(domain + '/targets/schema#/definitions/create', function(data, schema) {
-      resource.data = data;
-      resource.schema = schema;
+    form.loadSchema(domain + '/targets/schema#/definitions/create').then(function(response) {
+      resource = response;
     });
 
-    form._createTitleMap(resource.data.property('data'), function(responce) {
+    $rootScope.$digest();
+
+    form._createTitleMap(resource.data, function(responce) {
       titleMap = responce;
     });
 
-    $interval.flush(100);
-    $interval.flush(100);
+    $rootScope.$digest();
 
     expect(resource.data).toBeDefined();
     expect(resource.schema).toBeDefined();

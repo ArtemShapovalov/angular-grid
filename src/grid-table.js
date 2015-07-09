@@ -34,12 +34,18 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     getSortingParamByField: getSortingParamByField,
     getSortingParamValue: getSortingParamValue,
     setSorting: setSorting,
+    _getRelationResources: _getRelationResources,
+    _getRelationLink: _getRelationLink,
     _getRowsByData: _getRowsByData,
     _getLinks: _getLinks
   });
 
   return Table;
-
+  /**
+   * Get all data needed for rendering table
+   *
+   * @returns {{rows: *, columns: *, links: *}}
+   */
   function getConfig() {
     var self = this;
     return {
@@ -49,6 +55,11 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     }
   }
 
+  /**
+   * Main function for get rendering data
+   *
+   * @param callback
+   */
   function getTableInfo(callback) {
     /*jshint validthis: true */
     var self = this;
@@ -64,7 +75,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
       self.fetchData(url, fetchDataSuccess);
     });
 
-    function fetchDataSuccess(data, schema) {
+    function fetchDataSuccess(data) {
 
       self.pagination.setTotalCount(data.property('meta').propertyValue('total'));
       self._getRowsByData(data, function(rows) {
@@ -82,6 +93,12 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
 
   }
 
+  /**
+   * Get name sorting field and set it
+   *
+   * @param field
+   * @param direction
+   */
   function setSorting(field, direction) {
     field = this.getSortingParamByField(field);
     this.sorting.setSorting(field, direction)
@@ -219,6 +236,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
    *
    * @name Table#_getRowsByData
    * @param data Jsonary
+   * @param callback
    * @returns {Array}
    */
   function _getRowsByData(data, callback) {
@@ -226,7 +244,7 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
     var rows = [];
     var included = [];
     data.property('data').items(function(index, value) {
-      included.push(self._getRelationResource(value));
+      included.push(self._getRelationResources(value));
       rows.push(value);
     });
 
@@ -252,6 +270,76 @@ function gridTable(gridEntity, gridPagination, Sorting, $timeout, _) {
       callback(res);
     }
 
+  }
+
+  /**
+   * Circumvention the array relationships and get links for late them load
+   *
+   * @param data
+   * @returns {Object} link for get resource
+   */
+  function _getRelationResources(data) {
+    var self = this;
+    var result = {};
+
+    data.property('relationships').properties(function(relName, relData) {
+      result[relName] = self._getRelationLink(relData);
+    });
+
+    return result;
+  }
+
+  /**
+   * Get link from relation for load resource data
+   *
+   * "data": [{
+     *    "type": "posts",
+     *    "id": "1",
+     *    "attributes": {
+     *      ...
+     *    },
+     *    "relationships": {
+     *      "author": {           <-- input data
+     *         "links": {
+     *           "self": "http://example.com/posts/1/relationships/author",
+     *           "related": "http://example.com/posts/1/author"
+     *         },
+     *         "data": { "type": "people", "id": "9" }
+     *      }
+     *    }
+     *}]
+   * @name Entity#_getRelationLink
+   * @param relItem
+   * @returns {Array}
+   */
+  function _getRelationLink(relItem) {
+    var self = this;
+    var resources = [];
+
+    if (Array.isArray(relItem.propertyValue('data'))) {
+
+      relItem.property('data').items(function(index, dataObj) {
+        resources.push({
+          url: self.getResourceUrl(relItem.links()[0].href, {
+            type: self.default.actionGetResource,
+            id: dataObj.propertyValue('id')
+          })
+        });
+      });
+
+    } else {
+
+      if (!_.isEmpty(relItem.links('relation'))) {
+        resources = [{
+          url: self.getResourceUrl(relItem.links('relation')[0].href, {
+            type: self.default.actionGetResource,
+            id: relItem.property('data').propertyValue('id')
+          })
+        }];
+      }
+
+    }
+    return resources;
   }
 
 }

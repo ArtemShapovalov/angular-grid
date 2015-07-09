@@ -80,8 +80,6 @@ function gridEntity() {
       getResourceUrl: getResourceUrl,
       _getEmptyData: _getEmptyData,
       _getEmptyDataRelations: _getEmptyDataRelations,
-      _getRelationResource: _getRelationResource,
-      _getRelationLink: _getRelationLink,
       _batchLoadData: _batchLoadData
     });
 
@@ -133,7 +131,6 @@ function gridEntity() {
     /**
      * Fetch data by url and include schema from header data
      * @param url
-     * @param callback
      * @returns {boolean}
      */
     function loadData(url) {
@@ -157,7 +154,6 @@ function gridEntity() {
     /**
      * Fetch schema by url, create empty data and join them
      * @param url
-     * @param callback
      */
     function loadSchema(url) {
       var self = this;
@@ -193,7 +189,7 @@ function gridEntity() {
       var schemaAttributes = schema.propertySchemas('data').getFull().propertySchemas('attributes');
       _.forEach(schemaAttributes.definedProperties(), function(propertyName) {
 
-        result.data.attributes[propertyName] = schemaAttributes.propertySchemas(propertyName).createValue() !== undefined
+        result.data.attributes[propertyName] = schemaAttributes.propertySchemas(propertyName).createValue() != undefined
           ? schemaAttributes.propertySchemas(propertyName).createValue()
           : schemaAttributes.propertySchemas(propertyName)[0].defaultValue();
       });
@@ -281,73 +277,6 @@ function gridEntity() {
       $q.all(allRequest).then(function() {
         callback(resources);
       });
-    }
-
-    /**
-     * Circumvention the array relationships and get links for late them load
-     *
-     * @param data
-     * @returns {Object} link for get resource
-     */
-    function _getRelationResource(data) {
-      var self = this;
-      var relations;
-      var result = {};
-
-      if (relations = data.property('relationships').value()) {
-        _.forEach(relations, function(relItem, relKey) {
-          result[relKey] = self._getRelationLink(relItem);
-        })
-      }
-      return result;
-    }
-
-    /**
-     * Get link from relation for load resource data
-     *
-     * "data": [{
-     *    "type": "posts",
-     *    "id": "1",
-     *    "attributes": {
-     *      ...
-     *    },
-     *    "relationships": {
-     *      "author": {           <-- input data
-     *         "links": {
-     *           "self": "http://example.com/posts/1/relationships/author",
-     *           "related": "http://example.com/posts/1/author"
-     *         },
-     *         "data": { "type": "people", "id": "9" }
-     *      }
-     *    }
-     *}]
-     * @name Entity#_getRelationLink
-     * @param relItem
-     * @returns {Array}
-     */
-    function _getRelationLink(relItem) {
-      var self = this;
-      var resource = [];
-
-      if (Array.isArray(relItem.data)) {
-        var linkArray = [];
-        _.forEach(relItem.data, function(dataObj) {
-          linkArray.push({
-            url: self.getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: dataObj.id})
-          });
-        });
-        resource = linkArray;
-
-      } else {
-        if (!_.isEmpty(relItem.links) && !_.isEmpty(relItem.data)) {
-          resource = [{
-            url: self.getResourceUrl(relItem.links.self, {type: self.default.actionGetResource, id: relItem.data.id})
-          }];
-        } else {
-          resource = [];
-        }
-      }
-      return resource;
     }
 
     /**
